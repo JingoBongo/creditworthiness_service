@@ -1,9 +1,6 @@
 from b_logic_placeholder import do_the_thing_function
-from flask import Flask, jsonify
-# from flask_swagger import swagger
+from flask import Flask
 from flasgger import Swagger
-
-# from flask_restplus import Namespace, Resource, fields
 
 app = Flask(__name__)
 swagger = Swagger(app)

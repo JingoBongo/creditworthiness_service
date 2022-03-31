@@ -11,11 +11,15 @@ swagger = Swagger(app)
 
 @app.route('/hello_world')
 def hello_world():
+    """Everyone starts here. So did we.
+    """
     return 'Hello, World!'
 
 
 @app.route('/')
 def hello():
+    """Root, please go somewhere else
+    """
     return 'try swagger at least, (apidocs)'
 
 

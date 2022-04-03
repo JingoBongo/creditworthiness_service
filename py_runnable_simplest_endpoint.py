@@ -26,7 +26,7 @@ def hello():
       200:
         description: why would you go here, go away
     """
-    return 'try swagger at least, (apidocs). clean again'
+    return 'try swagger at least, (apidocs).'
 
 
 @app.route("/user/<string:job_id>")

@@ -8,3 +8,19 @@ we need to specify what app to start, for us right when launching:
 
 for now it looks like a valid windows command:
 set FLASK_APP=Main/hello.py & flask run --host=0.0.0.0 -p 5001
+
+
+
+to create venv:
+python3 -m venv /path/to/new/virtual/environment
+
+SO FAR for docker how-to this link was more useful than entire internet
+https://blog.logrocket.com/build-deploy-flask-app-using-docker/
+
+i do it having desktop docker launched opened in background to rebuild img
+ docker image build -t mscebec/simplest_microservice .
+
+to run
+docker run -p 5000:5000 -d mscebec/simplest_microservice
+
+docker stop [container id]   (where con. id is from docker ps)

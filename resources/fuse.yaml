@@ -1,0 +1,13 @@
+GENERAL:
+  BUSY_PORTS_JSON_FILE: \\resources\\busy_ports.json
+
+FUSE:
+  ACTIVATE_VENV: false
+  VENV_ACTIVATE_PATH: \\flask\\flaskEnvironment\\Scripts\\activate
+  START_TEST_SERVICES: true
+  FIRST_PORT: 5000
+  LAST_PORT: 6000
+
+SERVICES:
+  BASE:
+    test1: endpoints\\py_runnable_endpoint_template.py

@@ -15,7 +15,7 @@ def hello_world():
       200:
         description: start point
     """
-    return 'Hello, World!'
+    return 'Hello, Kristy!'
 
 
 @app.route('/')

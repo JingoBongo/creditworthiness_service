@@ -76,7 +76,7 @@ def init_start_service_procedure(service, sys=False):
         spawn_type = None
 
     # os.environ["DEBUSSY"] = "1"
-    g.set_environment_variable("FLASK_APP","service_full_name")
+    g.set_environment_variable("FLASK_APP", "service_full_name")
     if spawn_type != "multi":
         if local:
             start_service(service_full_name, port, local)

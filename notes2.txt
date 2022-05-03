@@ -5,7 +5,7 @@ we need to specify 'flask run --host=0.0.0.0' to make it visible for LAN
 we need to specify what app to start, for us right when launching:
     set FLASK_APP=Main/hello.py & flask run
 
-
+  x
 for now it looks like a valid windows command:
 set FLASK_APP=Main/hello.py & flask run --host=0.0.0.0 -p 5001
 

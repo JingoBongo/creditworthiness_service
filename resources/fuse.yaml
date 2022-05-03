@@ -1,21 +1,24 @@
 general:
-  busy_ports_json_file: "\\resources\\busy_ports.json"
+  busy_ports_json_file: "resources\\busy_ports.json"
   debug: True
+  host: "0.0.0.0"
 
 
 fuse:
   activate_venv: False
-  venv_activate_path: "\\orchestra_env\\Scripts\\activate"
+  venv_activate_path: "orchestra_env\\Scripts\\activate"
   first_port: 5000
   last_port: 6000
 
 services:
   system:
     test_sys_endpoint:
-      path: "\\endpoints\\system_endpoints\\py_runnable_endpoint_template.py"
+      path: "endpoints\\system_endpoints\\py_runnable_system_endpoint_template.py"
       local: True
       mono: True
   business:
-    endpoint_template: "\\endpoints\\py_runnable_endpoint_template.py"
-    second_endpoint: "\\endpoints\\py_runnable_endpoint.py"
+    endpoint_template:
+      path: "endpoints\\py_runnable_endpoint_template.py"
+    second_endpoint:
+      path: "endpoints\\py_runnable_endpoint.py"
 

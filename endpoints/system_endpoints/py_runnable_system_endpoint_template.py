@@ -30,6 +30,9 @@ if __name__ == "__main__":
     parser.add_argument('-local')
     args = parser.parse_args()
     endpoint_port = args.port
-
+    if bool(args.local):
+        host = "127.0.0.1"
+    else:
+        host = g.host
     # endpoint_port = int(os.environ.get('PORT', endpoint_port))
-    app.run(debug=g.debug, host='0.0.0.0', port=endpoint_port)
+    app.run(debug=g.debug, host=host, port=endpoint_port)

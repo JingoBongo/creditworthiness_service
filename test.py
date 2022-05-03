@@ -33,7 +33,6 @@ def get_free_port():
             return str_port
 
 
-def clear_busy_ports():
-    g.clear_busy_ports()
+
 
 

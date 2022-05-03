@@ -19,6 +19,4 @@ services:
   business:
     endpoint_template:
       path: "endpoints\\py_runnable_endpoint_template.py"
-    second_endpoint:
-      path: "endpoints\\py_runnable_endpoint.py"
 

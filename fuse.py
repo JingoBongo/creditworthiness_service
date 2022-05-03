@@ -4,11 +4,11 @@ import os
 from utils.read_from_yaml import read_from_yaml
 from utils import general_utils as g
 
-root_path = os.path.dirname(os.path.abspath(__file__))
-conf_path = 'resources/fuse.yaml'
-config = read_from_yaml(conf_path)
+root_path = g.root_path
+conf_path = g.conf_path
+config = g.config
 
-print(type(config['FUSE']['ACTIVATE_VENV']))
+print(type(config['fuse']['activate_venv']))
 
 
 # activate_venv_windows = root_path + "\\flask\\flaskEnvironment\\Scripts\\activate"
@@ -20,7 +20,7 @@ print(type(config['FUSE']['ACTIVATE_VENV']))
 print(os.path.dirname(os.path.abspath(__file__)))
 
 def start_venv():
-    activate_venv_windows = root_path + config['FUSE']['VENV_ACTIVATE_PATH']
+    activate_venv_windows = root_path + config['fuse']['venv_activate_path']
     returned_value = os.system(activate_venv_windows)  # returns the exit code in unix
     g.printc(f'venv activation code: {returned_value}')
 
@@ -32,9 +32,9 @@ def deact_venv():
 
 
 def get_free_port():
-    port_start_ind = config['FUSE']['FIRST_PORT']
-    port_end_ind = config['FUSE']['LAST_PORT']
-    busy_ports_json_path = config['GENERAL']['BUSY_PORTS_JSON_FILE']
+    port_start_ind = config['fuse']['first_port']
+    port_end_ind = config['fuse']['last_port']
+    busy_ports_json_path = config['general']['busy_ports_json_file']
     busy_ports_json = g.read_from_json(busy_ports_json_path)
 
     for i in range(port_start_ind, port_end_ind + 1):
@@ -46,35 +46,56 @@ def get_free_port():
 
 
 def start_service(port, service_full_name, host='0.0.0.0'):
-    start_service = f"set FLASK_APP={config['SERVICES']['BASE']['test1']} & flask run --host={host} -p {port}"
-    # g.printc(f'triggering command :{start_service}')
-    # returned_value = os.system(start_service)
-    g.printc('is it working?')
-    g.run_cmd_command(start_service)
-    # g.printc(f'returned value: {returned_value}')
+    # start_service = f"set FLASK_APP={config['services']['user']['endpoint_template']} & flask run --host={host} -p {port}"
+    # # g.printc(f'triggering command :{start_service}')
+    # # returned_value = os.system(start_service)
+    # g.printc('is it working?')
+    # g.run_cmd_command(start_service)
+    # # g.printc(f'returned value: {returned_value}')
+
+    service_full_path = ''
+    service_port = ''
+    service_local = ''
+
+    local_process = g.subprocess.Popen([g.sys.executable, "myscript.py"])  #run(["ls", "-l", "/dev/null"], capture_output=True)
+    g.launched_subprocesses.append(local_process)
 
 
-def clear_busy_ports():
-    busy_ports_json_path = config['GENERAL']['BUSY_PORTS_JSON_FILE']
-    g.clear_busy_ports(busy_ports_json_path)
+
+
+def init_start_service_procedure(service, sys=False):
+    br =6
+    type = 'business'
+    if sys:
+        type = 'system'
+    port = get_free_port()
+    service_full_name = root_path + config['services'][type][service]['path']
+    spawn_type = None
+    local = None
+    # TODO
+    start_service()
+
 
 
 def main():
     g.printc(f'Firing fuse..')
-    clear_busy_ports()
-    if config['FUSE']['ACTIVATE_VENV']:
-        g.printc(f"starting venv from {root_path + config['FUSE']['VENV_ACTIVATE_PATH']}")
+    # some preconfiguration
+    g.clear_busy_ports()
+    if config['fuse']['activate_venv']:
+        g.printc(f"starting venv from {root_path + config['fuse']['fuse']}")
         start_venv()
-    if config['FUSE']['START_TEST_SERVICES']:
-        free_port = get_free_port()
-        start_service(free_port, 'plchldr')
+    # fire system endpoints
+    for service in config['services']['system']:
+        init_start_service_procedure(service, sys=True)
+    # fire user endpoints
+    for service in config['services']['business']:
+        init_start_service_procedure(service)
 
 
-#         fire test services
 
 
 if __name__ == "__main__":
-    g.run_cmd_command('cd')
+    # g.run_cmd_command('cd')
     main()
 #     just an eternal loop
     while True:

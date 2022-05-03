@@ -34,7 +34,6 @@ def get_free_port():
 
 
 def clear_busy_ports():
-    busy_ports_json_path = config['GENERAL']['BUSY_PORTS_JSON_FILE']
-    g.clear_busy_ports(root_path+busy_ports_json_path)
+    g.clear_busy_ports()
 
-clear_busy_ports()
+

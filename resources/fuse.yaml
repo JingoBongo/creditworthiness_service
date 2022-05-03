@@ -1,13 +1,21 @@
-GENERAL:
-  BUSY_PORTS_JSON_FILE: \\resources\\busy_ports.json
+general:
+  busy_ports_json_file: "\\resources\\busy_ports.json"
+  debug: True
 
-FUSE:
-  ACTIVATE_VENV: false
-  VENV_ACTIVATE_PATH: \\flask\\flaskEnvironment\\Scripts\\activate
-  START_TEST_SERVICES: true
-  FIRST_PORT: 5000
-  LAST_PORT: 6000
 
-SERVICES:
-  BASE:
-    test1: endpoints\\py_runnable_endpoint_template.py
+fuse:
+  activate_venv: False
+  venv_activate_path: "\\orchestra_env\\Scripts\\activate"
+  first_port: 5000
+  last_port: 6000
+
+services:
+  system:
+    test_sys_endpoint:
+      path: "\\endpoints\\system_endpoints\\py_runnable_endpoint_template.py"
+      local: True
+      mono: True
+  business:
+    endpoint_template: "\\endpoints\\py_runnable_endpoint_template.py"
+    second_endpoint: "\\endpoints\\py_runnable_endpoint.py"
+

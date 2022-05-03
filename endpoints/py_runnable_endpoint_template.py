@@ -1,5 +1,6 @@
 from flask import Flask
 from flasgger import Swagger
+from utils import general_utils as g
 import os
 from argparse import ArgumentParser
 
@@ -61,4 +62,4 @@ if __name__ == "__main__":
     endpoint_port = args.port
 
     # endpoint_port = int(os.environ.get('PORT', endpoint_port))
-    app.run(debug=True, host='0.0.0.0', port=endpoint_port)
+    app.run(debug=g.debug, host='0.0.0.0', port=endpoint_port)

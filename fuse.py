@@ -45,12 +45,6 @@ def get_free_port():
 
 
 def start_service(service_full_name, port, local=False, host=g.host):
-    # start_service = f"set FLASK_APP={config['services']['user']['endpoint_template']} & flask run --host={host} -p {port}"
-    # # g.printc(f'triggering command :{start_service}')
-    # # returned_value = os.system(start_service)
-    # g.printc('is it working?')
-    # g.run_cmd_command(start_service)
-    # # g.printc(f'returned value: {returned_value}'
     local_process = g.subprocess.Popen([g.sys.executable, service_full_name, "-local", str(local), "-port", str(port)])
     g.launched_subprocesses.append(local_process)
 
@@ -75,8 +69,11 @@ def init_start_service_procedure(service, sys=False):
     except:
         spawn_type = None
 
+    if sys:
+        g.insert_into_sys_services(service_full_name, port)
+
     # os.environ["DEBUSSY"] = "1"
-    g.set_environment_variable("FLASK_APP", "service_full_name")
+    # g.set_environment_variable("FLASK_APP", service_full_name)
     if spawn_type != "multi":
         if local:
             start_service(service_full_name, port, local)

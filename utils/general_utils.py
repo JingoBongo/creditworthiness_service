@@ -6,7 +6,7 @@ import schedule
 
 import utils.db_utils as db_utils
 import utils.read_from_yaml as yaml_utils
-import named_custom_process as custom_subprocess
+import utils.named_custom_process as custom_subprocess
 
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils','')
 conf_path = '.\\resources\\fuse.yaml'

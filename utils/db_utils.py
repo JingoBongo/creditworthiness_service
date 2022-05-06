@@ -36,4 +36,4 @@ def clear_system_tables():
         """)
 
 # initial systable creation should be probably done in other place
-initial_sys_table_creation()
+# initial_sys_table_creation()

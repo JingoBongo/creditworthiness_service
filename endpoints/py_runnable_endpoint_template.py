@@ -1,22 +1,22 @@
-from flask import Flask
+from flask import Flask, render_template
 from flasgger import Swagger
 from utils import general_utils as g
 import os
 from argparse import ArgumentParser
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=g.root_path+'templates')
 swagger = Swagger(app)
 
 
-@app.route('/hello_world')
+@app.route('/snake')
 def hello_world():
-    """Everyone starts here. So did we.
+    """When pockets are empty.. at least you can play snakes
     ---
     responses:
       200:
-        description: start point
+        description: 99% caution
     """
-    return 'Hello, World!'
+    return render_template('snakes.html')
 
 
 @app.route('/')

@@ -4,12 +4,13 @@ import subprocess
 import sys
 import schedule
 
-from utils.db_utils import *
-from utils.read_from_yaml import *
+import utils.db_utils as db_utils
+import utils.read_from_yaml as yaml_utils
+import named_custom_process as custom_subprocess
 
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils','')
 conf_path = '.\\resources\\fuse.yaml'
-config = read_from_yaml(conf_path)
+config = yaml_utils.read_from_yaml(conf_path)
 busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']
 host=config['general']['host']
@@ -58,3 +59,4 @@ def set_port_busy(port):
 
 def set_environment_variable(param, param1):
     os.environ[param] = str(param1)
+

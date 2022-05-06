@@ -8,6 +8,7 @@ root_path = g.root_path
 conf_path = g.conf_path
 config = g.config
 
+
 # print(type(config['fuse']['activate_venv']))
 # print(os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,16 +45,23 @@ def get_free_port():
             return str_port
 
 
-def start_service(service_full_name, port, local=False, host=g.host):
-    local_process = g.subprocess.Popen([g.sys.executable, service_full_name, "-local", str(local), "-port", str(port)])
-    g.launched_subprocesses.append(local_process)
-
-
-
+def start_service(service_full_name, port, service_short_name, local=False, host=g.host):
+    local_process = g.custom_subprocess.CustomNamedProcess([g.sys.executable,
+                                                            service_full_name,
+                                                            "-local", str(local),
+                                                            "-port", str(port)],
+                                                           name=service_short_name)
+    g.launched_subprocesses.append(
+        g.custom_subprocess.CustomProcessListElement(service_full_name,
+                                                     port,
+                                                     service_short_name,
+                                                     local_process.pid,
+                                                     local_process))
+    return local_process
 
 
 def init_start_service_procedure(service, sys=False):
-    br =6
+    br = 6
     type = 'business'
     if sys:
         type = 'system'
@@ -69,26 +77,23 @@ def init_start_service_procedure(service, sys=False):
     except:
         spawn_type = None
 
-    if sys:
-        g.insert_into_sys_services(service_full_name, port)
-
-    # os.environ["DEBUSSY"] = "1"
-    # g.set_environment_variable("FLASK_APP", service_full_name)
+    new_process = None
     if spawn_type != "multi":
         if local:
-            start_service(service_full_name, port, local)
+            new_process = start_service(service_full_name, port, service_short_name=service, local=local)
         else:
-            start_service(service_full_name,port)
+            new_process = start_service(service_full_name, port, service_short_name=service)
     else:
         raise Exception('Implement multi endpoint stuff')
-
-
+    if sys:
+        g.db_utils.insert_into_sys_services(service_full_name, port, new_process.pid)
 
 
 def main():
     g.printc(f'Firing fuse..')
     # some preconfiguration
     g.clear_busy_ports()
+    g.db_utils.clear_system_tables()
     if config['fuse']['activate_venv']:
         g.printc(f"starting venv from {root_path + config['fuse']['fuse']}")
         start_venv()
@@ -104,11 +109,9 @@ def main():
                 init_start_service_procedure(service)
 
 
-
-
 if __name__ == "__main__":
     # g.run_cmd_command('cd')
     main()
-#     just an eternal loop
+    #     just an eternal loop
     while True:
         pass

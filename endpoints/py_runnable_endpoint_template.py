@@ -1,10 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from flasgger import Swagger
 from utils import general_utils as g
-import os
 from argparse import ArgumentParser
 
-app = Flask(__name__, template_folder=g.root_path+'templates')
+app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)
 
 
@@ -27,7 +26,7 @@ def hello():
       200:
         description: why would you go here, go away
     """
-    return 'try swagger at least, (/apidocs).'
+    return redirect(f"apidocs", code=200)
 
 
 @app.route("/user/<string:str_variable>")
@@ -51,10 +50,9 @@ def endpoint_with_var(str_variable):
         """
     return 'elo hello fello\', %s' % str_variable
 
+
 # experimental part
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-
     parser = ArgumentParser()
     parser.add_argument('-port')
     parser.add_argument('-local')

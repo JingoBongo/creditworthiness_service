@@ -9,17 +9,6 @@ conf_path = g.conf_path
 config = g.config
 
 
-# print(type(config['fuse']['activate_venv']))
-# print(os.path.dirname(os.path.abspath(__file__)))
-
-
-# activate_venv_windows = root_path + "\\flask\\flaskEnvironment\\Scripts\\activate"
-# cmd = "deactivate"
-#
-# returned_value = os.system(cmd)  # returns the exit code in unix
-# print('returned value:', returned_value)
-#
-
 def start_venv():
     activate_venv_windows = root_path + config['fuse']['venv_activate_path']
     returned_value = os.system(activate_venv_windows)  # returns the exit code in unix
@@ -40,8 +29,6 @@ def get_free_port():
     for i in range(port_start_ind, port_end_ind + 1):
         str_port = str(i)
         if not (str_port in busy_ports_json['busy_ports']):
-            # busy_ports_json['busy_ports'].append(str_port)
-            # g.write_to_json(busy_ports_json_path, busy_ports_json)
             return str_port
 
 
@@ -115,3 +102,4 @@ if __name__ == "__main__":
     #     just an eternal loop
     while True:
         pass
+

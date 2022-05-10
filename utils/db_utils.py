@@ -1,8 +1,10 @@
 import os
 import sqlite3 as sl
 
+
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
 sql_connection = sl.connect(root_path + 'resources\\main_db.db')
+
 
 
 def initial_sys_table_creation():

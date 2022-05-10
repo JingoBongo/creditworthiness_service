@@ -1,30 +1,15 @@
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g
-import os
+import schedule
+from multiprocessing import Process, Queue
 from argparse import ArgumentParser
+import time
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
-
-
-
-@app.route('/')
-def hello():
-    """Root, please go somewhere else
-    ---
-    responses:
-      200:
-        description: why would you go here, go away
-    """
-    return 'system endpoint'
-
-
-# experimental part
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-
     parser = ArgumentParser()
     parser.add_argument('-port')
     parser.add_argument('-local')
@@ -34,5 +19,17 @@ if __name__ == "__main__":
         host = "127.0.0.1"
     else:
         host = g.host
-    # endpoint_port = int(os.environ.get('PORT', endpoint_port))
+
+    process_name = "life_ping_schedule"
+    process_full_path = f"{g.root_path}\\utils\\life_ping_schedule.py"
+    local_process = g.custom_subprocess.CustomNamedProcess([g.sys.executable,
+                                                            process_full_path],
+                                                           name=process_name)
+    g.launched_subprocesses.append(
+        g.custom_subprocess.CustomProcessListElement(process_full_path,
+                                                     999999999,
+                                                     process_name,
+                                                     local_process.pid,
+                                                     local_process))
+
     app.run(debug=g.debug, host=host, port=endpoint_port)

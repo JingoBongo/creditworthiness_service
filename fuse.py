@@ -8,7 +8,7 @@ root_path = g.root_path
 conf_path = g.conf_path
 config = g.config
 
-
+# test change
 def start_venv():
     activate_venv_windows = root_path + config['fuse']['venv_activate_path']
     returned_value = os.system(activate_venv_windows)  # returns the exit code in unix

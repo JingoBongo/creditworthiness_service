@@ -9,6 +9,11 @@ swagger = Swagger(app)
 
 
 
+@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+def life_ping():
+    return '{"status":"alive"}'
+
+
 
 @app.route('/')
 def hello():

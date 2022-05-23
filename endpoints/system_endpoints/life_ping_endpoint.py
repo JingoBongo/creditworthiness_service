@@ -1,13 +1,17 @@
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g
-import schedule
-from multiprocessing import Process, Queue
 from argparse import ArgumentParser
-import time
 
 app = Flask(__name__)
 swagger = Swagger(app)
+
+
+@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+def life_ping():
+    return '{"status":"alive"}'
+
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()

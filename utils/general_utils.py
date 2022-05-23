@@ -1,40 +1,39 @@
 import json
 import os
-import subprocess
-import sys
-import schedule
-
-import utils.db_utils as db_utils
 import utils.read_from_yaml as yaml_utils
-import utils.named_custom_process as custom_subprocess
 
-root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils','')
+SYS_SERVICES_TABLE_NAME = 'Sys_Services'
+BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
+LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
+cur_file_name = os.path.basename(__file__)
+root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
 conf_path = '.\\resources\\fuse.yaml'
 config = yaml_utils.read_from_yaml(conf_path)
 busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']
-host=config['general']['host']
+host = config['general']['host']
 
-
+# TODO remove this, as I see this value isn't passed between processes and endpoints, therefore useless
 launched_subprocesses = []
 
 
-def printc(msg):
-    print(msg)
+def print_c(text):
+    print(f"[{cur_file_name}] {str(text)}")
 
 
 def run_cmd_command(command):
-    printc(f'triggering command :{command}')
+    print_c(f'triggering command :{command}')
     returned_value = os.system(command)
-    printc(f'returned value: {returned_value}')
+    print_c(f'returned value: {returned_value}')
 
 
 def read_from_json(path):
     try:
         with open(path) as json_file:
             return json.load(json_file)
-    except:
-        printc(f'Something went horribly wrong when attempted to read from file "{path}"')
+    except Exception as e:
+        print_c(f'Something went horribly wrong when attempted to read from file "{path}"')
+        print_c(e)
         return {}
 
 
@@ -42,8 +41,9 @@ def write_to_json(path, text):
     try:
         with open(path, 'w') as outfile:
             json.dump(text, outfile)
-    except:
-        printc(f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
+    except Exception as e:
+        print_c(f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
+        print_c(e)
 
 
 def clear_busy_ports():
@@ -59,4 +59,3 @@ def set_port_busy(port):
 
 def set_environment_variable(param, param1):
     os.environ[param] = str(param1)
-

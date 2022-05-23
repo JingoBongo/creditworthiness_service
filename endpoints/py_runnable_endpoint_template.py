@@ -51,6 +51,17 @@ def endpoint_with_var(str_variable):
     return 'elo hello fello\', %s' % str_variable
 
 
+@app.errorhandler(404)
+def handle_404(e):
+    # handle all other routes here
+    return 'Not Found, but we HANDLED IT'
+
+
+@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+def life_ping():
+    return '{"status":"alive"}'
+
+
 # experimental part
 if __name__ == "__main__":
     parser = ArgumentParser()

@@ -16,6 +16,7 @@ services:
       path: "endpoints\\system_endpoints\\py_runnable_system_endpoint_template.py"
       local: True
       mono: True
+      enabled: True
     life_ping_endpoint:
       path: "endpoints\\system_endpoints\\life_ping_endpoint.py"
       local: True
@@ -23,6 +24,7 @@ services:
   business:
     endpoint_template:
       path: "endpoints\\py_runnable_endpoint_template.py"
+      enabled: True
 
 sqlite:
   init:

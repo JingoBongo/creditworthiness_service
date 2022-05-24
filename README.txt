@@ -20,3 +20,4 @@ db_decorator is GIGA CHAD, but!. If you see that functions from db_utils have ar
 args* are consumed by decorator, but function only uses kwargs** that are supplemented by decorator
 TODO PRINTS AND LOGGING
 TODO add ability to show alive services to lifeping
+TODO AS FUCKING SAP: put methods where they belong.

@@ -1,4 +1,6 @@
 import os
+
+
 import utils.read_from_yaml as yaml_utils
 from utils.decorators.db_decorators import use_db_main_variables_decorator
 
@@ -27,6 +29,7 @@ def initial_table_creation(*args, **kwargs):
                 alc.Column('id', alc.Integer, primary_key=True),
                 alc.Column('name', alc.String),
                 alc.Column('port', alc.String),
+                alc.Column('status', alc.String, nullable=True),
                 alc.Column('pid', alc.Integer, nullable=False), )
     kwargs['metadata'].create_all(kwargs['engine'])
     print_c("Initial table re-creation completed")
@@ -66,9 +69,9 @@ def insert_into_sys_services(*args, **kwargs):
     val_port = kwargs['val_port']
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
-    ins = kwargs['sys_services'].insert().values(name=val_name, port=val_port, pid=val_pid)
+    ins = kwargs['sys_services'].insert().values(name=val_name, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into sys services table: {val_name}, {val_port}, {val_pid}")
+    print_c(f"Inserted into sys services table: {val_name}, {val_port}, {val_pid}, 'alive'")
 
 
 @use_db_main_variables_decorator(engine_path=engine_path, SYS_SERVICES_TABLE_NAME=SYS_SERVICES_TABLE_NAME,
@@ -78,9 +81,9 @@ def insert_into_business_services(*args, **kwargs):
     val_port = kwargs['val_port']
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
-    ins = kwargs['business_services'].insert().values(name=val_name, port=val_port, pid=val_pid)
+    ins = kwargs['business_services'].insert().values(name=val_name, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into business services table: {val_name}, {val_port}, {val_pid}")
+    print_c(f"Inserted into business services table: {val_name}, {val_port}, {val_pid}, 'alive'")
 
 
 @use_db_main_variables_decorator(engine_path=engine_path, SYS_SERVICES_TABLE_NAME=SYS_SERVICES_TABLE_NAME,
@@ -97,3 +100,33 @@ def clear_business_tables(*args, **kwargs):
     d = kwargs['sys_services'].delete()
     kwargs['engine'].execute(d)
     print_c("Cleared Business_Services table")
+
+@use_db_main_variables_decorator(engine_path=engine_path, SYS_SERVICES_TABLE_NAME=SYS_SERVICES_TABLE_NAME,
+                                 BUSINESS_SERVICES_TABLE_NAME=BUSINESS_SERVICES_TABLE_NAME,
+                                 required_args=['val_pid'])
+def delete_process_from_tables_by_pid(*args, **kwargs):
+    alc = kwargs['alc']
+    val_pid = kwargs['val_pid']
+    pid_column = alc.Column('pid', alc.String)
+    d = kwargs['business_services'].delete().where(pid_column == int(val_pid))
+    d2 = kwargs['sys_services'].delete().where(pid_column == int(val_pid))
+    kwargs['engine'].execute(d)
+    kwargs['engine'].execute(d2)
+    print_c(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
+
+
+
+@use_db_main_variables_decorator(engine_path=engine_path, SYS_SERVICES_TABLE_NAME=SYS_SERVICES_TABLE_NAME,
+                                 BUSINESS_SERVICES_TABLE_NAME=BUSINESS_SERVICES_TABLE_NAME,
+                                 required_args=['val_pid', 'val_status'])
+def change_service_status_by_pid(*args, **kwargs):
+    val_pid = kwargs['val_pid']
+    val_status = kwargs['val_status']
+    alc = kwargs['alc']
+    pid_column = alc.Column('pid', alc.String)
+    status_column = alc.Column('status', alc.String)
+    q = kwargs['business_services'].update().where(pid_column == int(val_pid)).values(status=str(val_status))
+    q2 = kwargs['business_services'].update().where(pid_column == int(val_pid)).values(status=str(val_status))
+    kwargs['engine'].execute(q)
+    kwargs['engine'].execute(q2)
+    print_c(f"Updated process by pid {val_pid} with status {val_status}")

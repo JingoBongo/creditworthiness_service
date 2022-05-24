@@ -1,6 +1,8 @@
 import sqlite3
 from binascii import Error
 
+import psutil
+
 
 def create_connection(db_file):
     """ create a database connection to the SQLite database
@@ -46,4 +48,13 @@ def main():
 
 if __name__ == '__main__':
     # main()
-    a = print('sdfsdf')
+    # a = print('sdfsdf')
+    p = psutil.Process(14908)
+    p.terminate()  # or p.kill()
+    # database = r"D:\files\yearV\cloud\reditworthiness_service\resources\main_db2.db"
+    # conn = sqlite3.connect(database)
+    # cur = conn.cursor()
+    # cur.execute("drop table Business_Services")
+    # cur.execute("drop table Sys_Services")
+    #
+    # rows = cur.fetchall()

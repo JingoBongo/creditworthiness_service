@@ -30,12 +30,15 @@ def use_db_main_variables_decorator(engine_path, SYS_SERVICES_TABLE_NAME, BUSINE
             kwargs['session'] = sessionmaker(kwargs['engine'])()
             kwargs['connection'] = kwargs['engine'].connect()
             kwargs['metadata'] = kwargs['alc'].MetaData()
-            kwargs['sys_services'] = kwargs['alc'].Table(SYS_SERVICES_TABLE_NAME, kwargs['metadata'],
-                                                         autoload=True,
-                                                         autoload_with=kwargs['engine'])
-            kwargs['business_services'] = kwargs['alc'].Table(BUSINESS_SERVICES_TABLE_NAME, kwargs['metadata'],
-                                                              autoload=True,
-                                                              autoload_with=kwargs['engine'])
+            try:
+                kwargs['sys_services'] = kwargs['alc'].Table(SYS_SERVICES_TABLE_NAME, kwargs['metadata'],
+                                                             autoload=True,
+                                                             autoload_with=kwargs['engine'])
+                kwargs['business_services'] = kwargs['alc'].Table(BUSINESS_SERVICES_TABLE_NAME, kwargs['metadata'],
+                                                                  autoload=True,
+                                                                  autoload_with=kwargs['engine'])
+            except Exception as e:
+                print_c(e)
             result = func(**kwargs)
             kwargs['connection'].connection.commit()
             kwargs['connection'].connection.close()

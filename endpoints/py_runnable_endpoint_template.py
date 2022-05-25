@@ -7,6 +7,11 @@ app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)
 
 
+@app.route('/send_n')
+def send_n():
+    return 'aboba'
+
+
 @app.route('/snake')
 def hello_world():
     """When pockets are empty.. at least you can play snakes
@@ -60,7 +65,6 @@ def handle_404(e):
 @app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
-
 
 
 if __name__ == "__main__":

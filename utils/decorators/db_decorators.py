@@ -1,10 +1,10 @@
 import os
-import utils.general_utils as g
 
 cur_file_name = os.path.basename(__file__)
-SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
-BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
-engine_path = g.sql_engine_path
+SYS_SERVICES_TABLE_NAME = 'Sys_Services'
+BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
+root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils\\decorators', '')
+engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
 
 
 def print_c(text):

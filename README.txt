@@ -1,3 +1,21 @@
+probable tasks for Andrew
+
+1. class CustomProcessListElement(): seems to be unused, although script write those elements into a list.
+ !!  never uses the list. Fix/make is useful or remove
+
+2. clean the code
+2.5 try to minimize amount of duplicated variables
+
+3. LOGGING -> logs come from certain (log example: [TIMESTAMP][PROCESS PID][file name? endpoint name? idk yet] [info/debug] info)
+3.5 replace prints with logging? or even store logs into files? or even into separate endpoint? last one is too much i think
+
+4. replace service.name (short/abs path) into service.name and service.path . BOTH IN DB AND LISTS, etc.
+
+5. make sure if you start second life_ping service second schedule job is not started
+
+6. mark important functions and make them 'try except' rescue? proof
+
+
 How to run: start fuse.py
 
 **For now requirements.txt doesn't exist, this is a TODO

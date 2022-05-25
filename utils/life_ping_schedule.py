@@ -7,6 +7,8 @@ import psutil
 
 from utils import db_utils
 
+# DO NOT IMPORT. !@!!!!!!
+
 root_path = g.root_path
 config = g.config
 
@@ -42,12 +44,12 @@ def process_one_service(n):
         # do other things anyway
         g.get_rid_of_service_by_pid_and_port(n['pid'], n['port'])
         kkey = None
-        for key in config['services']['system']:
-            if config['services']['system'][key]['path'] in n['name']:
-                kkey = key
-                break
-        for key in config['services']['business']:
-            if config['services']['business'][key]['path'] in n['name']:
+        if is_sys:
+            service_type = 'system'
+        else:
+            service_type = 'business'
+        for key in config['services'][service_type]:
+            if config['services']['service_type'][key]['path'] in n['name']:
                 kkey = key
                 break
         if kkey:

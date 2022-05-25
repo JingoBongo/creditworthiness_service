@@ -54,8 +54,8 @@ def start_service(service_name):
           200:
             description: 99% caution
         """
-    process_start_service(service_name)
-    return
+    return process_start_service(service_name)
+
 
 
 if __name__ == "__main__":

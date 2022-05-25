@@ -5,14 +5,13 @@ import os
 import requests
 import psutil
 
-
 from utils import db_utils
 
 root_path = g.root_path
 config = g.config
 
-SYS_SERVICES_TABLE_NAME = 'Sys_Services'
-BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
+SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
+BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
 cur_file_name = os.path.basename(__file__)
 
 
@@ -28,10 +27,6 @@ def ping_one(port):
     except Exception as e:
         print_c(e)
         return 'dead'
-
-
-
-
 
 
 def process_one_service(n):
@@ -58,14 +53,15 @@ def process_one_service(n):
         if kkey:
             g.init_start_service_procedure(kkey, sys=is_sys)
 
+
 def process_service_statuses(services_and_statuses):
     for n in services_and_statuses:
         try:
             process_one_service(n)
         except Exception as e:
-            print_c(f"Failed to properly process service {n['name']}, pid {n['pid']}, port {n['port']}, status {n['status']}")
+            print_c(
+                f"Failed to properly process service {n['name']}, pid {n['pid']}, port {n['port']}, status {n['status']}")
             print(e)
-
 
 
 def job():
@@ -75,7 +71,7 @@ def job():
     services_and_statuses = []
     for i in services:
         service_status = ping_one(i.port)
-        print('PID '+str(i.pid))
+        print('PID ' + str(i.pid))
         services_and_statuses.append({'name': i.name, 'port': i.port, 'pid': i.pid, 'status': service_status})
         if not i.status == service_status:
             db_utils.change_service_status_by_pid(i.pid, service_status)
@@ -85,8 +81,8 @@ def job():
     print_c("Scheduled life_ping task finished")
 
 
-schedule.every(15).seconds.do(job)
-# schedule.every(1).minute.do(job)
+# schedule.every(15).seconds.do(job)
+schedule.every(1).minute.do(job)
 
 try:
     while True:

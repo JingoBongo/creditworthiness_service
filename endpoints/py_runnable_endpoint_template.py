@@ -62,7 +62,7 @@ def life_ping():
     return '{"status":"alive"}'
 
 
-# experimental part
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('-port')
@@ -73,5 +73,4 @@ if __name__ == "__main__":
         host = "127.0.0.1"
     else:
         host = g.host
-    # endpoint_port = int(os.environ.get('PORT', endpoint_port))
     app.run(debug=g.debug, host=host, port=endpoint_port)

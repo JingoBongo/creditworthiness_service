@@ -1,14 +1,17 @@
 import os
+import utils.general_utils as g
 
 cur_file_name = os.path.basename(__file__)
+SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
+BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
+engine_path = g.sql_engine_path
 
 
 def print_c(text):
     print(f"[{cur_file_name}] {str(text)}")
 
 
-def use_db_main_variables_decorator(engine_path, SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME,
-                                    required_args=None):
+def sql_alchemy_db_func(required_args=None):
     def upper(func):
         def inner(*args, **kwargs):
             if required_args:

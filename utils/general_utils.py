@@ -1,15 +1,11 @@
 import json
 import os
-
 import psutil
-
 import utils.read_from_yaml as yaml_utils
 import sys
 import utils.named_custom_process as custom_subprocess
 import utils.db_utils as db_utils
 
-SYS_SERVICES_TABLE_NAME = 'Sys_Services'
-BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
 LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
@@ -18,6 +14,8 @@ config = yaml_utils.read_from_yaml(root_path + conf_path)
 busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']
 host = config['general']['host']
+SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
+sql_engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
 
 # TODO remove this, as I see this value isn't passed between processes and endpoints, therefore useless
 launched_subprocesses = []
@@ -107,16 +105,16 @@ def get_rid_of_service_by_pid_and_port_wrong(pid, port):
 
 def start_service(service_full_name, port, service_short_name, local=False, host=host):
     local_process = custom_subprocess.CustomNamedProcess([sys.executable,
-                                                            service_full_name,
-                                                            "-local", str(local),
-                                                            "-port", str(port)],
-                                                           name=service_short_name)
+                                                          service_full_name,
+                                                          "-local", str(local),
+                                                          "-port", str(port)],
+                                                         name=service_short_name)
     launched_subprocesses.append(
-                            custom_subprocess.CustomProcessListElement(service_full_name,
-                                                     port,
-                                                     service_short_name,
-                                                     local_process.pid,
-                                                     local_process))
+        custom_subprocess.CustomProcessListElement(service_full_name,
+                                                   port,
+                                                   service_short_name,
+                                                   local_process.pid,
+                                                   local_process))
     print_c(f"fuse added service to pool: {service_full_name}")
     return local_process
 
@@ -130,6 +128,7 @@ def get_free_port():
         str_port = str(i)
         if not (str_port in busy_ports_json['busy_ports']):
             return str_port
+
 
 def init_start_service_procedure(service, sys=False):
     type = 'business'
@@ -158,6 +157,7 @@ def init_start_service_procedure(service, sys=False):
         db_utils.insert_into_sys_services(service_full_name, port, new_process.pid)
     else:
         db_utils.insert_into_business_services(service_full_name, port, new_process.pid)
+
 
 def process_start_service(service_name):
     try:

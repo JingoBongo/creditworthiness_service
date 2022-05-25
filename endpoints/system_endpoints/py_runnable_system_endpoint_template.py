@@ -26,7 +26,7 @@ def hello():
     return 'system endpoint'
 
 
-# experimental part
+
 if __name__ == "__main__":
     from argparse import ArgumentParser
 
@@ -39,5 +39,4 @@ if __name__ == "__main__":
         host = "127.0.0.1"
     else:
         host = g.host
-    # endpoint_port = int(os.environ.get('PORT', endpoint_port))
     app.run(debug=g.debug, host=host, port=endpoint_port)

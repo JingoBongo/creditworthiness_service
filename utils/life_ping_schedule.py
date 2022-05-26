@@ -43,15 +43,17 @@ def process_one_service(n):
             is_sys = True
         # do other things anyway
         g.get_rid_of_service_by_pid_and_port(n['pid'], n['port'])
+        print_c(f"before life ping init start services")
         kkey = None
-        if is_sys:
-            service_type = 'system'
-        else:
-            service_type = 'business'
-        for key in config['services'][service_type]:
-            if config['services']['service_type'][key]['path'] in n['name']:
+        for key in config['services']['system']:
+            if config['services']['system'][key]['path'] in n['name']:
                 kkey = key
                 break
+        for key in config['services']['business']:
+            if config['services']['business'][key]['path'] in n['name']:
+                kkey = key
+                break
+        print_c(f"before life ping init start services")
         if kkey:
             g.init_start_service_procedure(kkey, sys=is_sys)
 
@@ -83,8 +85,8 @@ def job():
     print_c("Scheduled life_ping task finished")
 
 
-# schedule.every(15).seconds.do(job)
-schedule.every(1).minute.do(job)
+schedule.every(15).seconds.do(job)
+# schedule.every(1).minute.do(job)
 
 try:
     while True:

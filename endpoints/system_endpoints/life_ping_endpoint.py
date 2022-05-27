@@ -36,7 +36,7 @@ def get_rid_of_service(pid, port):
     """
     return get_rid_of_service_by_pid_and_port(pid, port)
 
-@app.route('/services/remove-wrong/<pid>/<port>')
+@app.route('/services/remove-dirty/<pid>/<port>')
 def remove_service_wrong(pid, port):
     """Removes a service wrong to trigger life ping revival. provide with pid and port..
         ---

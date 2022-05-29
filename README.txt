@@ -16,6 +16,9 @@ probable tasks for Andrew
 6. mark important functions and make them 'try except' rescue? proof
 
 
+NOTES TODO:
+LIFEPING CAN BE HIDEN AS FLASK CHILD CLASS
+
 How to run: start fuse.py
 
 **For now requirements.txt doesn't exist, this is a TODO

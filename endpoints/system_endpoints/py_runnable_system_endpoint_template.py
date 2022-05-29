@@ -28,8 +28,6 @@ def hello():
 
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-
     parser = ArgumentParser()
     parser.add_argument('-port')
     parser.add_argument('-local')

@@ -26,6 +26,7 @@ services:
       path: "endpoints\\py_runnable_endpoint_template.py"
       enabled: True
 
+
 sqlite:
   init:
     table_names:

@@ -1,7 +1,7 @@
 # the goal of this file is to launch everything.
 # root path: os.path.dirname(os.path.abspath(__file__))
 import os
-
+import sys
 
 from utils.package_utils import run_importing_process
 from utils import general_utils as g
@@ -31,6 +31,12 @@ def deact_venv():
 
 def main():
     print_c(f'Firing fuse..')
+    sys.path.append(root_path)
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    # sys.path.insert(0, os.path.abspath('../../'))
+    # import creditworthiness_service
+    for line in sys.path:
+        print(line)
     run_importing_process()
     # some preconfiguration
     g.clear_busy_ports()

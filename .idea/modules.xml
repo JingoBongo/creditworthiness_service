@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/reditworthiness_service.iml" filepath="$PROJECT_DIR$/.idea/reditworthiness_service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/creditworthiness_service.iml" filepath="$PROJECT_DIR$/.idea/creditworthiness_service.iml" />
     </modules>
   </component>
 </project>

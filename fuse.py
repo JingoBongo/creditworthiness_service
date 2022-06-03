@@ -4,6 +4,7 @@ import os
 
 
 from utils.named_custom_process import CustomNamedProcess, CustomProcessListElement
+from utils.package_utils import run_importing_process
 from utils.read_from_yaml import read_from_yaml
 from utils import general_utils as g
 from utils import db_utils
@@ -38,6 +39,7 @@ def deact_venv():
 
 def main():
     g.print_c(f'Firing fuse..')
+    run_importing_process()
     # some preconfiguration
     g.clear_busy_ports()
     # TODO> I think remake busy ports into DB table. or?..

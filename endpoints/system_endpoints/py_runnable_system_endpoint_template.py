@@ -1,7 +1,6 @@
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g
-import os
 from argparse import ArgumentParser
 
 app = Flask(__name__)

@@ -1,6 +1,5 @@
 import os
 
-
 all_py_local_files = []
 all_imports = []
 
@@ -29,12 +28,16 @@ def check_string_has_no_occurrences_in_the_list(string, list):
     return has_occurrence
 
 def get_package_name_from_line(line):
+    line = line.strip()
+    print(f"Line that got into 'get_package_name_from_file' : {line}")
     if line.startswith('import'):
+        print(f"'get_package_name_from_file' returned {line.split(' ')[1]}")
         return line.split(' ')[1]
     if 'from' in line:
         line = line.split('import')[0]
         line = line.split(' ')[1]
         line = line.split('.')[0]
+        print(f"'get_package_name_from_file' returned {line}")
         return line
     else:
         print(f"Dafuq is this line? : {line}")
@@ -50,7 +53,7 @@ def is_local_import(line):
 def find_used_packages():
     global all_py_local_files
     global all_imports
-    restricted_folders = ['orchestra_env', 'test1env_withoutml']
+    restricted_folders = ['orchestra_env', 'test1env_withoutml', 'empty_env']
     root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
 
     for root, dirs, files in os.walk(root_path):
@@ -60,6 +63,7 @@ def find_used_packages():
                 all_py_local_files.append(file.replace('.py',''))
                 with open(file_full_path) as f:
                     for line in f.readlines():
+                        line = line.strip()
                         if line.startswith('import') or line.startswith('from'):
                             # print(f"Import line : '{line}' in file {file}")
                             line = line.replace('\n', '')
@@ -78,6 +82,6 @@ def run_importing_process():
         try_import_and_install_package(im)
     print(f"Modules preparation complete")
 
-run_importing_process()
+# run_importing_process()
 # print('local files')
 # print(all_py_local_files)

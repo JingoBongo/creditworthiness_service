@@ -2,7 +2,7 @@ import __init__
 import subprocess
 import tempfile
 
-import yaml
+
 
 import os
 
@@ -139,6 +139,7 @@ def find_used_packages():
 
 def read_from_yaml(file_path):
     try:
+        import yaml
         with open(file_path) as f:
             return yaml.safe_load(f)
     except Exception as e:
@@ -150,6 +151,10 @@ def run_importing_process():
     print(f"Checking installed modules")
     for im in find_used_packages():
         try_import_and_install_package(im)
+    try:
+        os.system(f"pip install -Iv pyyaml")
+    except:
+        print('PYYAM should be already installed')
     config = read_from_yaml(root_path + conf_path)
     for module in config['uncommon_modules']:
         try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],

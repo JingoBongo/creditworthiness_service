@@ -5,7 +5,6 @@ general:
 
 
 fuse:
-  activate_venv: False
   venv_activate_path: "orchestra_env\\Scripts\\activate"
   first_port: 5000
   last_port: 6000

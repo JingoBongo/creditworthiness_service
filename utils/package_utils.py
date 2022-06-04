@@ -22,7 +22,7 @@ def try_import_and_install_package(package_name):
                     print(f"{package_name} is already installed")
     except ImportError:
         try:
-            print(f"Trying to Install required module: {package_name}")
+            print(f"Trying to Install required module: {package_name} --user")
             os.system(f"pip3 install {package_name}")
         except Exception as e:
             print(f"Failed to install {package_name}, it is probably installed already")
@@ -31,14 +31,6 @@ def try_import_and_install_package(package_name):
 
 def try_import_and_install_uncommon_package(import_name, module_name):
     pac_name, pac_ver = module_name.split('==')
-    # try:
-    #     if import_name:
-    #         str = f"import {import_name}"
-    #         if str:
-    #             if len(str) > 0:
-    #                 exec(str)
-    #                 print(f"{import_name} is already installed")
-    # except Exception:
     try:
         try:
             cmd = ['pip3', 'show', pac_name]
@@ -47,13 +39,6 @@ def try_import_and_install_uncommon_package(import_name, module_name):
                 proc.wait()
                 tempf.seek(0)
                 version = tempf.read()
-            # output = os.popen(f"pip3 show {pac_name}").read()
-            cmd = ['pip3', 'show', pac_name]
-            # output = subprocess.Popen( cmd, stdout=subprocess.pip3E ).communicate()[0]
-            # output.wait()
-            # version = output.read().strip()
-            # output.close()
-
         except:
             version = None
         version = str(version)
@@ -62,7 +47,7 @@ def try_import_and_install_uncommon_package(import_name, module_name):
             # cmd = ['pip3', 'install', '-Iv', pac_name, '--user']
             # subprocess.Popen(cmd)
             return
-        for line in version.split('\n'):
+        for line in version.split('\\r\\n'):
             if 'Version' in line:
                 if line.split(' ')[1] == pac_ver:
                     pass
@@ -70,7 +55,7 @@ def try_import_and_install_uncommon_package(import_name, module_name):
                     #             uninstall previous version
                     os.system(f"pip3 uninstall {pac_name} -y")
                     #     install specified version
-                    os.system(f"pip3 install -Iv {module_name}")
+                    os.system(f"pip3 install -Iv {module_name} --user")
 
     except Exception as e:
         print(f"Failed to install {module_name}, check the details yourselves")
@@ -152,7 +137,8 @@ def run_importing_process():
     for im in find_used_packages():
         try_import_and_install_package(im)
     try:
-        os.system(f"pip3 install -Iv pyyaml")
+        # os.system(f"pip3 install -Iv pyyaml")
+        try_import_and_install_package('pyyaml')
     except:
         print('PYYAM should be already installed')
     config = read_from_yaml(root_path + conf_path)

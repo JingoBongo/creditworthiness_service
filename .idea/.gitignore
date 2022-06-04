@@ -2,3 +2,5 @@
 /shelf/
 /workspace.xml
 *.pyc
+*.db
+*/busy_ports.json

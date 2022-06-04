@@ -1,3 +1,6 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+./resources/busy_ports.json
+./resources/main_db2.db
+./resources/main_db.db

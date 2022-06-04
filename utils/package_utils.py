@@ -57,7 +57,7 @@ def try_import_and_install_uncommon_package(import_name, module_name):
         except:
             version = None
         version = str(version)
-        if not version or len(version) < 5:
+        if not version or len(version) < 20:
             os.system(f"pip install -Iv {module_name}")
             # cmd = ['pip', 'install', '-Iv', pac_name, '--user']
             # subprocess.Popen(cmd)

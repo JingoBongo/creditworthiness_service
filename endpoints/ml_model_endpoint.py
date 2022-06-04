@@ -12,9 +12,9 @@ import pickle
 app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)
 
-scaler = pickle.load(open("endpoints/standard_scaler.pkl", 'rb'))
-one_hot_encoder = pickle.load(open("endpoints/one_hot_encoder.pkl", 'rb'))
-model = pickle.load(open("endpoints/bag_log_clf.pkl", 'rb'))
+scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
+one_hot_encoder = pickle.load(open("resources/pickles/one_hot_encoder.pkl", 'rb'))
+model = pickle.load(open("resources/pickles/bag_log_clf.pkl", 'rb'))
 
 print("MODELS: " + str(scaler) + str(one_hot_encoder) + str(model))
 numerical_columns = ["ApplicantIncome", "CoapplicantIncome", "LoanAmount", "Loan_Amount_Term"]
@@ -34,9 +34,6 @@ def processPerson():
         record = pd.DataFrame(json_record, columns=numerical_columns + categorical_columns)
         record["Credit_History"] = record["Credit_History"].replace({0: "No", 1: "Yes"})
 
-        # print(one_hot_encoder)
-        # print(one_hot_encoder.transform(record[categorical_columns]))
-
         encoded_categories_df = pd.DataFrame(one_hot_encoder.transform(record[categorical_columns]),
                                              columns=one_hot_encoder.get_feature_names_out())
         record = pd.concat([record, encoded_categories_df], axis=1)
@@ -44,12 +41,9 @@ def processPerson():
 
         record[numerical_columns] = scaler.transform(record[numerical_columns])
 
-        # print(np.array(record.loc[0]).reshape(1, -1))
-        predition = model.predict(np.array(record.loc[0]).reshape(1, -1))
-
-        print(predition)
-
-        return str(predition)
+        prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
+        print(prediction[0][1])
+        return str(prediction[0][1])
     except:
         return "nema json"
 

@@ -1,3 +1,6 @@
+import subprocess
+import tempfile
+
 import __init__
 import os
 import utils.general_utils as g
@@ -17,7 +20,7 @@ def try_import_and_install_package(package_name):
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name}")
-            os.system(f"pip install {package_name}")
+            os.system(f"pip install {package_name} --user")
         except Exception as e:
             print(f"Failed to install {package_name}, it is probably installed already")
             print(e)
@@ -25,34 +28,50 @@ def try_import_and_install_package(package_name):
 
 def try_import_and_install_uncommon_package(import_name, module_name):
     pac_name, pac_ver = module_name.split('==')
+    # try:
+    #     if import_name:
+    #         str = f"import {import_name}"
+    #         if str:
+    #             if len(str) > 0:
+    #                 exec(str)
+    #                 print(f"{import_name} is already installed")
+    # except Exception:
     try:
-        if import_name:
-            str = f"import {import_name}"
-            if str:
-                if len(str) > 0:
-                    exec(str)
-                    print(f"{import_name} is already installed")
-    except ImportError:
         try:
-            try:
-                version = os.popen(f"pip show {pac_name}").read()
-            except:
-                version = None
-            if not version:
-                os.system(f"pip install -Iv {module_name} --user")
-                return
-            for line in version.split('\n'):
-                if 'Version' in line:
-                    if line.split(' ')[1] == pac_ver:
-                        pass
-                    else:
-                        #             uninstall previous version
-                        os.system(f"pip uninstall {pac_name} -y")
-                        #     install specified version
-                        os.system(f"pip install -Iv {module_name} --user")
-        except Exception as e:
-            print(f"Failed to install {module_name}, check the details yourselves")
-            print(e)
+            cmd = ['pip', 'show', pac_name]
+            with tempfile.TemporaryFile() as tempf:
+                proc = subprocess.Popen(cmd, stdout=tempf)
+                proc.wait()
+                tempf.seek(0)
+                version = tempf.read()
+            # output = os.popen(f"pip show {pac_name}").read()
+            cmd = ['pip', 'show', pac_name]
+            # output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+            # output.wait()
+            # version = output.read().strip()
+            # output.close()
+
+        except:
+            version = None
+        version = str(version)
+        if not version or len(version) < 5:
+            os.system(f"pip install -Iv {module_name}")
+            # cmd = ['pip', 'install', '-Iv', pac_name, '--user']
+            # subprocess.Popen(cmd)
+            return
+        for line in version.split('\n'):
+            if 'Version' in line:
+                if line.split(' ')[1] == pac_ver:
+                    pass
+                else:
+                    #             uninstall previous version
+                    # os.system(f"pip uninstall {pac_name} -y")
+                    #     install specified version
+                    os.system(f"pip install -Iv {module_name}")
+
+    except Exception as e:
+        print(f"Failed to install {module_name}, check the details yourselves")
+        print(e)
 
 
 def check_string_has_no_occurrences_in_the_list(string, list):

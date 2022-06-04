@@ -17,11 +17,6 @@ services:
       local: True
       mono: True
       enabled: True
-    ml_model_endpoint:
-      path: "endpoints\\system_endpoints\\ml_model_endpoint.py"
-      local: True
-      mono: True
-      enabled: True
     life_ping_endpoint:
       path: "endpoints\\system_endpoints\\life_ping_endpoint.py"
       local: True
@@ -31,7 +26,7 @@ services:
       path: "endpoints\\py_runnable_endpoint_template.py"
       enabled: True
     ml_model_endpoint:
-      path: "endpoint\\ml_model_endpoint.py"
+      path: "endpoints\\ml_model_endpoint.py"
       enabled: True
 
 sqlite:

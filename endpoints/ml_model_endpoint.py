@@ -19,35 +19,38 @@ numerical_columns = ["ApplicantIncome", "CoapplicantIncome", "LoanAmount", "Loan
 categorical_columns = ["Gender", "Married", "Dependents", "Credit_History", "Education",
                        "Property_Area"]
 X = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 'Gender_Female',
-     'Gender_Male', 'Married_No', 'Married_Yes', 'Dependents_0', 'Dependents_1', 'Dependents_2', 'Dependents_3+', 'Credit_History_No', 'Credit_History_Yes',
-     'Education_Graduate', 'Education_Not Graduate', 'Property_Area_Rural', 'Property_Area_Semiurban', 'Property_Area_Urban']
-
+     'Gender_Male', 'Married_No', 'Married_Yes', 'Dependents_0', 'Dependents_1', 'Dependents_2', 'Dependents_3+',
+     'Credit_History_No', 'Credit_History_Yes', 'Education_Graduate', 'Education_Not Graduate', 'Property_Area_Rural',
+     'Property_Area_Semiurban', 'Property_Area_Urban']
 
 
 @app.route('/processPerson', methods=["POST", "GET"])
 def processPerson():
     try:
+        #   extract information from the JSON request and make it as dictionary record
         json_record = dict(request.json)
 
+        #   transform dictionary record into pandas series to perform replacement of data and extraction of correct
+        # columns of dictionary
         record = pd.DataFrame(json_record, columns=numerical_columns + categorical_columns)
         record["Credit_History"] = record["Credit_History"].replace({0: "No", 1: "Yes"})
 
-        # print(one_hot_encoder)
-        # print(one_hot_encoder.transform(record[categorical_columns]))
-
+        #   extract part of categorical data that is encoded via one-hot approach
         encoded_categories_df = pd.DataFrame(one_hot_encoder.transform(record[categorical_columns]),
                                              columns=one_hot_encoder.get_feature_names_out())
+
+        #   append encoded categories and remove original ones
         record = pd.concat([record, encoded_categories_df], axis=1)
         record.drop(columns=categorical_columns, inplace=True)
 
+        #   perform standardization of the numerical data
         record[numerical_columns] = scaler.transform(record[numerical_columns])
 
-        # print(np.array(record.loc[0]).reshape(1, -1))
-        predition = model.predict(np.array(record.loc[0]).reshape(1, -1))
+        #   calculate probability that person will return the loan (pay for it)
+        prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
+        print(prediction[0][1])
+        return str(prediction[0][1])
 
-        print(predition)
-
-        return str(predition)
     except:
         return "nema json"
 

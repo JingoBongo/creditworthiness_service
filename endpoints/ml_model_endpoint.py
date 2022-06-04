@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import pandas as pd
 import numpy as np
 import pickle
+# import scikit-learn==1.0.2
 
 app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)

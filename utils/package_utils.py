@@ -1,6 +1,6 @@
+import __init__
 import os
-import pathlib
-import sys
+import utils.general_utils as g
 
 all_py_local_files = []
 all_imports = []
@@ -20,6 +20,38 @@ def try_import_and_install_package(package_name):
             os.system(f"pip install {package_name}")
         except Exception as e:
             print(f"Failed to install {package_name}, it is probably installed already")
+            print(e)
+
+
+def try_import_and_install_uncommon_package(import_name, module_name):
+    pac_name, pac_ver = module_name.split('==')
+    try:
+        if import_name:
+            str = f"import {import_name}"
+            if str:
+                if len(str) > 0:
+                    exec(str)
+                    print(f"{import_name} is already installed")
+    except ImportError:
+        try:
+            try:
+                version = os.popen(f"pip show {pac_name}").read()
+            except:
+                version = None
+            if not version:
+                os.system(f"pip install -Iv {module_name} --user")
+                return
+            for line in version.split('\n'):
+                if 'Version' in line:
+                    if line.split(' ')[1] == pac_ver:
+                        pass
+                    else:
+                        #             uninstall previous version
+                        os.system(f"pip uninstall {pac_name} -y")
+                        #     install specified version
+                        os.system(f"pip install -Iv {module_name} --user")
+        except Exception as e:
+            print(f"Failed to install {module_name}, check the details yourselves")
             print(e)
 
 
@@ -87,8 +119,11 @@ def run_importing_process():
     print(f"Checking installed modules")
     for im in find_used_packages():
         try_import_and_install_package(im)
+    config = g.config
+    for module in config['uncommon_modules']:
+        try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
+                                                config['uncommon_modules'][module]['module_name'])
     print(f"Modules preparation complete")
-
 
 # run_importing_process()
 # print('local files')

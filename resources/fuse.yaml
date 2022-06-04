@@ -27,6 +27,11 @@ services:
     ml_model_endpoint:
       path: "endpoints\\ml_model_endpoint.py"
 
+uncommon_modules:
+  sk_learn:
+    import_name: sk_learn
+    module_name: scikit-learn==1.0.2
+
 
 sqlite:
   init:

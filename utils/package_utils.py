@@ -1,12 +1,15 @@
+import __init__
 import subprocess
 import tempfile
 
-import __init__
+import yaml
+
 import os
-import utils.general_utils as g
 
 all_py_local_files = []
 all_imports = []
+root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
+conf_path = '.\\resources\\fuse.yaml'
 
 
 def try_import_and_install_package(package_name):
@@ -134,11 +137,20 @@ def find_used_packages():
     return all_imports
 
 
+def read_from_yaml(file_path):
+    try:
+        with open(file_path) as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        print('*not a proper print*')
+        print(e)
+        print(f"*not a proper print* error reading {file_path} file")
+
 def run_importing_process():
     print(f"Checking installed modules")
     for im in find_used_packages():
         try_import_and_install_package(im)
-    config = g.config
+    config = read_from_yaml(root_path + conf_path)
     for module in config['uncommon_modules']:
         try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
                                                 config['uncommon_modules'][module]['module_name'])

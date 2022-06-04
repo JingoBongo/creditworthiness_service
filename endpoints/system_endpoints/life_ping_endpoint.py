@@ -1,5 +1,4 @@
 import __init__
-
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g
@@ -38,6 +37,7 @@ def get_rid_of_service(pid, port):
     """
     return get_rid_of_service_by_pid_and_port(pid, port)
 
+
 @app.route('/services/remove-dirty/<pid>/<port>')
 def remove_service_wrong(pid, port):
     """Removes a service wrong to trigger life ping revival. provide with pid and port..
@@ -48,6 +48,7 @@ def remove_service_wrong(pid, port):
     """
     return get_rid_of_service_by_pid_and_port_wrong(pid, port)
 
+
 @app.route('/services/start/<service_name>')
 def start_service(service_name):
     """Starts a service. provide with service name from config..
@@ -57,7 +58,6 @@ def start_service(service_name):
             description: 99% caution
         """
     return process_start_service(service_name)
-
 
 
 if __name__ == "__main__":

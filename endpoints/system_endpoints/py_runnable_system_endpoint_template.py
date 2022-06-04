@@ -1,5 +1,4 @@
 import __init__
-
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g
@@ -9,11 +8,9 @@ app = Flask(__name__)
 swagger = Swagger(app)
 
 
-
 @app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
-
 
 
 @app.route('/')
@@ -25,7 +22,6 @@ def hello():
         description: why would you go here, go away
     """
     return 'system endpoint'
-
 
 
 if __name__ == "__main__":

@@ -24,6 +24,8 @@ services:
     endpoint_template:
       path: "endpoints\\py_runnable_endpoint_template.py"
       enabled: True
+    ml_model_endpoint:
+      path: "endpoints\\ml_model_endpoint.py"
 
 
 sqlite:

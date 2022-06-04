@@ -1,6 +1,9 @@
+import __init__
+from utils.package_utils import run_importing_process
+run_importing_process()
 import os
 
-from utils.package_utils import run_importing_process
+
 from utils import general_utils as g
 from utils import db_utils
 
@@ -16,7 +19,7 @@ def print_c(text):
 
 def main():
     print_c(f'Firing fuse..')
-    run_importing_process()
+
     # some preconfiguration
     g.clear_busy_ports()
     # TODO> I think remake busy ports into DB table. or?..

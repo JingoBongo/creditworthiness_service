@@ -68,7 +68,7 @@ def try_import_and_install_uncommon_package(import_name, module_name):
                     pass
                 else:
                     #             uninstall previous version
-                    # os.system(f"pip uninstall {pac_name} -y")
+                    os.system(f"pip uninstall {pac_name} -y")
                     #     install specified version
                     os.system(f"pip install -Iv {module_name}")
 

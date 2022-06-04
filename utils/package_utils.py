@@ -55,7 +55,7 @@ def try_import_and_install_uncommon_package(import_name, module_name):
                     #             uninstall previous version
                     os.system(f"pip3 uninstall {pac_name} -y")
                     #     install specified version
-                    os.system(f"pip3 install -Iv {module_name} --user")
+                    os.system(f"pip3 install -Iv {module_name}")
 
     except Exception as e:
         print(f"Failed to install {module_name}, check the details yourselves")

@@ -12,7 +12,7 @@ import utils.db_utils as db_utils
 LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = '.\\resources\\fuse.yaml'
+conf_path = os.path.normpath('.//resources//fuse.yaml')
 config = yaml_utils.read_from_yaml(root_path + conf_path)
 busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']

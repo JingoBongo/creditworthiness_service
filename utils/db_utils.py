@@ -5,7 +5,7 @@ from utils.decorators.db_decorators import sql_alchemy_db_func
 
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = f"{root_path}\\resources\\fuse.yaml"
+conf_path = f"{root_path}//resources//fuse.yaml"
 config = yaml_utils.read_from_yaml(conf_path)
 SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
 engine_path = f"sqlite:///{root_path}resources\\main_db2.db"

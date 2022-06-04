@@ -9,7 +9,7 @@ import os
 all_py_local_files = []
 all_imports = []
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = '.\\resources\\fuse.yaml'
+conf_path = os.path.normpath('.//resources//fuse.yaml')
 
 
 def try_import_and_install_package(package_name):
@@ -23,7 +23,7 @@ def try_import_and_install_package(package_name):
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name}")
-            os.system(f"pip install {package_name}")
+            os.system(f"pip3 install {package_name}")
         except Exception as e:
             print(f"Failed to install {package_name}, it is probably installed already")
             print(e)
@@ -41,15 +41,15 @@ def try_import_and_install_uncommon_package(import_name, module_name):
     # except Exception:
     try:
         try:
-            cmd = ['pip', 'show', pac_name]
+            cmd = ['pip3', 'show', pac_name]
             with tempfile.TemporaryFile() as tempf:
                 proc = subprocess.Popen(cmd, stdout=tempf)
                 proc.wait()
                 tempf.seek(0)
                 version = tempf.read()
-            # output = os.popen(f"pip show {pac_name}").read()
-            cmd = ['pip', 'show', pac_name]
-            # output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+            # output = os.popen(f"pip3 show {pac_name}").read()
+            cmd = ['pip3', 'show', pac_name]
+            # output = subprocess.Popen( cmd, stdout=subprocess.pip3E ).communicate()[0]
             # output.wait()
             # version = output.read().strip()
             # output.close()
@@ -58,8 +58,8 @@ def try_import_and_install_uncommon_package(import_name, module_name):
             version = None
         version = str(version)
         if not version or len(version) < 20:
-            os.system(f"pip install -Iv {module_name}")
-            # cmd = ['pip', 'install', '-Iv', pac_name, '--user']
+            os.system(f"pip3 install -Iv {module_name}")
+            # cmd = ['pip3', 'install', '-Iv', pac_name, '--user']
             # subprocess.Popen(cmd)
             return
         for line in version.split('\n'):
@@ -68,9 +68,9 @@ def try_import_and_install_uncommon_package(import_name, module_name):
                     pass
                 else:
                     #             uninstall previous version
-                    os.system(f"pip uninstall {pac_name} -y")
+                    os.system(f"pip3 uninstall {pac_name} -y")
                     #     install specified version
-                    os.system(f"pip install -Iv {module_name}")
+                    os.system(f"pip3 install -Iv {module_name}")
 
     except Exception as e:
         print(f"Failed to install {module_name}, check the details yourselves")
@@ -152,7 +152,7 @@ def run_importing_process():
     for im in find_used_packages():
         try_import_and_install_package(im)
     try:
-        os.system(f"pip install -Iv pyyaml")
+        os.system(f"pip3 install -Iv pyyaml")
     except:
         print('PYYAM should be already installed')
     config = read_from_yaml(root_path + conf_path)

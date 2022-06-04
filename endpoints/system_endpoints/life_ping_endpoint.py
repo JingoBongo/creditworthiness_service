@@ -72,7 +72,7 @@ if __name__ == "__main__":
         host = g.host
 
     process_name = "life_ping_schedule"
-    process_full_path = f"{g.root_path}\\utils\\life_ping_schedule.py"
+    process_full_path = f"{g.root_path}//utils//life_ping_schedule.py"
     local_process = g.custom_subprocess.CustomNamedProcess([g.sys.executable,
                                                             process_full_path],
                                                            name=process_name)

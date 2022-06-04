@@ -20,7 +20,7 @@ def try_import_and_install_package(package_name):
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name}")
-            os.system(f"pip install {package_name} --user")
+            os.system(f"pip install {package_name}")
         except Exception as e:
             print(f"Failed to install {package_name}, it is probably installed already")
             print(e)

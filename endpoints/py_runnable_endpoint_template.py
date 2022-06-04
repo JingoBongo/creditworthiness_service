@@ -24,7 +24,7 @@ def hello_world():
     return render_template('snakes.html')
 
 
-@app.route('/snake')
+@app.route('/form')
 def init_form():
     """We have a form!
     ---

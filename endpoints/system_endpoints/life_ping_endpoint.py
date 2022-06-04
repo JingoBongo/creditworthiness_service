@@ -1,3 +1,5 @@
+import __init__
+
 from flask import Flask
 from flasgger import Swagger
 from utils import general_utils as g

@@ -1,7 +1,19 @@
+import sys
+
+import __init__
+
 from flask import Flask, render_template, redirect
 from flasgger import Swagger
-from utils import general_utils as g
+try:
+    from utils import general_utils as g
+except:
+    print(sys.path)
 from argparse import ArgumentParser
+
+
+# root_path = os.path.dirname(os.path.abspath(__file__)).replace('endpoints', '')
+# sys.path.append(root_path)
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)

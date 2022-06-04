@@ -1,7 +1,10 @@
 import os
+import pathlib
+import sys
 
 all_py_local_files = []
 all_imports = []
+
 
 def try_import_and_install_package(package_name):
     try:
@@ -19,6 +22,7 @@ def try_import_and_install_package(package_name):
             print(f"Failed to install {package_name}, it is probably installed already")
             print(e)
 
+
 def check_string_has_no_occurrences_in_the_list(string, list):
     has_occurrence = True
     for l in list:
@@ -26,6 +30,7 @@ def check_string_has_no_occurrences_in_the_list(string, list):
             # print(f"{l} IN {string}????")
             has_occurrence = False
     return has_occurrence
+
 
 def get_package_name_from_line(line):
     line = line.strip()
@@ -42,6 +47,7 @@ def get_package_name_from_line(line):
     else:
         print(f"Dafuq is this line? : {line}")
 
+
 def is_local_import(line):
     for py in all_py_local_files:
         if py in line:
@@ -49,6 +55,7 @@ def is_local_import(line):
             return True
     # print(f"{line} is NOT local")
     return False
+
 
 def find_used_packages():
     global all_py_local_files
@@ -60,7 +67,7 @@ def find_used_packages():
         for file in files:
             file_full_path = os.path.join(root, file)
             if file.endswith(".py") and check_string_has_no_occurrences_in_the_list(file_full_path, restricted_folders):
-                all_py_local_files.append(file.replace('.py',''))
+                all_py_local_files.append(file.replace('.py', ''))
                 with open(file_full_path) as f:
                     for line in f.readlines():
                         line = line.strip()
@@ -80,7 +87,24 @@ def run_importing_process():
     print(f"Checking installed modules")
     for im in find_used_packages():
         try_import_and_install_package(im)
+    # try to add all internal folders are sys.path
+    # root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
+    # for root, subdirectories, files in os.walk(root_path):
+    #     for subdirectory in subdirectories:
+    #         if '.git' not in os.path.join(root, subdirectory) and '.idea' not in os.path.join(root, subdirectory):
+    #             print(os.path.join(root, subdirectory))
+    #             # sys.path.append(os.path.join(root, subdirectory))
+    # print(sys.path)
+    myDir = os.getcwd()
+    sys.path.append(myDir)
+
+    from pathlib import Path
+    path = Path(myDir)
+    a = str(path.parent.absolute())
+    print(a)
+    sys.path.append(a)
     print(f"Modules preparation complete")
+
 
 # run_importing_process()
 # print('local files')

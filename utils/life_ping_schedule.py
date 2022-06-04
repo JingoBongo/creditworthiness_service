@@ -1,3 +1,4 @@
+import __init__
 import schedule
 import time
 import utils.general_utils as g

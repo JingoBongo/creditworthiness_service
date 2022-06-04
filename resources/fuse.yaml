@@ -26,6 +26,9 @@ services:
       enabled: True
     ml_model_endpoint:
       path: "endpoints//ml_model_endpoint.py"
+    ui_endpoint:
+      path: "endpoints//ui_endpoint.py"
+      local: False
 
 uncommon_modules:
   sklearn:

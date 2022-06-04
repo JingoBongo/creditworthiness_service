@@ -10,9 +10,9 @@ import pickle
 app = Flask(__name__, template_folder=g.root_path + 'templates')
 swagger = Swagger(app)
 
-scaler = pickle.load(open("endpoints/standard_scaler.pkl", 'rb'))
-one_hot_encoder = pickle.load(open("endpoints/one_hot_encoder.pkl", 'rb'))
-model = pickle.load(open("endpoints/bag_log_clf.pkl", 'rb'))
+scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
+one_hot_encoder = pickle.load(open("resources/pickles/one_hot_encoder.pkl", 'rb'))
+model = pickle.load(open("resources/pickles/bag_log_clf.pkl", 'rb'))
 
 print("MODELS: " + str(scaler) + str(one_hot_encoder) + str(model))
 numerical_columns = ["ApplicantIncome", "CoapplicantIncome", "LoanAmount", "Loan_Amount_Term"]

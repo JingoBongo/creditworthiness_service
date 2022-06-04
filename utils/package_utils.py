@@ -87,22 +87,6 @@ def run_importing_process():
     print(f"Checking installed modules")
     for im in find_used_packages():
         try_import_and_install_package(im)
-    # try to add all internal folders are sys.path
-    # root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-    # for root, subdirectories, files in os.walk(root_path):
-    #     for subdirectory in subdirectories:
-    #         if '.git' not in os.path.join(root, subdirectory) and '.idea' not in os.path.join(root, subdirectory):
-    #             print(os.path.join(root, subdirectory))
-    #             # sys.path.append(os.path.join(root, subdirectory))
-    # print(sys.path)
-    myDir = os.getcwd()
-    sys.path.append(myDir)
-
-    from pathlib import Path
-    path = Path(myDir)
-    a = str(path.parent.absolute())
-    print(a)
-    sys.path.append(a)
     print(f"Modules preparation complete")
 
 

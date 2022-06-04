@@ -1,0 +1,41 @@
+general:
+  busy_ports_json_file: "resources\\busy_ports.json"
+  debug: False
+  host: "0.0.0.0"
+
+
+fuse:
+  activate_venv: False
+  venv_activate_path: "orchestra_env\\Scripts\\activate"
+  first_port: 5000
+  last_port: 6000
+
+services:
+  system:
+    test_sys_endpoint:
+      path: "endpoints\\system_endpoints\\py_runnable_system_endpoint_template.py"
+      local: True
+      mono: True
+      enabled: True
+    ml_model_endpoint:
+      path: "endpoints\\system_endpoints\\ml_model_endpoint.py"
+      local: True
+      mono: True
+      enabled: True
+    life_ping_endpoint:
+      path: "endpoints\\system_endpoints\\life_ping_endpoint.py"
+      local: True
+      mono: True
+  business:
+    endpoint_template:
+      path: "endpoints\\py_runnable_endpoint_template.py"
+      enabled: True
+    ml_model_endpoint:
+      path: "endpoint\\ml_model_endpoint.py"
+      enabled: True
+
+sqlite:
+  init:
+    table_names:
+      - Sys_Services
+      - Business_Services

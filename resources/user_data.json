@@ -1,0 +1,32 @@
+{
+  "Gender": [
+    "Male"
+  ],
+  "Married": [
+    "Yes"
+  ],
+  "Dependents": [
+    "2"
+  ],
+  "Education": [
+    "Graduate"
+  ],
+  "ApplicantIncome": [
+    100000
+  ],
+  "CoapplicantIncome": [
+    50000
+  ],
+  "LoanAmount": [
+    10000000
+  ],
+  "Loan_Amount_Term": [
+    12
+  ],
+  "Credit_History": [
+    1
+  ],
+  "Property_Area": [
+    "Urban"
+  ]
+}

@@ -1,5 +1,5 @@
 import __init__
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request, flash, url_for
 from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
@@ -9,17 +9,38 @@ swagger = Swagger(app)
 
 
 
-
-@app.route('/form')
-def init_form():
-    """We have a form!
-    ---
-    responses:
-      200:
-        description: 99% caution
-    """
+@app.route('/index')
+def index():
     return render_template('form.html')
 
+@app.route("/form" , methods=['GET', 'POST'])
+def form():
+  gender             = request.form.get('genderOptions')
+  married            = request.form.get('marriedOptions')
+  dependents         = request.form.get('dependents')
+  education_degree   = request.form.get('educationDegree')
+  self_employed      = request.form.get('selfEmployedOptions')
+  applicant_income   = request.form.get('applicantIncome')
+  coapplicant_income = request.form.get('coapplicantIncome')
+  loan_amount        = request.form.get('loanAmount')
+  loan_amount_term   = request.form.get('loanAmountTerm')
+  credit_history     = request.form.get('creditHistory')
+  property_area_type = request.form.get('propertyAreaType')
+
+
+  data = {
+    "Gender":               gender,
+    "Married":              married,
+    "Dependents":           dependents,
+    "Education Degree":     education_degree,
+    "Self Employed":        self_employed,
+    "Applicant's Income":   applicant_income,
+    "Coapplicant's Income": coapplicant_income,
+    "Loan Amount":          loan_amount,
+    "Loan Amount Term":     loan_amount_term,
+    "Credit History":       credit_history,
+    "Property Area Type":   property_area_type
+  }
 
 @app.route('/')
 def hello():

@@ -1,5 +1,5 @@
 import __init__
-from flask import Flask, render_template, redirect, request
+from flask import Blueprint, Flask, render_template, redirect, request
 from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
@@ -7,10 +7,11 @@ from argparse import ArgumentParser
 import pandas as pd
 import numpy as np
 import pickle
+import json
+import os
 # import scikit-learn==1.0.2
 
-app = Flask(__name__, template_folder=g.root_path + 'templates')
-swagger = Swagger(app)
+ml_endpoint = Blueprint('ml_endpoint',__name__, template_folder=g.root_path + 'templates')
 
 scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
 one_hot_encoder = pickle.load(open("resources/pickles/one_hot_encoder.pkl", 'rb'))
@@ -26,47 +27,51 @@ X = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', '
 
 
 
-@app.route('/processPerson', methods=["POST", "GET"])
+@ml_endpoint.route('/processPerson', methods=["POST", "GET"])
 def processPerson():
     try:
-        json_record = dict(request.json)
-
-        record = pd.DataFrame(json_record, columns=numerical_columns + categorical_columns)
-        record["Credit_History"] = record["Credit_History"].replace({0: "No", 1: "Yes"})
-
-        encoded_categories_df = pd.DataFrame(one_hot_encoder.transform(record[categorical_columns]),
-                                             columns=one_hot_encoder.get_feature_names_out())
-        record = pd.concat([record, encoded_categories_df], axis=1)
-        record.drop(columns=categorical_columns, inplace=True)
-
-        record[numerical_columns] = scaler.transform(record[numerical_columns])
-
-        prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
-        print(prediction[0][1])
-        return str(prediction[0][1])
+        json_record = request.get_json(force=True) or request.data or request.form
+        print("Esti Json",json_record)
     except:
-        return "nema json"
+        print("nema json, trying from file...")
+        f = open(os.path.normpath("resources//user_data.json"))
+        json_record = dict(json.load(f))
+        print(json_record)
+    record = pd.DataFrame(json_record, columns=numerical_columns + categorical_columns)
+    record["Credit_History"] = record["Credit_History"].replace({0: "No", 1: "Yes"})
+
+    encoded_categories_df = pd.DataFrame(one_hot_encoder.transform(record[categorical_columns]),
+                                            columns=one_hot_encoder.get_feature_names_out())
+    record = pd.concat([record, encoded_categories_df], axis=1)
+    record.drop(columns=categorical_columns, inplace=True)
+
+    record[numerical_columns] = scaler.transform(record[numerical_columns])
+
+    prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
+    print(prediction[0][1])
+        
+    return str(prediction[0][1])
 
 
-@app.errorhandler(404)
+@ml_endpoint.errorhandler(404)
 def handle_404(e):
     # handle all other routes here
     return 'Not Found, but we HANDLED IT'
 
 
-@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+@ml_endpoint.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
 
 
-if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    endpoint_port = args.port
-    if args.local == "True":
-        host = "127.0.0.1"
-    else:
-        host = g.host
-    app.run(debug=g.debug, host=host, port=endpoint_port)
+# if __name__ == "__main__":
+#     parser = ArgumentParser()
+#     parser.add_argument('-port')
+#     parser.add_argument('-local')
+#     args = parser.parse_args()
+#     endpoint_port = args.port
+#     if args.local == "True":
+#         host = "127.0.0.1"
+#     else:
+#         host = g.host
+#     ml_endpoint.run(debug=g.debug, host=host, port=endpoint_port)

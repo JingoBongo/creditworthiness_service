@@ -1,154 +1,180 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Form prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-  </head>
-  <body>
+</head>
+
+<body>
     <div class="container-lg">
-      <form>
-        <div class="row mb-3">
-          <fieldset class="row mb-3">
-            <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
-            <div class="col-sm-10">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="male">
-                <label class="form-check-label" for="gridRadios1">
+        <form method="POST" action="{{ url_for('form') }}">
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="genderOptions" id="gridRadios1" value="Male">
+                            <label class="form-check-label" for="gridRadios1">
                   Male
                 </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="female">
-                <label class="form-check-label" for="gridRadios2">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="genderOptions" id="gridRadios2" value="Female">
+                            <label class="form-check-label" for="gridRadios2">
                   Female
                 </label>
-              </div>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-          </fieldset>
-        </div>
 
-        <div class="row mb-3">
-          <fieldset class="row mb-3">
-            <legend class="col-form-label col-sm-2 pt-0">Married</legend>
-            <div class="col-sm-10">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosA" id="gridRadios11" value="option1">
-                <label class="form-check-label" for="gridRadios11">
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <legend class="col-form-label col-sm-2 pt-0">Married</legend>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="marriedOptions" id="gridRadios11" value="Yes">
+                            <label class="form-check-label" for="gridRadios11">
                   Yes
                 </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosA" id="gridRadios12" value="option2">
-                <label class="form-check-label" for="gridRadios12">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="marriedOptions" id="gridRadios12" value="No">
+                            <label class="form-check-label" for="gridRadios12">
                   No
                 </label>
-              </div>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-          </fieldset>
-        </div>
 
-        <div class="row mb-3">
-          <label for="inputDependents" class="col-sm-2 col-form-label">Dependents</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputDependents" placeholder="Number of dependents">
-          </div>
-        </div>
+            <div class="row mb-3">
+                <label for="inputDependents" class="col-sm-2 col-form-label">Dependents</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="dependents" id="inputDependents" placeholder="Number of dependents" value="{{ request.form['dependents'] }}">
+                </div>
+            </div>
 
-        <div class="row mb-3">
-          <label for="inputEducation" class="col-sm-2 col-form-label">Education Degree</label>
-          <div class="col-sm-10">
-            <select id="inputEducation" class="form-control">
-              <option>Not Graduate</option>
-              <option>Graduate</option>
-            </select>
-          </div>
-        </div>
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <label for="inputEducation" class="col-sm-2 col-form-label">Education Degree</label>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="educationDegree" id="gridRadios51" value="Graduate">
+                            <label class="form-check-label" for="gridRadios51">
+                  Graduate
+                </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="educationDegree" id="gridRadios52" value="Not Graduate">
+                            <label class="form-check-label" for="gridRadios52">
+                  Not Graduate
+                </label>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
 
-        <div class="row mb-3">
-          <fieldset class="row mb-3">
-            <legend class="col-form-label col-sm-2 pt-0">Self employed</legend>
-            <div class="col-sm-10">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosB" id="gridRadios21" value="option1">
-                <label class="form-check-label" for="gridRadios21">
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <legend class="col-form-label col-sm-2 pt-0">Self employed</legend>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="selfEmployedOptions" id="gridRadios21" value="1">
+                            <label class="form-check-label" for="gridRadios21">
                   Yes
                 </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosB" id="gridRadios22" value="option2">
-                <label class="form-check-label" for="gridRadios22">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="selfEmployedOptions" id="gridRadios22" value="0">
+                            <label class="form-check-label" for="gridRadios22">
                   No
                 </label>
-              </div>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-          </fieldset>
-        </div>
 
-        <div class="row mb-3">
-          <label for="inputIncome" class="col-sm-2 col-form-label">Applicant's Income</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputIncome" placeholder="Income per year">
-          </div>
-        </div>
+            <div class="row mb-3">
+                <label for="inputIncome" class="col-sm-2 col-form-label">Applicant's Income</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputIncome" placeholder="Income per year" name="applicantIncome" value="{{ request.form['applicantIncome'] }}">
+                </div>
+            </div>
 
-        <div class="row mb-3">
-          <label for="inputIncomeCoapplicant" class="col-sm-2 col-form-label">Coapplicant's Income</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputIncomeCoapplicant" placeholder="Income per year">
-          </div>
-        </div>
+            <div class="row mb-3">
+                <label for="inputIncomeCoapplicant" class="col-sm-2 col-form-label">Coapplicant's Income</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputIncomeCoapplicant" placeholder="Income per year" name="coapplicantIncome" value="{{ request.form['coapplicantIncome'] }}">
+                </div>
+            </div>
 
-        <div class="row mb-3">
-          <label for="inputAmount" class="col-sm-2 col-form-label">Loan Amount</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputAmount" placeholder="Amount of loan in thousands of $">
-          </div>
-        </div>
+            <div class="row mb-3">
+                <label for="inputAmount" class="col-sm-2 col-form-label">Loan Amount</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputAmount" placeholder="Amount of loan in thousands of $" name="loanAmount" value="{{ request.form['loanAmount'] }}">
+                </div>
+            </div>
 
-        <div class="row mb-3">
-          <label for="inputAmount" class="col-sm-2 col-form-label">Loan Amount Term</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputAmount" placeholder="Number of months">
-          </div>
-        </div>
+            <div class="row mb-3">
+                <label for="inputAmount" class="col-sm-2 col-form-label">Loan Amount Term</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputAmount" placeholder="Number of months" name="loanAmountTerm" value="{{ request.form['loanAmountTerm'] }}">
+                </div>
+            </div>
 
-        <div class="row mb-3">
-          <fieldset class="row mb-3">
-            <legend class="col-form-label col-sm-2 pt-0">Has a credit history?</legend>
-            <div class="col-sm-10">
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosC" id="gridRadios31" value="option1">
-                <label class="form-check-label" for="gridRadios31">
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <legend class="col-form-label col-sm-2 pt-0">Has a credit history?</legend>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="creditHistory" id="gridRadios31" value="1">
+                            <label class="form-check-label" for="gridRadios31">
                   Yes
                 </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gridRadiosC" id="gridRadios32" value="option2">
-                <label class="form-check-label" for="gridRadios32">
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="creditHistory" id="gridRadios32" value="0">
+                            <label class="form-check-label" for="gridRadios32">
                   No
                 </label>
-              </div>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-          </fieldset>
-        </div>
 
-        <div class="row mb-3">
-          <label for="inputProperty" class="col-sm-2 col-form-label">Property Area Type</label>
-          <div class="col-sm-10">
-            <select id="inputTerm" class="form-control">
-              <option>Urban</option>
-              <option>Rural</option>
-              <option>Semi-Urban</option>
-            </select>
-          </div>
-        </div>
+            <div class="row mb-3">
+                <fieldset class="row mb-3">
+                    <label for="inputProperty" class="col-sm-2 col-form-label">Property Area Type</label>
+                    <div class="col-sm-10">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="propertyAreaType" id="gridRadios41" value="Urban">
+                            <label class="form-check-label" for="gridRadios41">
+                  Urban
+                </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="propertyAreaType" id="gridRadios42" value="Rural">
+                            <label class="form-check-label" for="gridRadios42">
+                  Rural
+                </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="propertyAreaType" id="gridRadios43" value="Semi Urban">
+                            <label class="form-check-label" for="gridRadios42">
+                  Semi Urban
+                </label>
+                        </div>
+                </fieldset>
+                </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
-  </body>
+                <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+
 </html>
-

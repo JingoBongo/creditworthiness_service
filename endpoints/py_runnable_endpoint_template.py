@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from ml_model_endpoint import ml_endpoint
 
 app = Flask(__name__, template_folder=g.root_path + 'templates')
+app.secret_key = "631113d3-5487-450f-a43d-8b90db71c20d"
 swagger = Swagger(app)
 
 app.register_blueprint(ml_endpoint)

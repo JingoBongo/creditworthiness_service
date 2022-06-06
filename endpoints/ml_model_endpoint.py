@@ -1,5 +1,5 @@
 import __init__
-from flask import Blueprint, Flask, render_template, redirect, request
+from flask import Blueprint, Flask, render_template, redirect, request, flash
 from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
@@ -49,8 +49,8 @@ def processPerson():
 
     prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
     print(prediction[0][1])
-        
-    return str(prediction[0][1])
+    flash("Your credit worthiness score:")
+    return render_template("result.html", prediction = str(prediction[0][1]))
 
 
 @ml_endpoint.errorhandler(404)

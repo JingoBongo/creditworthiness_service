@@ -29,7 +29,6 @@ services:
     ui_endpoint:
       path: "endpoints//ui_endpoint.py"
       local: False
-      enabled: True
 
 uncommon_modules:
   sklearn:

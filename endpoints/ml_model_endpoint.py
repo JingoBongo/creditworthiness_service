@@ -11,7 +11,8 @@ import json
 import os
 # import scikit-learn==1.0.2
 
-ml_endpoint = Blueprint('ml_endpoint',__name__, template_folder=g.root_path + 'templates')
+ml_endpoint = Flask(__name__, template_folder=g.root_path + 'templates')
+# ml_endpoint.secret_key("fahdsfjfhdfsljdfhsldfkhfsdls")
 
 scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
 one_hot_encoder = pickle.load(open("resources/pickles/one_hot_encoder.pkl", 'rb'))
@@ -49,7 +50,7 @@ def processPerson():
 
     prediction = model.predict_proba(np.array(record.loc[0]).reshape(1, -1))
     print(prediction[0][1])
-    flash("Your credit worthiness score:")
+    # flash("Your credit worthiness score:")
     return render_template("result.html", prediction = str(prediction[0][1]))
 
 
@@ -64,14 +65,14 @@ def life_ping():
     return '{"status":"alive"}'
 
 
-# if __name__ == "__main__":
-#     parser = ArgumentParser()
-#     parser.add_argument('-port')
-#     parser.add_argument('-local')
-#     args = parser.parse_args()
-#     endpoint_port = args.port
-#     if args.local == "True":
-#         host = "127.0.0.1"
-#     else:
-#         host = g.host
-#     ml_endpoint.run(debug=g.debug, host=host, port=endpoint_port)
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument('-port')
+    parser.add_argument('-local')
+    args = parser.parse_args()
+    endpoint_port = args.port
+    if args.local == "True":
+        host = "127.0.0.1"
+    else:
+        host = g.host
+    ml_endpoint.run(debug=g.debug, host=host, port=endpoint_port)

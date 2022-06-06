@@ -5,13 +5,20 @@ from flask import Flask, render_template, redirect, request, url_for, send_from_
 from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
-from ml_model_endpoint import ml_endpoint
+import re
+# from ml_model_endpoint import ml_endpoint
 
 app = Flask(__name__, template_folder=g.root_path + 'templates')
 app.secret_key = "631113d3-5487-450f-a43d-8b90db71c20d"
 swagger = Swagger(app)
 
-app.register_blueprint(ml_endpoint)
+# app.register_blueprint(ml_endpoint)
+
+root_path = g.root_path
+config = g.config
+
+SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
+BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
 
 data_hash_path = os.path.normpath("resources//user_data.json")
 
@@ -56,11 +63,22 @@ def form():
     print_c("New json file is created from the form data")
 
   headers = {"Content-Type": "application/json; charset=utf-8"}
-  response = requests.post(url_for('ml_endpoint.processPerson', _external=True), headers=headers, json=user_data)
+  services = g.db_utils.select_from_table(
+        BUSINESS_SERVICES_TABLE_NAME)
+  port = ""
+  
+  for i in services:
+    service = {"name": i['name'], "port": i['port']}
+    print(service)
+    if "model_endpoint" in service["name"]:
+      port = service["port"]
+      print(port)
+
+  response = requests.post(f"http://localhost:{port}/processPerson", headers=headers, json=user_data)
 
   print('response from server:',response.status_code)
-  print('RESPONSE DATA:',response)
-  return redirect(url_for('ml_endpoint.processPerson'))
+  print('RESPONSE DATA:',response.json)
+  return redirect(f"http://localhost:{port}/processPerson")
 
 @app.route('/snake')
 def hello_world():

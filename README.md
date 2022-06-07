@@ -1,3 +1,58 @@
+TODO
+
+init:
+Create database  if doesn't exist.
+populate DB by config
+ create tables by schemas(separate folder, json format), list from config
+
+make it possible for service to have predefined port from config
+make Bus\Sys tables etc have name & path variables instead of just name
+make separate table for scheduled processes so we can kill them or maintain their count
+
+ 
+general
+ make LOGGER
+ make 3 separate folders instead of utils. Business implementation; System implementation; Utils
+ maka separate 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 tasks for Andrew
 
 1. class CustomProcessListElement(): seems to be unused, although script write those elements into a list.

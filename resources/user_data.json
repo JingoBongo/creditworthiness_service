@@ -6,22 +6,22 @@
     "Yes"
   ],
   "Dependents": [
-    "2"
+    "1"
   ],
   "Education": [
     "Graduate"
   ],
   "ApplicantIncome": [
-    100000
+    400000
   ],
   "CoapplicantIncome": [
-    50000
+    3
   ],
   "LoanAmount": [
-    10000000
+    3
   ],
   "Loan_Amount_Term": [
-    12
+    24
   ],
   "Credit_History": [
     1

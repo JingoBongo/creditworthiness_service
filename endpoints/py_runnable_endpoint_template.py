@@ -6,6 +6,7 @@ from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
 import re
+
 # from ml_model_endpoint import ml_endpoint
 
 app = Flask(__name__, template_folder=g.root_path + 'templates')
@@ -22,63 +23,66 @@ BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
 
 data_hash_path = os.path.normpath("resources//user_data.json")
 
+
 @app.route('/send_n')
 def send_n():
     return 'aboba'
+
 
 @app.route('/index')
 def index():
     return render_template('form.html')
 
-@app.route("/form" , methods=['GET', 'POST'])
+
+@app.route("/form", methods=['GET', 'POST'])
 def form():
-  gender             = request.form.get('genderOptions')
-  married            = request.form.get('marriedOptions')
-  dependents         = request.form.get('dependents')
-  education_degree   = request.form.get('educationDegree')
-  self_employed      = request.form.get('selfEmployedOptions')
-  applicant_income   = int(request.form.get('applicantIncome'))
-  coapplicant_income = int(request.form.get('coapplicantIncome'))
-  loan_amount        = int(request.form.get('loanAmount'))
-  loan_amount_term   = int(request.form.get('loanAmountTerm'))
-  credit_history     = int(request.form.get('creditHistory'))
-  property_area_type = request.form.get('propertyAreaType')
+    gender = request.form.get('genderOptions')
+    married = request.form.get('marriedOptions')
+    dependents = request.form.get('dependents')
+    education_degree = request.form.get('educationDegree')
+    self_employed = request.form.get('selfEmployedOptions')
+    applicant_income = int(request.form.get('applicantIncome'))
+    coapplicant_income = int(request.form.get('coapplicantIncome'))
+    loan_amount = int(request.form.get('loanAmount'))
+    loan_amount_term = int(request.form.get('loanAmountTerm'))
+    credit_history = int(request.form.get('creditHistory'))
+    property_area_type = request.form.get('propertyAreaType')
 
+    user_data = {
+        "Gender": [gender],
+        "Married": [married],
+        "Dependents": [dependents],
+        "Education": [education_degree],
+        "ApplicantIncome": [applicant_income],
+        "CoapplicantIncome": [coapplicant_income],
+        "LoanAmount": [loan_amount],
+        "Loan_Amount_Term": [loan_amount_term],
+        "Credit_History": [credit_history],
+        "Property_Area": [property_area_type]
+    }
 
-  user_data = {
-    "Gender":            [gender],
-    "Married":           [married],
-    "Dependents":        [dependents],
-    "Education":         [education_degree],
-    "ApplicantIncome":   [applicant_income],
-    "CoapplicantIncome": [coapplicant_income],
-    "LoanAmount":        [loan_amount],
-    "Loan_Amount_Term":  [loan_amount_term],
-    "Credit_History":    [credit_history],
-    "Property_Area":     [property_area_type]
-  }
+    with open(data_hash_path, 'w') as j:
+        json.dump(user_data, j, indent=2)
+        print_c("New json file is created from the form data")
 
-  with open(data_hash_path, 'w') as j:
-    json.dump(user_data, j, indent=2)
-    print_c("New json file is created from the form data")
-
-  headers = {"Content-Type": "application/json; charset=utf-8"}
-  services = g.db_utils.select_from_table(
+    headers = {"Content-Type": "application/json; charset=utf-8"}
+    services = g.db_utils.select_from_table(
         BUSINESS_SERVICES_TABLE_NAME)
-  port = ""
-  
-  for i in services:
-    service = {"name": i['name'], "port": i['port']}
-    print(service)
-    if "model_endpoint" in service["name"]:
-      port = service["port"]
-      print(port)
+    port = ""
 
-  response = requests.post(f"http://localhost:{port}/processPerson", headers=headers, json=user_data)
+    for i in services:
+        service = {"name": i['name'], "port": i['port']}
+        print(service)
+        if "model_endpoint" in service["name"]:
+            port = service["port"]
+            print(port)
 
-  print('response from server:',response.status_code)
-  print('RESPONSE DATA:',response.json)
-  return redirect(f"http://localhost:{port}/processPerson")
+    response = requests.post(f"http://localhost:{port}/processPerson", headers=headers, json=user_data)
+
+    print('response from server:', response.status_code)
+    print('RESPONSE DATA:', response.json)
+    return redirect(f"http://localhost:{port}/processPerson")
+
 
 @app.route('/snake')
 def hello_world():
@@ -89,6 +93,7 @@ def hello_world():
         description: 99% caution
     """
     return render_template('snakes.html')
+
 
 @app.route('/')
 def hello():
@@ -132,6 +137,7 @@ def handle_404(e):
 @app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()

@@ -38,6 +38,13 @@ uncommon_modules:
 
 sqlite:
   init:
+    tables:
+      Sys_Services:
+        schema_path: "resources//schemas//sys_services_table_schema.json"
+      Business_Services:
+        schema_path: "resources//schemas//business_services_table_schema.json"
+      Schedulers:
+        schema_path: "resources//schemas//schedulers_table_schema.json"
     table_names:
       - Sys_Services
       - Business_Services

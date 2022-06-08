@@ -23,6 +23,7 @@ def main():
     # some preconfiguration
     g.clear_busy_ports()
     # TODO> I think remake busy ports into DB table. or?..
+    db_utils.initial_db_creation()
     db_utils.initial_table_creation()
     db_utils.clear_system_tables()
     db_utils.clear_business_tables()

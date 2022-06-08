@@ -2,6 +2,9 @@ import os
 
 import utils.read_from_yaml as yaml_utils
 from utils.decorators.db_decorators import sql_alchemy_db_func
+import sqlite3
+
+from utils.json_utils import read_from_json
 
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
@@ -14,20 +17,86 @@ engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
 def print_c(text):
     print(f"[{cur_file_name}] {str(text)}")
 
+# TODO generic operations: drop, delete, insert, select
+
+def process_one_column(column, kwargs):
+    print(1)
+    alc = kwargs['alc']
+    generic_type = None
+    column_name = column['name']
+    if column['type'] == 'BigInteger':
+        generic_type = alc.BigInteger
+    elif column['type'] == 'Date':
+        generic_type = alc.Date
+    elif column['type'] == 'Boolean':
+        generic_type = alc.Boolean
+    elif column['type'] == 'DateTime':
+        generic_type = alc.DateTime
+    elif column['type'] == 'Enum':
+        generic_type = alc.Enum
+    elif column['type'] == 'Float':
+        generic_type = alc.Float
+    elif column['type'] == 'Integer':
+        generic_type = alc.Integer
+    elif column['type'] == 'Interval':
+        generic_type = alc.Interval
+    elif column['type'] == 'LargeBinary':
+        generic_type = alc.LargeBinary
+    elif column['type'] == 'MatchType':
+        generic_type = alc.MatchType
+    elif column['type'] == 'Numeric':
+        generic_type = alc.Numeric
+    elif column['type'] == 'PickleType':
+        generic_type = alc.PickleType
+    elif column['type'] == 'SchemaType':
+        generic_type = alc.SchemaType
+    elif column['type'] == 'SmallInteger':
+        generic_type = alc.SmallInteger
+    elif column['type'] == 'String':
+        generic_type = alc.String
+    elif column['type'] == 'Text':
+        generic_type = alc.Text
+    elif column['type'] == 'Time':
+        generic_type = alc.Time
+    elif column['type'] == 'Unicode':
+        generic_type = alc.Unicode
+    elif column['type'] == 'UnicodeText':
+        generic_type = alc.UnicodeText
+    else:
+        generic_type = alc.String
+
+    # check primary
+    if 'primary_key' in column.keys():
+        return alc.Column(column_name, generic_type, primary_key=bool(column['primary_key']))
+    # check nullable
+    if 'nullable' in column.keys():
+        return alc.Column(column_name, generic_type, nullable=bool(column['nullable']))
+    return alc.Column(column_name, generic_type)
+
 
 @sql_alchemy_db_func()
 def initial_table_creation(*args, **kwargs):
-    tables_to_create = config['sqlite']['init']['table_names']
+    # TODO IN PROGRESS
+    tables_to_create = config['sqlite']['init']['tables']
     alc = kwargs['alc']
     for table in tables_to_create:
+        schema_path = root_path + config['sqlite']['init']['tables'][table]['schema_path']
+        schema = read_from_json(schema_path)
         if not alc.inspect(kwargs['engine']).dialect.has_table(kwargs['connection'], table):
-            temp_table = alc.Table(
-                table, kwargs['metadata'],
-                alc.Column('id', alc.Integer, primary_key=True),
-                alc.Column('name', alc.String),
-                alc.Column('port', alc.String),
-                alc.Column('status', alc.String, nullable=True),
-                alc.Column('pid', alc.Integer, nullable=False), )
+            columns = [process_one_column(c, kwargs) for c in schema['columns']]
+            temp_table = alc.Table(table, kwargs['metadata'], *columns)
+
+    # tables_to_create = config['sqlite']['init']['table_names']
+    # alc = kwargs['alc']
+    # for table in tables_to_create:
+    #     if not alc.inspect(kwargs['engine']).dialect.has_table(kwargs['connection'], table):
+    #         temp_table = alc.Table(
+    #             table, kwargs['metadata'],
+    #             alc.Column('id', alc.Integer, primary_key=True),
+    #             alc.Column('name', alc.String),
+    #             alc.Column('port', alc.String),
+    #             alc.Column('status', alc.String, nullable=True),
+    #             alc.Column('pid', alc.Integer, nullable=False), )
     kwargs['metadata'].create_all(kwargs['engine'])
     print_c("Initial table re-creation completed")
 
@@ -103,3 +172,8 @@ def change_service_status_by_pid(*args, **kwargs):
     kwargs['engine'].execute(q)
     kwargs['engine'].execute(q2)
     print_c(f"Updated process by pid {val_pid} with status {val_status}")
+
+
+def initial_db_creation():
+    conn = sqlite3.connect(f"{root_path}resources\\main_db2.db")
+    conn.close()

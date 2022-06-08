@@ -1,27 +1,27 @@
 {
   "Gender": [
-    "Male"
+    "Female"
   ],
   "Married": [
     "Yes"
   ],
   "Dependents": [
-    "2"
+    "1"
   ],
   "Education": [
     "Graduate"
   ],
   "ApplicantIncome": [
-    100000
+    433000
   ],
   "CoapplicantIncome": [
-    50000
+    0
   ],
   "LoanAmount": [
-    10000000
+    6
   ],
   "Loan_Amount_Term": [
-    12
+    24
   ],
   "Credit_History": [
     1

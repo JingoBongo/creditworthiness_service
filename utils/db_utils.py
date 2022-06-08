@@ -6,12 +6,13 @@ import sqlite3
 
 from utils.json_utils import read_from_json
 
+db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
 conf_path = f"{root_path}//resources//fuse.yaml"
 config = yaml_utils.read_from_yaml(conf_path)
 SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
-engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
+engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 
 
 def print_c(text):
@@ -100,7 +101,16 @@ def insert_into_sys_services(*args, **kwargs):
     val_path = kwargs['val_path']
     ins = kwargs['sys_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into sys services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
+    print_c(f"Inserted into Sys_Services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
+
+@sql_alchemy_db_func(required_args=['val_name', 'val_path', 'val_pid'])
+def insert_into_schedulers(*args, **kwargs):
+    val_name = kwargs['val_name']
+    val_pid = kwargs['val_pid']
+    val_path = kwargs['val_path']
+    ins = kwargs['schedulers'].insert().values(name=val_name, path=val_path, pid=val_pid)
+    kwargs['engine'].execute(ins)
+    print_c(f"Inserted into Schedulers table: {val_name}, {val_path}, {val_pid}, 'alive'")
 
 
 @sql_alchemy_db_func(required_args=['table_name'])
@@ -125,7 +135,7 @@ def insert_into_business_services(*args, **kwargs):
     val_path = kwargs['val_path']
     ins = kwargs['business_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into business services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
+    print_c(f"Inserted into Business_Services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
 
 
 @sql_alchemy_db_func()
@@ -175,5 +185,5 @@ def change_service_status_by_pid(*args, **kwargs):
 
 
 def initial_db_creation():
-    conn = sqlite3.connect(f"{root_path}resources\\main_db2.db")
+    conn = sqlite3.connect(f"{root_path}resources\\main_db.db")
     conn.close()

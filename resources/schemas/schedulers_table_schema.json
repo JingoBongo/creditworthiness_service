@@ -19,11 +19,6 @@
       "name": "pid",
       "type": "Integer",
       "nullable": "False"
-    },
-    {
-      "name": "status",
-      "type": "String",
-      "nullable": "True"
     }
   ]
 }

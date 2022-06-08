@@ -1,11 +1,12 @@
 import os
 
+db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
 SYS_SERVICES_TABLE_NAME = 'Sys_Services'
 BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
 SCHEDULERS_TABLE_NAME = 'Schedulers'
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils\\decorators', '')
-engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
+engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 
 
 def print_c(text):

@@ -37,7 +37,7 @@ def select_all_tasks(conn):
         print(row)
 
 def main():
-    database = r"D:\Files\univYear5\cloud\creditworthiness_service\resources\main_db2.db"
+    database = r"D:\Files\univYear5\cloud\creditworthiness_service\resources\main_db.db"
 
     # create a database connection
     conn = create_connection(database)

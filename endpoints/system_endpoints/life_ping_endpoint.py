@@ -60,6 +60,13 @@ def start_service(service_name):
         """
     return process_start_service(service_name)
 
+def launch_life_ping_scheduler_if_not_exists(process_name, process_full_path):
+    table_results = g.db_utils.select_from_table('Schedulers')
+    if len(table_results > 0):
+        if not process_name in table_results['name'].values():
+            local_process = start_generic_subprocess(process_name, process_full_path)
+            g.db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -75,12 +82,5 @@ if __name__ == "__main__":
     # TODO add logic with adding to schedulers db and checking if there is only one life ping
     process_name = "life_ping_schedule"
     process_full_path = f"{g.root_path}//schedulers//system_schedulers//life_ping_schedule.py"
-    local_process = start_generic_subprocess(process_name, process_full_path)
-    # g.launched_subprocesses.append(
-    #     g.custom_subprocess.CustomProcessListElement(process_full_path,
-    #                                                  999999999,
-    #                                                  process_name,
-    #                                                  local_process.pid,
-    #                                                  local_process))
-
+    launch_life_ping_scheduler_if_not_exists(process_name, process_full_path)
     app.run(debug=g.debug, host=host, port=endpoint_port)

@@ -7,6 +7,7 @@ import sys
 import utils.subprocess_utils as custom_subprocess
 import utils.db_utils as db_utils
 
+db_name = 'main_db.db'
 LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
 cur_file_name = os.path.basename(__file__)
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
@@ -16,7 +17,7 @@ busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']
 host = config['general']['host']
 SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
-sql_engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
+sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 
 # TODO remove this, as I see this value isn't passed between processes and endpoints, therefore useless
 launched_subprocesses = []

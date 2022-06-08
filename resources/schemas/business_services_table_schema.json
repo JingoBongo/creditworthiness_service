@@ -11,7 +11,7 @@
       "nullable": "False"
     },
     {
-      "name": "full_path",
+      "name": "path",
       "type": "String",
       "nullable": "False"
     },

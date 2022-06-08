@@ -3,6 +3,7 @@ import os
 cur_file_name = os.path.basename(__file__)
 SYS_SERVICES_TABLE_NAME = 'Sys_Services'
 BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
+SCHEDULERS_TABLE_NAME = 'Schedulers'
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils\\decorators', '')
 engine_path = f"sqlite:///{root_path}resources\\main_db2.db"
 
@@ -38,6 +39,9 @@ def sql_alchemy_db_func(required_args=None):
                                                              autoload=True,
                                                              autoload_with=kwargs['engine'])
                 kwargs['business_services'] = kwargs['alc'].Table(BUSINESS_SERVICES_TABLE_NAME, kwargs['metadata'],
+                                                                  autoload=True,
+                                                                  autoload_with=kwargs['engine'])
+                kwargs['schedulers'] = kwargs['alc'].Table(SCHEDULERS_TABLE_NAME, kwargs['metadata'],
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
             except Exception as e:

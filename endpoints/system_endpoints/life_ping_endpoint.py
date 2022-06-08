@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 
 from utils.general_utils import get_rid_of_service_by_pid_and_port, process_start_service, \
     get_rid_of_service_by_pid_and_port_wrong
+from utils.subprocess_utils import start_generic_subprocess
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -71,16 +72,15 @@ if __name__ == "__main__":
     else:
         host = g.host
 
+    # TODO add logic with adding to schedulers db and checking if there is only one life ping
     process_name = "life_ping_schedule"
-    process_full_path = f"{g.root_path}//utils//life_ping_schedule.py"
-    local_process = g.custom_subprocess.CustomNamedProcess([g.sys.executable,
-                                                            process_full_path],
-                                                           name=process_name)
-    g.launched_subprocesses.append(
-        g.custom_subprocess.CustomProcessListElement(process_full_path,
-                                                     999999999,
-                                                     process_name,
-                                                     local_process.pid,
-                                                     local_process))
+    process_full_path = f"{g.root_path}//schedulers//system_schedulers//life_ping_schedule.py"
+    local_process = start_generic_subprocess(process_name, process_full_path)
+    # g.launched_subprocesses.append(
+    #     g.custom_subprocess.CustomProcessListElement(process_full_path,
+    #                                                  999999999,
+    #                                                  process_name,
+    #                                                  local_process.pid,
+    #                                                  local_process))
 
     app.run(debug=g.debug, host=host, port=endpoint_port)

@@ -20,7 +20,7 @@ def print_c(text):
 # TODO generic operations: drop, delete, insert, select
 
 def process_one_column(column, kwargs):
-    print(1)
+
     alc = kwargs['alc']
     generic_type = None
     column_name = column['name']
@@ -76,8 +76,11 @@ def process_one_column(column, kwargs):
 
 @sql_alchemy_db_func()
 def initial_table_creation(*args, **kwargs):
-    # TODO IN PROGRESS
-    tables_to_create = config['sqlite']['init']['tables']
+    try:
+        tables_to_create = config['sqlite']['init']['tables']
+    except:
+        print_c(f"It seems there are no tables to re-create on init")
+        return
     alc = kwargs['alc']
     for table in tables_to_create:
         schema_path = root_path + config['sqlite']['init']['tables'][table]['schema_path']
@@ -85,30 +88,19 @@ def initial_table_creation(*args, **kwargs):
         if not alc.inspect(kwargs['engine']).dialect.has_table(kwargs['connection'], table):
             columns = [process_one_column(c, kwargs) for c in schema['columns']]
             temp_table = alc.Table(table, kwargs['metadata'], *columns)
-
-    # tables_to_create = config['sqlite']['init']['table_names']
-    # alc = kwargs['alc']
-    # for table in tables_to_create:
-    #     if not alc.inspect(kwargs['engine']).dialect.has_table(kwargs['connection'], table):
-    #         temp_table = alc.Table(
-    #             table, kwargs['metadata'],
-    #             alc.Column('id', alc.Integer, primary_key=True),
-    #             alc.Column('name', alc.String),
-    #             alc.Column('port', alc.String),
-    #             alc.Column('status', alc.String, nullable=True),
-    #             alc.Column('pid', alc.Integer, nullable=False), )
     kwargs['metadata'].create_all(kwargs['engine'])
     print_c("Initial table re-creation completed")
 
 
-@sql_alchemy_db_func(required_args=['val_name', 'val_port', 'val_pid'])
+@sql_alchemy_db_func(required_args=['val_name', 'val_path', 'val_port', 'val_pid'])
 def insert_into_sys_services(*args, **kwargs):
     val_port = kwargs['val_port']
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
-    ins = kwargs['sys_services'].insert().values(name=val_name, port=val_port, pid=val_pid, status='alive')
+    val_path = kwargs['val_path']
+    ins = kwargs['sys_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into sys services table: {val_name}, {val_port}, {val_pid}, 'alive'")
+    print_c(f"Inserted into sys services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
 
 
 @sql_alchemy_db_func(required_args=['table_name'])
@@ -125,28 +117,36 @@ def select_from_table(*args, **kwargs):
         print_c(e)
 
 
-@sql_alchemy_db_func(required_args=['val_name', 'val_port', 'val_pid'])
+@sql_alchemy_db_func(required_args=['val_name', 'val_path', 'val_port', 'val_pid'])
 def insert_into_business_services(*args, **kwargs):
     val_port = kwargs['val_port']
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
-    ins = kwargs['business_services'].insert().values(name=val_name, port=val_port, pid=val_pid, status='alive')
+    val_path = kwargs['val_path']
+    ins = kwargs['business_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
     kwargs['engine'].execute(ins)
-    print_c(f"Inserted into business services table: {val_name}, {val_port}, {val_pid}, 'alive'")
+    print_c(f"Inserted into business services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
 
 
 @sql_alchemy_db_func()
-def clear_system_tables(*args, **kwargs):
+def clear_system_services_table(*args, **kwargs):
     d = kwargs['business_services'].delete()
     kwargs['engine'].execute(d)
     print_c("Cleared Sys_Services table")
 
 
 @sql_alchemy_db_func()
-def clear_business_tables(*args, **kwargs):
+def clear_business_services_table(*args, **kwargs):
     d = kwargs['sys_services'].delete()
     kwargs['engine'].execute(d)
     print_c("Cleared Business_Services table")
+
+
+@sql_alchemy_db_func()
+def clear_schedulers_table(*args, **kwargs):
+    d = kwargs['schedulers'].delete()
+    kwargs['engine'].execute(d)
+    print_c("Cleared Schedulers table")
 
 
 @sql_alchemy_db_func(required_args=['val_pid'])

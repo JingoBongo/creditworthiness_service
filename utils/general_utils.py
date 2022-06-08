@@ -4,10 +4,8 @@ import os
 import psutil
 import utils.read_from_yaml as yaml_utils
 import sys
-import utils.named_custom_process as custom_subprocess
+import utils.subprocess_utils as custom_subprocess
 import utils.db_utils as db_utils
-
-
 
 LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
 cur_file_name = os.path.basename(__file__)
@@ -106,19 +104,12 @@ def get_rid_of_service_by_pid_and_port_wrong(pid, port):
         return 'failed to remove service'
 
 
-def start_service(service_full_name, port, service_short_name, local=False, host=host):
-    local_process = custom_subprocess.CustomNamedProcess([sys.executable,
-                                                          service_full_name,
-                                                          "-local", str(local),
-                                                          "-port", str(port)],
-                                                         name=service_short_name)
-    launched_subprocesses.append(
-        custom_subprocess.CustomProcessListElement(service_full_name,
-                                                   port,
-                                                   service_short_name,
-                                                   local_process.pid,
-                                                   local_process))
-    print_c(f"fuse added service to pool: {service_full_name}")
+def start_service(service_short_name, service_full_path, port, local=False, host=host):
+    local_part = ['-local', str(local)]
+    port_part = ['-port', str(port)]
+    local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part, service_short_name)
+    print_c(f"fuse added service to pool: {service_short_name}")
+    print_c(f"added path: {service_full_path}")
     return local_process
 
 
@@ -137,29 +128,47 @@ def init_start_service_procedure(service, sys=False):
     type = 'business'
     if sys:
         type = 'system'
-    port = get_free_port()
+
+    if 'port' in config['services'][type][service].keys() \
+            and isinstance(config['services'][type][service]['port'], int) \
+            and config['services'][type][service]['port'] > 0:
+        port = config['services'][type][service]['port']
+    else:
+        port = get_free_port()
     set_port_busy(port)
-    service_full_name = root_path + config['services'][type][service]['path']
-    try:
+    service_full_path = root_path + config['services'][type][service]['path']
+    # try:
+    #     local = config['services'][type][service]['local']
+    # except:
+    #     local = None
+
+    if 'local' in config['services'][type][service].keys():
         local = config['services'][type][service]['local']
-    except:
+    else:
         local = None
-    try:
+
+
+    # try:
+    #     spawn_type = config['services'][type][service]['mono']
+    # except:
+    #     spawn_type = None
+
+    if 'mono' in config['services'][type][service].keys():
         spawn_type = config['services'][type][service]['mono']
-    except:
+    else:
         spawn_type = None
 
     if spawn_type != "multi":
         if local:
-            new_process = start_service(service_full_name, port, service_short_name=service, local=local)
+            new_process = start_service(service, service_full_path, port, local=local)
         else:
-            new_process = start_service(service_full_name, port, service_short_name=service)
+            new_process = start_service(service, service_full_path, port)
     else:
         raise Exception('Implement multi endpoint stuff')
     if sys:
-        db_utils.insert_into_sys_services(service_full_name, port, new_process.pid)
+        db_utils.insert_into_sys_services(service, service_full_path, port, new_process.pid)
     else:
-        db_utils.insert_into_business_services(service_full_name, port, new_process.pid)
+        db_utils.insert_into_business_services(service, service_full_path, port, new_process.pid)
 
 
 def process_start_service(service_name):

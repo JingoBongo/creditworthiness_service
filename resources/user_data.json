@@ -1,6 +1,6 @@
 {
   "Gender": [
-    "Male"
+    "Female"
   ],
   "Married": [
     "Yes"
@@ -12,13 +12,13 @@
     "Graduate"
   ],
   "ApplicantIncome": [
-    400000
+    433000
   ],
   "CoapplicantIncome": [
-    3
+    0
   ],
   "LoanAmount": [
-    3
+    6
   ],
   "Loan_Amount_Term": [
     24

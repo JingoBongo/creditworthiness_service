@@ -20,7 +20,7 @@ services:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: True
       mono: True
-      port: 80
+#      port: 80
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"

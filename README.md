@@ -1,11 +1,11 @@
 TODO
 
 init:
-Create database  if doesn't exist.
-populate DB by config
- create tables by schemas(separate folder, json format), list from config
+Create database  if doesn't exist. CHECK
+populate DB by config              CHECK
+ create tables by schemas(separate folder, json format), list from config      CHECK
 
-make it possible for service to have predefined port from config
+make it possible for service to have predefined port from config               CHECK
 make Bus\Sys tables etc have name & path variables instead of just name
 make separate table for scheduled processes so we can kill them or maintain their count
 
@@ -50,7 +50,7 @@ general
 
 
 
-
+TODO. ACTUALLY TRY FLASK APP CHILD WITH BUILT IN ROUTES
 
 
 tasks for Andrew

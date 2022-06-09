@@ -18,10 +18,14 @@ engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 def print_c(text):
     print(f"[{cur_file_name}] {str(text)}")
 
-# TODO generic operations: drop, delete, insert, select
+
+# TODO test these generic operations
+# select - check
+# delete - check (clear)
+# drop   - check
+# insert - check, but needs even more testing
 
 def process_one_column(column, kwargs):
-
     alc = kwargs['alc']
     generic_type = None
     column_name = column['name']
@@ -99,9 +103,11 @@ def insert_into_sys_services(*args, **kwargs):
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
     val_path = kwargs['val_path']
-    ins = kwargs['sys_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
+    ins = kwargs['sys_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid,
+                                                 status='alive')
     kwargs['engine'].execute(ins)
     print_c(f"Inserted into Sys_Services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
+
 
 @sql_alchemy_db_func(required_args=['val_name', 'val_path', 'val_pid'])
 def insert_into_schedulers(*args, **kwargs):
@@ -133,7 +139,8 @@ def insert_into_business_services(*args, **kwargs):
     val_name = kwargs['val_name']
     val_pid = kwargs['val_pid']
     val_path = kwargs['val_path']
-    ins = kwargs['business_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid, status='alive')
+    ins = kwargs['business_services'].insert().values(name=val_name, path=val_path, port=val_port, pid=val_pid,
+                                                      status='alive')
     kwargs['engine'].execute(ins)
     print_c(f"Inserted into Business_Services table: {val_name}, {val_path}, {val_port}, {val_pid}, 'alive'")
 
@@ -159,6 +166,58 @@ def clear_schedulers_table(*args, **kwargs):
     print_c("Cleared Schedulers table")
 
 
+# TODO: test this
+# Be aware that this function requires a dictionary of insert values
+# where key = column_name and value is inserted value
+@sql_alchemy_db_func(required_args=['table_name', 'values_dict'])
+def insert_into_table(*args, **kwargs):
+    try:
+        table_name = kwargs['table_name']
+        table = kwargs['alc'].Table(table_name, kwargs['metadata'],
+                                    autoload=True,
+                                    autoload_with=kwargs['engine'])
+        ins = kwargs['sys_services'].insert().values(**kwargs['values_dict'])
+        kwargs['engine'].execute(ins)
+        print_c(f"Inserted into {table_name} table: '{kwargs['values_dict']}'")
+    except:
+        print_c(f"Something went horribly wrong while trying to insert values '{kwargs['values_dict']}' into table {kwargs['table_name']}")
+
+
+# TODO, test this
+@sql_alchemy_db_func(required_args=['table_name'])
+def clear_table(*args, **kwargs):
+    try:
+        table_name = kwargs['table_name']
+        table = kwargs['alc'].Table(table_name, kwargs['metadata'],
+                                    autoload=True,
+                                    autoload_with=kwargs['engine'])
+        d = table.delete()
+        kwargs['engine'].execute(d)
+        print_c(f"Cleared {table_name} table")
+    except:
+        print_c(
+            f"Something went wrong while trying to delete table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
+
+
+# TODO, test this
+@sql_alchemy_db_func(required_args=['table_name'])
+def drop_table(*args, **kwargs):
+    try:
+        table_name = kwargs['table_name']
+        table = kwargs['alc'].Table(table_name, kwargs['metadata'],
+                                    autoload=True,
+                                    autoload_with=kwargs['engine'])
+        table = kwargs['metadata'].tables.get(table)
+        if table is not None:
+            kwargs['metadata'].drop_all(kwargs['engine'], [table], checkfirst=True)
+            print_c(f"Dropped {table_name} table")
+        else:
+            print_c(f"Are you sure table {table_name} exists? It doesn't seem so")
+    except:
+        print_c(
+            f"Something went wrong while trying to drop table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
+
+
 @sql_alchemy_db_func(required_args=['val_pid'])
 def delete_process_from_tables_by_pid(*args, **kwargs):
     alc = kwargs['alc']
@@ -169,6 +228,25 @@ def delete_process_from_tables_by_pid(*args, **kwargs):
     kwargs['engine'].execute(d)
     kwargs['engine'].execute(d2)
     print_c(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
+
+
+@sql_alchemy_db_func(required_args=['val_pid'])
+def get_service_port_by_pid(*args, **kwargs):
+    alc = kwargs['alc']
+    val_pid = kwargs['val_pid']
+    pid_column = alc.Column('pid', alc.String)
+    port_column = alc.Column('port', alc.String)
+    d = kwargs['business_services'].select(port_column).where(pid_column == int(val_pid))
+    d2 = kwargs['sys_services'].select(port_column).where(pid_column == int(val_pid))
+    prox1 = kwargs['engine'].execute(d)
+    prox2 = kwargs['engine'].execute(d2)
+    result1 = prox1.fetchall()
+    result2 = prox2.fetchall()
+    result1 = result1 + result2
+    if len(result1) > 1:
+        print_c(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
+    print_c(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
+    return result1[0]['port']
 
 
 @sql_alchemy_db_func(required_args=['val_pid', 'val_status'])

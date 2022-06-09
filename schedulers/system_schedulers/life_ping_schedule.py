@@ -37,21 +37,22 @@ def process_one_service(n):
     if n['status'] == 'dead':
         # define if is sys service
         is_sys = False
-        sys_paths = []
-        for key in config['services']['system']:
-            sys_paths.append(g.root_path + config['services']['system'][key]['path'])
-        if n['name'] in sys_paths:
+        # sys_paths = []
+        # for key in config['services']['system']:
+        #     sys_paths.append(g.root_path + config['services']['system'][key]['path'])
+        # if n['name'] in sys_paths:
+        if n['name'] in config['services']['system']:
             is_sys = True
         # do other things anyway
-        g.get_rid_of_service_by_pid_and_port(n['pid'], n['port'])
+        g.get_rid_of_service_by_pid(n['pid'])
         print_c(f"before life ping init start services")
         kkey = None
         for key in config['services']['system']:
-            if config['services']['system'][key]['path'] in n['name']:
+            if n['name'] in config['services']['system']:
                 kkey = key
                 break
         for key in config['services']['business']:
-            if config['services']['business'][key]['path'] in n['name']:
+            if n['name'] in config['services']['business']:
                 kkey = key
                 break
         print_c(f"before life ping init start services")

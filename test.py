@@ -29,7 +29,7 @@ def select_all_tasks(conn):
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM Sys_services")
+    cur.execute("SELECT * FROM Schedulers")
 
     rows = cur.fetchall()
 
@@ -37,7 +37,7 @@ def select_all_tasks(conn):
         print(row)
 
 def main():
-    database = r"D:\Files\univYear5\cloud\creditworthiness_service\resources\main_db.db"
+    database = r"D:\files\yearV\cloud\v3\creditworthiness_service\resources\main_db.db"
 
     # create a database connection
     conn = create_connection(database)

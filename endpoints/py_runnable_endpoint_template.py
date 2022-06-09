@@ -1,5 +1,7 @@
-from email import header
-import __init__, json, os, requests
+import __init__
+import json
+import os
+import requests
 from fuse import print_c
 from flask import Flask, render_template, redirect, request, url_for, send_from_directory, jsonify
 from flasgger import Swagger
@@ -81,7 +83,7 @@ def form():
   return redirect(f"http://localhost:{port}/processPerson")
 
 @app.route('/snake')
-def hello_world():
+def snake():
     """When pockets are empty.. at least you can play snakes
     ---
     responses:
@@ -89,6 +91,17 @@ def hello_world():
         description: 99% caution
     """
     return render_template('snakes.html')
+
+
+@app.route('/tetris')
+def tetris():
+    """This is becoming a common joke.. I like it
+    ---
+    responses:
+      200:
+        description: 99% caution
+    """
+    return render_template('tetris.html')
 
 @app.route('/')
 def hello():

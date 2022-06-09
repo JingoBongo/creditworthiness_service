@@ -19,9 +19,6 @@ host = config['general']['host']
 SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
 sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 
-# TODO remove this, as I see this value isn't passed between processes and endpoints, therefore useless
-launched_subprocesses = []
-
 
 def print_c(text):
     print(f"[{cur_file_name}] {str(text)}")
@@ -81,24 +78,23 @@ def kill_process(pid):
         print_c(f"Tried to kill process {pid}, it appears to be dead already")
 
 
-def get_rid_of_service_by_pid_and_port(pid, port):
+def get_rid_of_service_by_pid(pid):
     try:
         kill_process(pid)
+        port_to_delete = db_utils.get_service_port_by_pid(pid)
         db_utils.delete_process_from_tables_by_pid(pid)
-        delete_port_from_list(port)
-        print_c(f"Got rid of service with pid {pid} on port {port}")
+        delete_port_from_list(port_to_delete)
+        print_c(f"Got rid of service with pid {pid} on port {port_to_delete}")
         return 'removed service'
     except Exception as e:
         print_c(e)
         return 'failed to remove service'
 
 
-def get_rid_of_service_by_pid_and_port_wrong(pid, port):
+def get_rid_of_service_by_pid_and_port_dirty(pid):
     try:
         kill_process(pid)
-        # db_utils.delete_process_from_tables_by_pid(pid)
-        # delete_port_from_list(port)
-        print_c(f"Got rid of service with pid {pid} on port {port} dirty")
+        print_c(f"Got rid of service with pid {pid} dirty")
         return 'removed service'
     except Exception as e:
         print_c(e)
@@ -108,7 +104,8 @@ def get_rid_of_service_by_pid_and_port_wrong(pid, port):
 def start_service(service_short_name, service_full_path, port, local=False, host=host):
     local_part = ['-local', str(local)]
     port_part = ['-port', str(port)]
-    local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part, service_short_name)
+    local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part,
+                                                               service_short_name)
     print_c(f"fuse added service to pool: {service_short_name}")
     print_c(f"added path: {service_full_path}")
     return local_process
@@ -138,21 +135,11 @@ def init_start_service_procedure(service, sys=False):
         port = get_free_port()
     set_port_busy(port)
     service_full_path = root_path + config['services'][type][service]['path']
-    # try:
-    #     local = config['services'][type][service]['local']
-    # except:
-    #     local = None
 
     if 'local' in config['services'][type][service].keys():
         local = config['services'][type][service]['local']
     else:
         local = None
-
-
-    # try:
-    #     spawn_type = config['services'][type][service]['mono']
-    # except:
-    #     spawn_type = None
 
     if 'mono' in config['services'][type][service].keys():
         spawn_type = config['services'][type][service]['mono']

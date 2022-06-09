@@ -1,0 +1,34 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "path",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "port",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "pid",
+      "type": "Integer",
+      "nullable": "False"
+    },
+    {
+      "name": "status",
+      "type": "String",
+      "nullable": "True"
+    }
+  ]
+}

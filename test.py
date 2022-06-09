@@ -29,7 +29,7 @@ def select_all_tasks(conn):
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM Business_Services")
+    cur.execute("SELECT * FROM Schedulers")
 
     rows = cur.fetchall()
 
@@ -37,7 +37,7 @@ def select_all_tasks(conn):
         print(row)
 
 def main():
-    database = r"D:\files\yearV\cloud\reditworthiness_service\resources\main_db2.db"
+    database = r"D:\files\yearV\cloud\v3\creditworthiness_service\resources\main_db.db"
 
     # create a database connection
     conn = create_connection(database)
@@ -70,11 +70,11 @@ if __name__ == '__main__':
     conf_path = '\\resources\\fuse.yaml'
     root_path = os.path.dirname(os.path.abspath(__file__))
     config = read_from_yaml(root_path + conf_path)
-    list = config['uncommon_modules']
-    for l in list:
-        print(l)
+    # list = config['uncommon_modules']
+    # for l in list:
+    #     print(l)
     # print(f"{config['uncommon_modules']}")
-    # main()
+    main()
     # # a = print('sdfsdf')
     # p = psutil.Process(14908)
     # p.terminate()  # or p.kill()

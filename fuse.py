@@ -22,30 +22,32 @@ def main():
 
     # some preconfiguration
     g.clear_busy_ports()
-    # TODO> I think remake busy ports into DB table. or?..
+    db_utils.initial_db_creation()
     db_utils.initial_table_creation()
-    db_utils.clear_system_tables()
-    db_utils.clear_business_tables()
+    db_utils.clear_system_services_table()
+    db_utils.clear_business_services_table()
+    db_utils.clear_schedulers_table()
     # fire system endpoints
+    # Is all this checking necessary? I am not sure anymore
     if isinstance(config['services']['system'], dict):
         if len(config['services']['system']) > 0:
             for service in config['services']['system']:
-                try:
-                    enabled = config['services']['business'][service]['enabled']
-                except:
-                    enabled = True
-                if enabled:
-                    g.init_start_service_procedure(service, sys=True)
-    # fire user endpoints
+                if 'enabled' in config['services']['system'][service].keys():
+                    if config['services']['system'][service]['enabled'] == False:
+                        continue
+                g.init_start_service_procedure(service, sys=True)
+        else:
+            print_c(f"It seems there are no system services to launch, it is not right")
+    # fire business endpoints
     if isinstance(config['services']['business'], dict):
         if len(config['services']['business']) > 0:
             for service in config['services']['business']:
-                try:
-                    enabled = config['services']['business'][service]['enabled']
-                except:
-                    enabled = True
-                if enabled:
-                    g.init_start_service_procedure(service)
+                if 'enabled' in config['services']['business'][service].keys():
+                    if config['services']['business'][service]['enabled'] == False:
+                        continue
+                g.init_start_service_procedure(service)
+        else:
+            print_c(f"It seems there are no business services to launch, is it a test launch?")
     while True:
         pass
 

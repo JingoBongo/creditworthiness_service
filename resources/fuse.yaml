@@ -20,15 +20,21 @@ services:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: True
       mono: True
+      port: 80
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"
       enabled: True
     ml_model_endpoint:
       path: "endpoints//ml_model_endpoint.py"
+      enabled: False
     ui_endpoint:
       path: "endpoints//ui_endpoint.py"
       local: False
+      enabled: False
+    form_page:
+      path: "endpoints//form_page.py"
+      enabled: False
 
 uncommon_modules:
   sklearn:
@@ -38,6 +44,14 @@ uncommon_modules:
 
 sqlite:
   init:
+    tables:
+      Sys_Services:
+        schema_path: "resources//schemas//sys_services_table_schema.json"
+      Business_Services:
+        schema_path: "resources//schemas//business_services_table_schema.json"
+      Schedulers:
+        schema_path: "resources//schemas//schedulers_table_schema.json"
     table_names:
       - Sys_Services
       - Business_Services
+# these table names are just like constant variables here. TODO: make file with constants

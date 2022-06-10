@@ -2,16 +2,17 @@ import __init__
 from flask import Flask, render_template, redirect, url_for
 from flasgger import Swagger
 from utils import general_utils as g
+from utils import constants as c
 from argparse import ArgumentParser
 
-app = Flask(__name__, template_folder=g.root_path + 'templates')
+app = Flask(__name__, template_folder=c.root_path + c.templates_folder_name)
 swagger = Swagger(app)
 
-root_path = g.root_path
+root_path = c.root_path
 config = g.config
 
-SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
-BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
+SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
+BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 
 @app.route('/send_n')
 def send_n():
@@ -83,7 +84,7 @@ def handle_404(e):
     return 'This is not a thing. But you can see what is available at /apidocs'
 
 
-@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+@app.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
 

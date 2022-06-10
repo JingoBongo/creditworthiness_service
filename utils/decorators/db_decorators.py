@@ -1,12 +1,13 @@
 import os
+import utils.constants as c
 
 db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
-SYS_SERVICES_TABLE_NAME = 'Sys_Services'
-BUSINESS_SERVICES_TABLE_NAME = 'Business_Services'
-SCHEDULERS_TABLE_NAME = 'Schedulers'
-root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils\\decorators', '')
-engine_path = f"sqlite:///{root_path}resources\\{db_name}"
+SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
+BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
+SCHEDULERS_TABLE_NAME = c.schedulers_table_name
+root_path = c.root_path
+engine_path = c.sql_engine_path
 
 
 def print_c(text):

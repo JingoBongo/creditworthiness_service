@@ -2,19 +2,20 @@ import __init__
 import schedule
 import time
 import utils.general_utils as g
+from utils import constants as c
 import os
 import requests
 import psutil
 
 from utils import db_utils
 
-# DO NOT IMPORT. !@!!!!!!
+# DO NOT IMPORT. (his file) !@!!!!!!
 
-root_path = g.root_path
+root_path = c.root_path
 config = g.config
 
-SYS_SERVICES_TABLE_NAME = g.SYS_SERVICES_TABLE_NAME
-BUSINESS_SERVICES_TABLE_NAME = g.BUSINESS_SERVICES_TABLE_NAME
+SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
+BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 cur_file_name = os.path.basename(__file__)
 
 
@@ -24,7 +25,7 @@ def print_c(text):
 
 def ping_one(port):
     try:
-        r = requests.patch(f"http://localhost:{port}{g.LIFE_PING_ENDPOINT_CONTEXT}").status_code
+        r = requests.patch(f"http://localhost:{port}{c.life_ping_endpoint_context}").status_code
         if r:
             return 'alive'
     except Exception as e:
@@ -37,10 +38,6 @@ def process_one_service(n):
     if n['status'] == 'dead':
         # define if is sys service
         is_sys = False
-        # sys_paths = []
-        # for key in config['services']['system']:
-        #     sys_paths.append(g.root_path + config['services']['system'][key]['path'])
-        # if n['name'] in sys_paths:
         if n['name'] in config['services']['system']:
             is_sys = True
         # do other things anyway

@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from utils.general_utils import get_rid_of_service_by_pid, process_start_service, \
     get_rid_of_service_by_pid_and_port_dirty
 from utils.subprocess_utils import start_generic_subprocess
+from utils import constants as c
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -32,7 +33,7 @@ def get_services_list():
     return str(g.db_utils.select_from_table('Business_services') + g.db_utils.select_from_table('Sys_services'))
 
 
-@app.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+@app.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
 
@@ -105,6 +106,6 @@ if __name__ == "__main__":
 
     # TODO add logic with adding to schedulers db and checking if there is only one life ping
     process_name = "life_ping_schedule"
-    process_full_path = f"{g.root_path}//schedulers//system_schedulers//life_ping_schedule.py"
+    process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.life_ping_schedule_pyfile_name}"
     launch_life_ping_scheduler_if_not_exists(process_name, process_full_path)
     app.run(debug=g.debug, host=host, port=endpoint_port)

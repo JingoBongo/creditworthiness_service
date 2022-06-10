@@ -20,7 +20,7 @@ services:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: True
       mono: True
-#      port: 80
+      port: 5001
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"
@@ -28,13 +28,13 @@ services:
     ml_model_endpoint:
       path: "endpoints//ml_model_endpoint.py"
       enabled: False
-    ui_endpoint:
-      path: "endpoints//ui_endpoint.py"
-      local: False
-      enabled: False
     form_page:
       path: "endpoints//form_page.py"
       enabled: False
+    back_gateway:
+      path: "endpoints//py_runnable_back_gateway.py"
+      enabled: False
+      port: 5000
 
 uncommon_modules:
   sklearn:

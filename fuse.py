@@ -6,9 +6,10 @@ import os
 
 from utils import general_utils as g
 from utils import db_utils
+from utils import constants as c
 
-root_path = g.root_path
-conf_path = g.conf_path
+root_path = c.root_path
+conf_path = c.conf_path
 config = g.config
 cur_file_name = os.path.basename(__file__)
 
@@ -22,6 +23,7 @@ def main():
 
     # some preconfiguration
     g.clear_busy_ports()
+    g.reserve_ports_from_config()
     db_utils.initial_db_creation()
     db_utils.initial_table_creation()
     db_utils.clear_system_services_table()

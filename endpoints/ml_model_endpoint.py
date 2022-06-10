@@ -2,6 +2,7 @@ import __init__
 from flask import Blueprint, Flask, render_template, redirect, request, flash
 from flasgger import Swagger
 from utils import general_utils as g
+from utils import constants as c
 from argparse import ArgumentParser
 
 import pandas as pd
@@ -11,7 +12,7 @@ import json
 import os
 # import scikit-learn==1.0.2
 
-ml_endpoint = Flask(__name__, template_folder=g.root_path + 'templates')
+ml_endpoint = Flask(__name__, template_folder=c.root_path + c.templates_folder_name)
 # ml_endpoint.secret_key("fahdsfjfhdfsljdfhsldfkhfsdls")
 
 scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
@@ -60,7 +61,7 @@ def handle_404(e):
     return 'Not Found, but we HANDLED IT'
 
 
-@ml_endpoint.route(f"{g.LIFE_PING_ENDPOINT_CONTEXT}", methods=['PATCH'])
+@ml_endpoint.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
 def life_ping():
     return '{"status":"alive"}'
 

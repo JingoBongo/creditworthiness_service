@@ -1,3 +1,5 @@
+import socket
+
 import __init__
 import json
 import os
@@ -6,18 +8,18 @@ import utils.read_from_yaml as yaml_utils
 import sys
 import utils.subprocess_utils as custom_subprocess
 import utils.db_utils as db_utils
+import utils.constants as c
 
 db_name = 'main_db.db'
-LIFE_PING_ENDPOINT_CONTEXT = '/life_ping'
 cur_file_name = os.path.basename(__file__)
-root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = os.path.normpath('.//resources//fuse.yaml')
-config = yaml_utils.read_from_yaml(root_path + conf_path)
-busy_ports_json_path = root_path + config['general']['busy_ports_json_file']
+# root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
+# conf_path = os.path.normpath('.//resources//fuse.yaml')
+config = yaml_utils.read_from_yaml(c.root_path + c.conf_path)
+busy_ports_json_path = c.root_path + config['general']['busy_ports_json_file']
 debug = config['general']['debug']
 host = config['general']['host']
-SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
-sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
+# SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
+sql_engine_path = c.sql_engine_path
 
 
 def print_c(text):
@@ -50,9 +52,20 @@ def write_to_json(path, text):
 
 
 def clear_busy_ports():
-    new_json = {"busy_ports": ['5000']}
+    new_json = {"busy_ports": []}
     write_to_json(busy_ports_json_path, new_json)
 
+
+def reserve_ports_from_config():
+    busy_ports_json = read_from_json(busy_ports_json_path)
+    # busy_ports_json['busy_ports'].append(str(port))
+    for service in config['services']['system']:
+        if 'port' in config['services']['system'][service].keys():
+            busy_ports_json['busy_ports'].append(str(config['services']['system'][service]['port']))
+    for service in config['services']['business']:
+        if 'port' in config['services']['business'][service].keys():
+            busy_ports_json['busy_ports'].append(str(config['services']['business'][service]['port']))
+    write_to_json(busy_ports_json_path, busy_ports_json)
 
 def delete_port_from_list(port):
     new_json = read_from_json(busy_ports_json_path)
@@ -62,7 +75,8 @@ def delete_port_from_list(port):
 
 def set_port_busy(port):
     busy_ports_json = read_from_json(busy_ports_json_path)
-    busy_ports_json['busy_ports'].append(str(port))
+    if not str(port) in busy_ports_json['busy_ports']:
+        busy_ports_json['busy_ports'].append(str(port))
     write_to_json(busy_ports_json_path, busy_ports_json)
 
 
@@ -111,6 +125,17 @@ def start_service(service_short_name, service_full_path, port, local=False, host
     return local_process
 
 
+def check_port_is_in_use(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = False
+    try:
+        sock.bind(("0.0.0.0", port))
+        result = True
+    except:
+        print_c(f"{port} Port is in use")
+    sock.close()
+    return result
+
 def get_free_port():
     port_start_ind = config['fuse']['first_port']
     port_end_ind = config['fuse']['last_port']
@@ -118,7 +143,7 @@ def get_free_port():
 
     for i in range(port_start_ind, port_end_ind + 1):
         str_port = str(i)
-        if not (str_port in busy_ports_json['busy_ports']):
+        if not (str_port in busy_ports_json['busy_ports']) and not check_port_is_in_use(str_port):
             return str_port
 
 
@@ -134,7 +159,7 @@ def init_start_service_procedure(service, sys=False):
     else:
         port = get_free_port()
     set_port_busy(port)
-    service_full_path = root_path + config['services'][type][service]['path']
+    service_full_path = c.root_path + config['services'][type][service]['path']
 
     if 'local' in config['services'][type][service].keys():
         local = config['services'][type][service]['local']
@@ -172,3 +197,4 @@ def process_start_service(service_name):
     except Exception as e:
         print_c(e)
         return 'service failed to start'
+

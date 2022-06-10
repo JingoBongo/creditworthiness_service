@@ -1,5 +1,11 @@
 TODO
 
+constants class
+logging. I think it is supposed to be 'logging file per SUBPROCESS',
+therefore doing that after attempt to make child Flask app
+
+
+
 init:
 Create database  if doesn't exist. CHECK
 populate DB by config              CHECK

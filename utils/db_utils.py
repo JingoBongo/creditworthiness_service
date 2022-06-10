@@ -3,16 +3,16 @@ import os
 import utils.read_from_yaml as yaml_utils
 from utils.decorators.db_decorators import sql_alchemy_db_func
 import sqlite3
+import utils.constants as c
 
 from utils.json_utils import read_from_json
 
-db_name = 'main_db.db'
+
+
 cur_file_name = os.path.basename(__file__)
-root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = f"{root_path}//resources//fuse.yaml"
-config = yaml_utils.read_from_yaml(conf_path)
-SYS_SERVICES_TABLE_NAME, BUSINESS_SERVICES_TABLE_NAME = config['sqlite']['init']['table_names']
-engine_path = f"sqlite:///{root_path}resources\\{db_name}"
+root_path = c.root_path
+config = yaml_utils.read_from_yaml(root_path + c.conf_path)
+engine_path = c.sql_engine_path
 
 
 def print_c(text):
@@ -263,5 +263,5 @@ def change_service_status_by_pid(*args, **kwargs):
 
 
 def initial_db_creation():
-    conn = sqlite3.connect(f"{root_path}resources\\main_db.db")
+    conn = sqlite3.connect(f"{root_path}resources\\{c.db_name}")
     conn.close()

@@ -5,3 +5,4 @@
 *.db
 */busy_ports.json
 __pycache__/
+.idea

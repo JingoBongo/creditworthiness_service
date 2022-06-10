@@ -35,6 +35,8 @@ services:
       path: "endpoints//py_runnable_back_gateway.py"
       enabled: False
       port: 5000
+    fflask:
+      path: "endpoints//test_fflask.py"
 
 uncommon_modules:
   sklearn:

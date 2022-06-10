@@ -1,8 +1,8 @@
-import logging
-import os
 import sys
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+import __init__
+import logging
+
 
 
 def setup_logger(name, log_file, level=logging.INFO):
@@ -44,15 +44,3 @@ def setup_logger(name, log_file, level=logging.INFO):
     logger.addHandler(consoleHandler)
 
     return logger
-
-# first file logger
-logger = setup_logger('first_logger', 'first_logfile.log')
-logger.info("This is just info message")
-
-# second file logger
-super_logger = setup_logger('second_logger', 'second_logfile.log')
-super_logger.error('This is an error message')
-
-def another_method():
-   # using logger defined above also works here
-   logger.info('Inside method')

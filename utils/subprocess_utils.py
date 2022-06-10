@@ -1,10 +1,13 @@
 import subprocess
 import sys
+from utils import logger_utils
 
 
 class CustomNamedProcess(subprocess.Popen):
     def __init__(self, *args, name=None, **kwargs):
         self.name = name
+        # todo, mess w/ folder for logs
+        # self.log = logger_utils.setup_logger(name, )
         super().__init__(*args, **kwargs)
 
 

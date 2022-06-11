@@ -1,13 +1,12 @@
 import __init__
 from flask import render_template, redirect, url_for
-from flasgger import Swagger
-from utils import general_utils as g
-from utils import constants as c
+from utils import constants as c, test_outter_class
 from argparse import ArgumentParser
 
 from utils.flask_child import FuseNode
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+log = app.log
 
 
 
@@ -17,6 +16,8 @@ def send_n():
 
 @app.route('/index')
 def index():
+    log.info("test log thingy")
+    test_outter_class.make_a_thing()
     return 'Did you expect a default page or something?))'
 
 
@@ -73,12 +74,6 @@ def endpoint_with_var(str_variable):
             description: A simple business logic unit with swagger
         """
     return 'elo hello fello\', %s' % str_variable
-
-
-@app.errorhandler(404)
-def handle_404(e):
-    # handle all other routes here
-    return 'This is not a thing. But you can see what is available at /apidocs'
 
 
 

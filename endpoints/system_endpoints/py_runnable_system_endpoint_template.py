@@ -1,17 +1,14 @@
 import __init__
-from flask import Flask
-from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
 from utils import constants as c
+from utils.flask_child import FuseNode
 
-app = Flask(__name__)
-swagger = Swagger(app)
+parser = ArgumentParser()
+app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+log = app.log
 
 
-@app.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
-def life_ping():
-    return '{"status":"alive"}'
 
 
 @app.route('/')
@@ -26,13 +23,4 @@ def hello():
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    endpoint_port = args.port
-    if args.local == "True":
-        host = "127.0.0.1"
-    else:
-        host = g.host
-    app.run(debug=g.debug, host=host, port=endpoint_port)
+    app.run()

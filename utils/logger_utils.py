@@ -1,7 +1,9 @@
+import __init__
+import os
 import sys
 
-import __init__
 import logging
+from utils import constants as c
 
 
 
@@ -10,15 +12,15 @@ def setup_logger(name, log_file, level=logging.INFO):
     def decorate_emit(fn):
         def new(*args):
             levelno = args[0].levelno
-            if(levelno >= logging.CRITICAL):
+            if levelno >= logging.CRITICAL:
                 color = '\x1b[31;1m'
-            elif(levelno >= logging.ERROR):
+            elif levelno >= logging.ERROR:
                 color = '\x1b[31;1m'
-            elif(levelno >= logging.WARNING):
+            elif levelno >= logging.WARNING:
                 color = '\x1b[33;1m'
-            elif(levelno >= logging.INFO):
+            elif levelno >= logging.INFO:
                 color = '\x1b[32;1m'
-            elif(levelno >= logging.DEBUG):
+            elif levelno >= logging.DEBUG:
                 color = '\x1b[35;1m'
             else:
                 color = '\x1b[0m'
@@ -31,7 +33,7 @@ def setup_logger(name, log_file, level=logging.INFO):
         return new
 
     """To setup as many loggers as you want"""
-    logFormatter = logging.Formatter("[%(asctime)s] [%(process)-s-%(processName)-s] [%(levelname)-s]  %(message)s")
+    logFormatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(levelname)-s] %(message)s")
     handler = logging.FileHandler(log_file)
     handler.setFormatter(logFormatter)
     consoleHandler = logging.StreamHandler(sys.stdout)
@@ -44,3 +46,12 @@ def setup_logger(name, log_file, level=logging.INFO):
     logger.addHandler(consoleHandler)
 
     return logger
+
+
+def get_log(name):
+    pid = os.getpid()
+    logger_name = f"{name}-{pid}"
+    log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
+    log = setup_logger(logger_name, log_path)
+    c.current_subprocess_logger = log
+    return log

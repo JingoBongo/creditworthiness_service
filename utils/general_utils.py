@@ -1,6 +1,7 @@
+import __init__
+import shutil
 import socket
 
-import __init__
 import json
 import os
 import psutil
@@ -22,8 +23,10 @@ host = config['general']['host']
 sql_engine_path = c.sql_engine_path
 
 
+
 def print_c(text):
-    print(f"[{cur_file_name}] {str(text)}")
+    # print(f"[{cur_file_name}] {str(text)}")
+    c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
 
 
 def run_cmd_command(command):
@@ -198,3 +201,17 @@ def process_start_service(service_name):
         print_c(e)
         return 'service failed to start'
 
+def remove_folder_contents(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def clear_log_folder():
+    log_folder_name = c.root_path+'resources//'+c.logs_folder_name
+    remove_folder_contents(log_folder_name)

@@ -1,16 +1,17 @@
 import __init__
-from flask import Flask
-from flasgger import Swagger
 from utils import general_utils as g
 from argparse import ArgumentParser
 
-from utils.general_utils import get_rid_of_service_by_pid, process_start_service, \
-    get_rid_of_service_by_pid_and_port_dirty
+from utils.flask_child import FuseNode
+from utils.general_utils import get_rid_of_service_by_pid, process_start_service, get_rid_of_service_by_pid_and_port_dirty
 from utils.subprocess_utils import start_generic_subprocess
 from utils import constants as c
 
-app = Flask(__name__)
-swagger = Swagger(app)
+
+parser = ArgumentParser()
+app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+log = app.log
+
 
 @app.route('/schedulers/statuses')
 def get_shedulers_list():
@@ -94,18 +95,7 @@ def launch_life_ping_scheduler_if_not_exists(process_name, process_full_path):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    endpoint_port = args.port
-    if args.local == "True":
-        host = "127.0.0.1"
-    else:
-        host = g.host
-
-    # TODO add logic with adding to schedulers db and checking if there is only one life ping
     process_name = "life_ping_schedule"
     process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.life_ping_schedule_pyfile_name}"
     launch_life_ping_scheduler_if_not_exists(process_name, process_full_path)
-    app.run(debug=g.debug, host=host, port=endpoint_port)
+    app.run()

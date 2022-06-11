@@ -1,9 +1,9 @@
 import __init__
-from flask import Blueprint, Flask, render_template, redirect, request, flash
-from flasgger import Swagger
+from flask import Flask, render_template, redirect, request, flash
 from utils import general_utils as g
 from utils import constants as c
 from argparse import ArgumentParser
+from utils.flask_child import FuseNode
 
 import pandas as pd
 import numpy as np
@@ -12,8 +12,11 @@ import json
 import os
 # import scikit-learn==1.0.2
 
-ml_endpoint = Flask(__name__, template_folder=c.root_path + c.templates_folder_name)
-# ml_endpoint.secret_key("fahdsfjfhdfsljdfhsldfkhfsdls")
+
+parser = ArgumentParser()
+app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+log = app.log
+# app.secret_key("fahdsfjfhdfsljdfhsldfkhfsdls")
 
 scaler = pickle.load(open("resources/pickles/standard_scaler.pkl", 'rb'))
 one_hot_encoder = pickle.load(open("resources/pickles/one_hot_encoder.pkl", 'rb'))
@@ -29,7 +32,7 @@ X = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', '
 
 
 
-@ml_endpoint.route('/processPerson', methods=["POST", "GET"])
+@app.route('/processPerson', methods=["POST", "GET"])
 def processPerson():
     try:
         json_record = request.get_json(force=True) or request.data or request.form
@@ -55,25 +58,8 @@ def processPerson():
     return render_template("result.html", prediction = str(prediction[0][1]))
 
 
-@ml_endpoint.errorhandler(404)
-def handle_404(e):
-    # handle all other routes here
-    return 'Not Found, but we HANDLED IT'
 
-
-@ml_endpoint.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
-def life_ping():
-    return '{"status":"alive"}'
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    endpoint_port = args.port
-    if args.local == "True":
-        host = "127.0.0.1"
-    else:
-        host = g.host
-    ml_endpoint.run(debug=g.debug, host=host, port=endpoint_port)
+    app.run()

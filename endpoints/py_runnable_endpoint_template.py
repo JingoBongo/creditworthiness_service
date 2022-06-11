@@ -1,18 +1,16 @@
 import __init__
-from flask import Flask, render_template, redirect, url_for
-from flasgger import Swagger
+from flask import render_template, redirect, url_for
 from utils import general_utils as g
 from utils import constants as c
 from argparse import ArgumentParser
 
-app = Flask(__name__, template_folder=c.root_path + c.templates_folder_name)
-swagger = Swagger(app)
+from utils.flask_child import FuseNode
 
-root_path = c.root_path
-config = g.config
+parser = ArgumentParser()
+app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+log = app.log
 
-SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
-BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
+
 
 @app.route('/send_n')
 def send_n():
@@ -78,24 +76,7 @@ def endpoint_with_var(str_variable):
     return 'elo hello fello\', %s' % str_variable
 
 
-@app.errorhandler(404)
-def handle_404(e):
-    # handle all other routes here
-    return 'This is not a thing. But you can see what is available at /apidocs'
 
-
-@app.route(f"{c.life_ping_endpoint_context}", methods=['PATCH'])
-def life_ping():
-    return '{"status":"alive"}'
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    endpoint_port = args.port
-    if args.local == "True":
-        host = "127.0.0.1"
-    else:
-        host = g.host
-    app.run(debug=g.debug, host=host, port=endpoint_port)
+    app.run()

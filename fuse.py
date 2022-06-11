@@ -7,6 +7,7 @@ import os
 from utils import general_utils as g
 from utils import db_utils
 from utils import constants as c
+from utils import logger_utils
 
 root_path = c.root_path
 conf_path = c.conf_path
@@ -14,15 +15,24 @@ config = g.config
 cur_file_name = os.path.basename(__file__)
 
 
+def setup_cur_logger():
+    log = logger_utils.get_log('fuse')
+    c.current_subprocess_logger = log
+
 def print_c(text):
-    print(f"[{cur_file_name}] {str(text)}")
+    # print(f"[{cur_file_name}] {str(text)}")
+    c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
+
 
 
 def main():
+    setup_cur_logger()
     print_c(f'Firing fuse..')
 
     # some preconfiguration
+
     g.clear_busy_ports()
+    g.clear_log_folder()
     g.reserve_ports_from_config()
     db_utils.initial_db_creation()
     db_utils.initial_table_creation()

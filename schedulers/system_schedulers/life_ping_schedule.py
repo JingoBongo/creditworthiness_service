@@ -5,7 +5,7 @@ import utils.general_utils as g
 from utils import constants as c
 import os
 import requests
-import psutil
+from utils import logger_utils
 
 from utils import db_utils
 
@@ -17,10 +17,17 @@ config = g.config
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 cur_file_name = os.path.basename(__file__)
+log = logger_utils.get_log('life_ping_schedule')
+c.current_subprocess_logger = log
+
+
+
+
 
 
 def print_c(text):
-    print(f"[{cur_file_name}] {str(text)}")
+    # print(f"[{cur_file_name}] {str(text)}")
+    c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
 
 
 def ping_one(port):

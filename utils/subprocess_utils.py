@@ -1,23 +1,20 @@
 import subprocess
 import sys
 from utils import logger_utils
+from utils import constants as c
 
 
 class CustomNamedProcess(subprocess.Popen):
     def __init__(self, *args, name=None, **kwargs):
         self.name = name
+        # logger_name = f"{name}-{self.pid}"
+        # log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
+        # self.log = logger_utils.setup_logger(logger_name, log_path)
+        super().__init__(*args, **kwargs)
         # todo, mess w/ folder for logs
         # self.log = logger_utils.setup_logger(name, )
-        super().__init__(*args, **kwargs)
 
 
-class CustomProcessListElement():
-    def __init__(self, full_name, port, short_name, pid, obj_reference):
-        self.full_name = full_name
-        self.port = port
-        self.short_name = short_name
-        self.pid = pid
-        self.obj_reference = obj_reference
 
 def start_generic_subprocess(name, path):
     local_process = CustomNamedProcess([sys.executable, path], name=name)

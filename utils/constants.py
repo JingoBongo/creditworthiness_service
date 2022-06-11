@@ -13,3 +13,5 @@ templates_folder_name = 'templates'
 schedulers_folder_name = 'schedulers'
 system_schedulers_folder_name = 'system_schedulers'
 life_ping_schedule_pyfile_name = 'life_ping_schedule.py'
+logs_folder_name = 'logs'
+current_subprocess_logger = None

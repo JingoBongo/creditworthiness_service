@@ -1,5 +1,24 @@
 TODO
 
+complement logs in constant file to be used in arbitrary files
+add .log() and .error() functions that arbitrari functions can use.
+these function probably should be from logger_utils, but closely use constants ACTIVE get_logger function
+
+implement concatenator for logs and hide the result into zip file (this WILL be a disaster to make)
+
+refactor flask_child a bit
+
+refactor some functions to probably take its own utils file instead of general utils. 
+It is unintuitive to find json utils in there.
+
+refactor the way it logs package utils. Do I need full logs of that? can I possibly make it a 
+progress bar but just a print?
+
+implement some Fuse logo since this thing kinda started to be a unique framework
+
+update settings file? I'd like to first find if I need it. Deleting for now.
+(reminder tho, it can be generated using pycharm upper menu)
+
 constants class
 logging. I think it is supposed to be 'logging file per SUBPROCESS',
 therefore doing that after attempt to make child Flask app

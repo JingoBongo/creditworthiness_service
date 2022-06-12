@@ -1,6 +1,8 @@
+import logging
 import os
 
 from flasgger import Swagger
+from flask.logging import default_handler
 
 import __init__
 from flask import Flask, app, Response
@@ -52,7 +54,7 @@ class FuseNode(Flask):
         self.host = host
         self.port = endpoint_port
         self.swagger = Swagger(self)
-        self.log = self.get_log()
+        self.get_log()
         # app.run(debug=g.debug, host=host, port=endpoint_port)
 
     def run(self, *args, **kwargs):
@@ -60,11 +62,26 @@ class FuseNode(Flask):
 
     def get_log(self):
         name = self.name
-        pid = os.getpid()
-        logger_name = f"{name}-{pid}"
-        log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
-        log = logger_utils.setup_logger(logger_name, log_path)
-        c.current_subprocess_logger = log
+        # w_logger = self.logger.ge
+        # pid = os.getpid()
+        # logger_name = f"{name}-{pid}"
+        # log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
+        # log = logger_utils.setup_logger(logger_name, log_path)
+        log = logger_utils.get_log(name)
+
+        # // test part
+        # TODO: this worked to collect request logs, but not perfectly. proably needs refactoring
+        w_log = logging.getLogger('werkzeug')
+        w_log.setLevel(logging.DEBUG)
+        w_log.addHandler(c.current_rotating_handler)
+        w_log.addHandler(c.current_console_handler)
+        # for handl in w_log.handlers:
+        #     log.addHandler(handl)
+        #
+
+
+        self.logger = log
+        # c.current_subprocess_logger = log
         return log
 
 

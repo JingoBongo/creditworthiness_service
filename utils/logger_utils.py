@@ -1,4 +1,5 @@
 import __init__
+from logging.handlers import RotatingFileHandler
 import os
 import sys
 
@@ -32,14 +33,17 @@ def setup_logger(name, log_file, level=logging.INFO):
             return fn(*args)
         return new
 
-    """To setup as many loggers as you want"""
+    # logFormatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(filename)s] [%(levelname)-s] %(message)s")
     logFormatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(levelname)-s] %(message)s")
-    handler = logging.FileHandler(log_file)
+    # handler = logging.FileHandler(log_file)
+    handler = RotatingFileHandler(log_file, maxBytes=50*1024, backupCount=2)
     handler.setFormatter(logFormatter)
     consoleHandler = logging.StreamHandler(sys.stdout)
     consoleHandler.setFormatter(logFormatter)
     consoleHandler.emit = decorate_emit(consoleHandler.emit)
 
+    c.current_rotating_handler = handler
+    c.current_console_handler = consoleHandler
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
@@ -54,4 +58,31 @@ def get_log(name):
     log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
     log = setup_logger(logger_name, log_path)
     c.current_subprocess_logger = log
+    sys.excepthook = handle_exception
     return log
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    c.current_subprocess_logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+
+def info(text):
+    c.current_subprocess_logger.info(text)
+
+def debug(text):
+    c.current_subprocess_logger.debug(text)
+
+def error(text):
+    c.current_subprocess_logger.error(text)
+
+def warn(text):
+    c.current_subprocess_logger.warn(text)
+
+def critical(text):
+    c.current_subprocess_logger.critical(text)
+
+def exception(text):
+    c.current_subprocess_logger.exception(text)

@@ -39,9 +39,14 @@ services:
       path: "endpoints//test_fflask.py"
 
 uncommon_modules:
+#  pyyaml:
+#    import_name: pyyaml
+#    module_name: pyyaml
+#    module_version: any
   sklearn:
     import_name: sklearn
-    module_name: scikit-learn==1.0.2
+    module_name: scikit-learn
+    module_version: 1.0.2
 
 
 sqlite:

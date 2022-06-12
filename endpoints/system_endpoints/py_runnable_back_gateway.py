@@ -6,7 +6,7 @@ from utils.flask_child import FuseNode
 
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
-log = app.log
+
 
 
 @app.route('/')

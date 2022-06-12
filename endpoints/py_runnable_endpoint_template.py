@@ -3,12 +3,13 @@ from flask import render_template, redirect, url_for
 from utils import general_utils as g
 from utils import constants as c
 from argparse import ArgumentParser
-
+from utils import logger_utils as log
 from utils.flask_child import FuseNode
+
 
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
-log = app.log
+
 
 
 

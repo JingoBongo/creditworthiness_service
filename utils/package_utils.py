@@ -1,6 +1,7 @@
 import __init__
 import subprocess
 import tempfile
+from utils import constants as c
 
 
 
@@ -8,8 +9,17 @@ import os
 
 all_py_local_files = []
 all_imports = []
-root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-conf_path = os.path.normpath('.//resources//fuse.yaml')
+# root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
+root_path = c.root_path
+# conf_path = os.path.normpath('.//resources//fuse.yaml')
+conf_path = c.conf_path
+
+
+
+def progress_bar(progress, total, text=''):
+    percent = 100* (progress / float(total))
+    bar = '■' * int(percent) + '-'*(100-int(percent))
+    print(f"\r|{bar}| {percent:.2f}% : {str(text)}", end = "\r")
 
 
 def try_import_and_install_package(package_name):
@@ -19,7 +29,7 @@ def try_import_and_install_package(package_name):
             if str:
                 if len(str) > 0:
                     exec(str)
-                    print(f"{package_name} is already installed")
+                    # print(f"{package_name} is already installed")
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name} --user")
@@ -29,10 +39,15 @@ def try_import_and_install_package(package_name):
             print(e)
 
 
-def try_import_and_install_uncommon_package(import_name, module_name):
-    pac_name, pac_ver = module_name.split('==')
+def try_import_and_install_uncommon_package(import_name, pac_name, pac_ver):
+    # pac_name
+    if not pac_ver == 'any':
+        module_postfix = '=='+pac_ver
+    else:
+        module_postfix = ''
     try:
         try:
+            # tries to find module locally
             cmd = ['pip3', 'show', pac_name]
             with tempfile.TemporaryFile() as tempf:
                 proc = subprocess.Popen(cmd, stdout=tempf)
@@ -42,23 +57,26 @@ def try_import_and_install_uncommon_package(import_name, module_name):
         except:
             version = None
         version = str(version)
+        # if module isn't installed locally, install it
         if not version or len(version) < 20:
-            os.system(f"pip3 install -Iv {module_name}")
-            # cmd = ['pip3', 'install', '-Iv', pac_name, '--user']
-            # subprocess.Popen(cmd)
+            os.system(f"pip3 install -Iv {pac_name}{module_postfix}")
             return
+        # if there is actually some version of it, find the version
         for line in version.split('\\r\\n'):
             if 'Version' in line:
-                if line.split(' ')[1] == pac_ver:
+                # if version corresponds to config version
+                if line.split(' ')[1] == pac_ver or pac_ver == 'any':
                     pass
                 else:
-                    #             uninstall previous version
+                    #     uninstall previous version
                     os.system(f"pip3 uninstall {pac_name} -y")
                     #     install specified version
-                    os.system(f"pip3 install -Iv {module_name}")
+                    os.system(f"pip3 install -Iv {pac_name}{module_postfix}")
 
     except Exception as e:
-        print(f"Failed to install {module_name}, check the details yourselves")
+        # print(f"Failed to install {pac_name}, check the details yourselves")
+        # print(e)
+        print(f"Failed to install {pac_name}, check the details yourselves")
         print(e)
 
 
@@ -100,7 +118,7 @@ def find_used_packages():
     global all_py_local_files
     global all_imports
     restricted_folders = ['orchestra_env', 'test1env_withoutml', 'empty_env']
-    root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
+    root_path = c.root_path
 
     for root, dirs, files in os.walk(root_path):
         for file in files:
@@ -128,23 +146,32 @@ def read_from_yaml(file_path):
         with open(file_path) as f:
             return yaml.safe_load(f)
     except Exception as e:
-        print('*not a proper print*')
+        # print(e)
+        # print(f"*not a proper print* error reading {file_path} file")
         print(e)
         print(f"*not a proper print* error reading {file_path} file")
 
 def run_importing_process():
     print(f"Checking installed modules")
-    for im in find_used_packages():
+    ind = 1
+    used_packages = find_used_packages()
+    progress_bar(ind, len(used_packages))
+    for im in used_packages:
+        progress_bar(ind, len(used_packages), f"processing : {im}")
         try_import_and_install_package(im)
+        ind += 1
+    print()
+    print(f"Checking installed uncommon modules from config")
     try:
         # os.system(f"pip3 install -Iv pyyaml")
-        try_import_and_install_package('pyyaml')
+        try_import_and_install_uncommon_package('pyyaml', 'pyyaml', 'any')
     except:
-        print('PYYAM should be already installed')
+        print('PYYAML should be already installed')
     config = read_from_yaml(root_path + conf_path)
     for module in config['uncommon_modules']:
         try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
-                                                config['uncommon_modules'][module]['module_name'])
+                                                config['uncommon_modules'][module]['module_name'],
+                                                config['uncommon_modules'][module]['module_version'])
     print(f"Modules preparation complete")
 
 # run_importing_process()

@@ -1,7 +1,9 @@
 import os
 import utils.constants as c
+from utils import logger_utils as log
 
-db_name = 'main_db.db'
+
+db_name = c.db_name
 cur_file_name = os.path.basename(__file__)
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
@@ -10,8 +12,8 @@ root_path = c.root_path
 engine_path = c.sql_engine_path
 
 
-def print_c(text):
-    print(f"[{cur_file_name}] {str(text)}")
+# def print_c(text):
+#     print(f"[{cur_file_name}] {str(text)}")
 
 
 def sql_alchemy_db_func(required_args=None):
@@ -47,11 +49,13 @@ def sql_alchemy_db_func(required_args=None):
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
             except Exception as e:
-                print_c(e)
+                log.exception(e)
+                # print_c(e)
             result = func(**kwargs)
             kwargs['connection'].connection.commit()
             kwargs['connection'].connection.close()
-            print_c("query executed, connection closed")
+            # print_c("query executed, connection closed")
+            log.info(f"{func.__name__} query executed, connection closed")
             return result
 
         return inner

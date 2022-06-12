@@ -15,3 +15,5 @@ system_schedulers_folder_name = 'system_schedulers'
 life_ping_schedule_pyfile_name = 'life_ping_schedule.py'
 logs_folder_name = 'logs'
 current_subprocess_logger = None
+current_rotating_handler = None
+current_console_handler = None

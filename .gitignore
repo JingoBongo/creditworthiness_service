@@ -8,3 +8,5 @@ __pycache__/
 .idea
 __init__.cpython-39.pyc
 */logs/
+# exception to the rule
+!logs/.gitkeep

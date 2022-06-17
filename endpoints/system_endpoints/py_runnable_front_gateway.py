@@ -1,3 +1,6 @@
+import requests
+from flask import url_for, redirect, make_response
+
 import __init__
 from utils import general_utils as g
 from argparse import ArgumentParser
@@ -19,6 +22,12 @@ def hello():
     """
     return 'system endpoint'
 
-
+# @app.route('/provide/tetris')
+@app.route('/provide/', defaults={'path': ''})
+@app.route('/provide/<path:path>')
+def test_provider(path):
+    new_url = 'http://localhost:5000/'+path
+    something = redirect(new_url)
+    return something
 if __name__ == "__main__":
     app.run()

@@ -15,12 +15,17 @@ services:
       path: "endpoints//system_endpoints//py_runnable_system_endpoint_template.py"
       local: True
       mono: True
-      enabled: True
+      enabled: False
     life_ping_endpoint:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: True
       mono: True
       port: 5001
+    front_gateway:
+      path: "endpoints//system_endpoints//py_runnable_front_gateway.py"
+      enabled: True
+      port: 80
+
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"
@@ -31,12 +36,6 @@ services:
     form_page:
       path: "endpoints//form_page.py"
       enabled: False
-    back_gateway:
-      path: "endpoints//py_runnable_back_gateway.py"
-      enabled: False
-      port: 5000
-    fflask:
-      path: "endpoints//test_fflask.py"
 
 uncommon_modules:
 #  pyyaml:

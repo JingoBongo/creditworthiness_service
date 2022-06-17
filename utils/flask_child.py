@@ -55,6 +55,7 @@ class FuseNode(Flask):
         self.port = endpoint_port
         self.swagger = Swagger(self)
         self.get_log()
+        self.logger.info(f"Started FuseNode {self.name} at {host}:{endpoint_port}")
         # app.run(debug=g.debug, host=host, port=endpoint_port)
 
     def run(self, *args, **kwargs):

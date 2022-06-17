@@ -1,3 +1,5 @@
+import logging
+
 import __init__
 import shutil
 import socket
@@ -229,14 +231,24 @@ def process_start_service(service_name):
         log.exception(e)
         return 'service failed to start'
 
+def check_fuse_logger_file_is_current_logger(filepath):
+    fuse_name = 'abobacadabra99912299939993999499959'
+    for key in logging.root.manager.loggerDict.keys():
+        if 'fuse-'+str(os.getpid()) in key:
+            fuse_name = key
+    if fuse_name == filepath:
+        return True
+    return False
+
 def remove_folder_contents(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+            if not check_fuse_logger_file_is_current_logger(filename):
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
             log.info(f"Cleared contents of '{folder}' folder")
         except Exception as e:
             # print('Failed to delete %s. Reason: %s' % (file_path, e))

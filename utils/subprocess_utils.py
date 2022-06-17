@@ -1,18 +1,11 @@
 import subprocess
 import sys
-from utils import logger_utils
-from utils import constants as c
 
 
 class CustomNamedProcess(subprocess.Popen):
     def __init__(self, *args, name=None, **kwargs):
         self.name = name
-        # logger_name = f"{name}-{self.pid}"
-        # log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
-        # self.log = logger_utils.setup_logger(logger_name, log_path)
         super().__init__(*args, **kwargs)
-        # todo, mess w/ folder for logs
-        # self.log = logger_utils.setup_logger(name, )
 
 
 

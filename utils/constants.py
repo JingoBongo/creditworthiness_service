@@ -17,3 +17,22 @@ logs_folder_name = 'logs'
 current_subprocess_logger = None
 current_rotating_handler = None
 current_console_handler = None
+
+
+
+
+
+
+
+
+
+
+
+
+
+fuse_logo = '    ______     \n'\
+'   / ____/_  __________ \n'\
+'  / /_  / / / / ___/ _ \\\n'\
+' / __/ / /_/ (__  )  __/\n'\
+'/_/    \__,_/____/\___/ \n'\
+'                        \n'

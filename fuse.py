@@ -32,6 +32,7 @@ def main():
     setup_cur_logger()
     # print_c(f'Firing fuse..')
     log.info(f'Firing fuse..')
+    print(c.fuse_logo)
     # some preconfiguration
     g.clear_busy_ports()
     g.clear_log_folder()

@@ -93,6 +93,8 @@ def set_port_busy(port):
         log.info(f"Set port {port} as busy")
     else:
         log.info(f"Did not set port {port} as busy")
+#         TODO for some reason for predefined ports it says that it didnt set them busy, but  it does it
+#               maybe it does it before
 
 
 def set_environment_variable(param, param1):

@@ -1,0 +1,24 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "service_name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "function_name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "route",
+      "type": "String",
+      "nullable": "False"
+    }
+  ]
+}

@@ -17,7 +17,7 @@ config = g.config
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 cur_file_name = os.path.basename(__file__)
-log.get_log('life_ping_schedule')
+log.get_log(c.life_ping_schedule_name)
 # c.current_subprocess_logger = log
 
 
@@ -99,4 +99,4 @@ try:
         schedule.run_pending()
         time.sleep(1)
 except:
-    log.error("Life ping schedule loop exited")
+    log.error(f"{c.life_ping_schedule_name} loop exited")

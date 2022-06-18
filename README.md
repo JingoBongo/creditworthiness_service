@@ -1,5 +1,11 @@
 TODO
 
+check for busy port while assigning new port doesn't work as intended and needs fix
+
+refactor endpoints to return at least JSON, not just some text
+
+maybe add EXTRA bouncer for life_ping service as it is used to bounce everrything else
+
 Front gateway: 
 it needs to have at least these 2 features:
 1. provide documentation about what this fuse instance can provide and how to use it in general

@@ -8,8 +8,6 @@ from utils import logger_utils as log
 
 from utils.json_utils import read_from_json
 
-
-
 cur_file_name = os.path.basename(__file__)
 root_path = c.root_path
 config = yaml_utils.read_from_yaml(root_path + c.conf_path)
@@ -124,7 +122,6 @@ def insert_into_schedulers(*args, **kwargs):
     log.info(f"Inserted into Schedulers table: {val_name}, {val_path}, {val_pid}, 'alive'")
 
 
-
 @sql_alchemy_db_func(required_args=['table_name'])
 def select_from_table(*args, **kwargs):
     try:
@@ -178,23 +175,23 @@ def clear_schedulers_table(*args, **kwargs):
     log.info("Cleared Schedulers table")
 
 
-# TODO: test this
+
 # Be aware that this function requires a dictionary of insert values
 # where key = column_name and value is inserted value
 @sql_alchemy_db_func(required_args=['table_name', 'values_dict'])
 def insert_into_table(*args, **kwargs):
     try:
         table_name = kwargs['table_name']
+        values = kwargs['values_dict']
         table = kwargs['alc'].Table(table_name, kwargs['metadata'],
                                     autoload=True,
                                     autoload_with=kwargs['engine'])
-        ins = kwargs['sys_services'].insert().values(**kwargs['values_dict'])
+        ins = table.insert().values(**values)
         kwargs['engine'].execute(ins)
-        # print_c(f"Inserted into {table_name} table: '{kwargs['values_dict']}'")
         log.info(f"Inserted into {table_name} table: '{kwargs['values_dict']}'")
     except Exception as e:
-        # print_c(f"Something went horribly wrong while trying to insert values '{kwargs['values_dict']}' into table {kwargs['table_name']}")
-        log.exception(f"Something went horribly wrong while trying to insert values '{kwargs['values_dict']}' into table {kwargs['table_name']}")
+        log.exception(
+            f"Something went horribly wrong while trying to insert values '{kwargs['values_dict']}' into table {kwargs['table_name']}")
         log.exception(e)
 
 
@@ -212,7 +209,8 @@ def clear_table(*args, **kwargs):
         log.info(f"Cleared {table_name} table")
     except Exception as e:
         # print_c(f"Something went wrong while trying to delete table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
-        log.exception(f"Something went wrong while trying to delete table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
+        log.exception(
+            f"Something went wrong while trying to delete table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
         log.exception(e)
 
 
@@ -234,7 +232,8 @@ def drop_table(*args, **kwargs):
             log.info(f"Are you sure table {table_name} exists? It doesn't seem so")
     except Exception as e:
         # print_c(f"Something went wrong while trying to drop table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
-        log.exception(f"Something went wrong while trying to drop table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
+        log.exception(
+            f"Something went wrong while trying to drop table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
         log.exception(e)
 
 

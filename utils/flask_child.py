@@ -59,30 +59,21 @@ class FuseNode(Flask):
         # app.run(debug=g.debug, host=host, port=endpoint_port)
 
     def run(self, *args, **kwargs):
+        if 'port' in kwargs.keys():
+            self.port = kwargs['port']
         super().run(debug=self.debug, host=self.host, port=self.port)
 
     def get_log(self):
         name = self.name
-        # w_logger = self.logger.ge
-        # pid = os.getpid()
-        # logger_name = f"{name}-{pid}"
-        # log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
-        # log = logger_utils.setup_logger(logger_name, log_path)
         log = logger_utils.get_log(name)
 
         # // test part
-        # TODO: this worked to collect request logs, but not perfectly. proably needs refactoring
+        # TODO: this worked to collect request logs, but not perfectly. probably needs refactoring
         w_log = logging.getLogger('werkzeug')
         w_log.setLevel(logging.DEBUG)
         w_log.addHandler(c.current_rotating_handler)
         w_log.addHandler(c.current_console_handler)
-        # for handl in w_log.handlers:
-        #     log.addHandler(handl)
-        #
-
-
         self.logger = log
-        # c.current_subprocess_logger = log
         return log
 
 

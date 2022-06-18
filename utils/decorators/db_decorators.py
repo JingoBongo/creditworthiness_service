@@ -8,6 +8,7 @@ cur_file_name = os.path.basename(__file__)
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 SCHEDULERS_TABLE_NAME = c.schedulers_table_name
+HARVESTED_ROUTES_TABLE_NAME = c.harvested_routes_table_name
 root_path = c.root_path
 engine_path = c.sql_engine_path
 
@@ -46,6 +47,9 @@ def sql_alchemy_db_func(required_args=None):
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
                 kwargs['schedulers'] = kwargs['alc'].Table(SCHEDULERS_TABLE_NAME, kwargs['metadata'],
+                                                                  autoload=True,
+                                                                  autoload_with=kwargs['engine'])
+                kwargs['harvested_routes'] = kwargs['alc'].Table(HARVESTED_ROUTES_TABLE_NAME, kwargs['metadata'],
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
             except Exception as e:

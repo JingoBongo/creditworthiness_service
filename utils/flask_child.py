@@ -36,27 +36,34 @@ def not_found_handler(e):
 
 class FuseNode(Flask):
     def __init__(self, *args, **kwargs):
-        parser = kwargs['arg_parser']
-        kwargs = removekey(kwargs, 'arg_parser')
-        super().__init__(*args, **kwargs)
-        # adding 2 default thigs: life_ping route and 404 error handler
-        self.add_url_rule(c.life_ping_endpoint_context, methods=['PATCH'], view_func=life_ping_handler)
-        self.register_error_handler(404, not_found_handler)
-        parser.add_argument('-port')
-        parser.add_argument('-local')
-        args = parser.parse_args()
-        endpoint_port = args.port
-        if args.local == "True":
-            host = "127.0.0.1"
-        else:
-            host = g.host
-        self.debug = g.debug
-        self.host = host
-        self.port = endpoint_port
-        self.swagger = Swagger(self)
-        self.get_log()
-        self.logger.info(f"Started FuseNode {self.name} at {host}:{endpoint_port}")
-        # app.run(debug=g.debug, host=host, port=endpoint_port)
+        try:
+            parser = kwargs['arg_parser']
+            kwargs = removekey(kwargs, 'arg_parser')
+            super().__init__(*args, **kwargs)
+            # adding 2 default thigs: life_ping route and 404 error handler
+            self.add_url_rule(c.life_ping_endpoint_context, methods=['PATCH'], view_func=life_ping_handler)
+            self.register_error_handler(404, not_found_handler)
+            parser.add_argument('-port')
+            parser.add_argument('-local')
+            args = parser.parse_args()
+            endpoint_port = args.port
+            if args.local == "True":
+                host = "127.0.0.1"
+            else:
+                host = g.host
+            self.debug = g.debug
+            self.host = host
+            self.port = endpoint_port
+            self.swagger = Swagger(self)
+            self.get_log()
+            self.logger.info(f"Started FuseNode {self.name} at {host}:{endpoint_port}")
+            # app.run(debug=g.debug, host=host, port=endpoint_port)
+        except Exception as e:
+            print(f"Something went wrong while launching fuse node")
+            print(e)
+            self.logger.info(f"Something went wrong while launching fuse node")
+            self.logger.info(e)
+
 
     def run(self, *args, **kwargs):
         if 'port' in kwargs.keys():

@@ -6,6 +6,12 @@ refactor endpoints to return at least JSON, not just some text
 
 maybe add EXTRA bouncer for life_ping service as it is used to bounce everrything else
 
+I am not sure that wwhile recreating tables it properly checks if file is present: Implement
+
+make some json return dummy available for everything
+
+flask is multithreaded by deafult. find how to specify thread count if what (gates and taskmaster will need more)
+
 Front gateway: 
 it needs to have at least these 2 features:
 1. provide documentation about what this fuse instance can provide and how to use it in general

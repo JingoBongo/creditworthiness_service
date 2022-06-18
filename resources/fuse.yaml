@@ -19,12 +19,13 @@ services:
     life_ping_endpoint:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: True
-      mono: True
       port: 5001
-    front_gateway:
+    front_gateway_bigger_name:
       path: "endpoints//system_endpoints//py_runnable_front_gateway.py"
-      enabled: True
       port: 80
+    db_endpoint:
+      path: "endpoints//system_endpoints//db_endpoint.py"
+      port: 5002
 
   business:
     endpoint_template:

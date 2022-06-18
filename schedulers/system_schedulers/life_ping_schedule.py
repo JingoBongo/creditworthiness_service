@@ -45,24 +45,27 @@ def process_one_service(n):
     # n['status'] = 'dead'
     if n['status'] == 'dead':
         # define if is sys service
-        is_sys = False
-        if n['name'] in config['services']['system']:
-            is_sys = True
         # do other things anyway
         g.get_rid_of_service_by_pid(n['pid'])
         # print_c(f"before life ping init start services")
-        kkey = None
-        for key in config['services']['system']:
-            if n['name'] in config['services']['system']:
-                kkey = key
-                break
-        for key in config['services']['business']:
-            if n['name'] in config['services']['business']:
-                kkey = key
-                break
+
+        if n['name'] in config['services']['system'].keys():
+            g.init_start_service_procedure(n['name'], sys=True)
+            return
+            # for key in config['services']['system'].keys():
+            #     if key == n['name']:
+            #         g.init_start_service_procedure(key, sys=True)
+            #         return
+            #     break
+        if n['name'] in config['services']['business'].keys():
+            g.init_start_service_procedure(n['name'], sys=False)
+            return
+            # for key in config['services']['business'].keys():
+            #     if key == n['name']:
+            #         g.init_start_service_procedure(key, sys=False)
+            #         return
         # print_c(f"before life ping init start services")
-        if kkey:
-            g.init_start_service_procedure(kkey, sys=is_sys)
+        log.error(f"Tried to revive '{n['name']}' but it was not found in config services lists")
 
 
 def process_service_statuses(services_and_statuses):

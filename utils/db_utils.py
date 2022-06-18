@@ -214,6 +214,8 @@ def clear_table(*args, **kwargs):
         log.exception(e)
 
 
+
+
 # TODO, test this
 @sql_alchemy_db_func(required_args=['table_name'])
 def drop_table(*args, **kwargs):
@@ -248,6 +250,16 @@ def delete_process_from_tables_by_pid(*args, **kwargs):
     kwargs['engine'].execute(d2)
     # print_c(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
     log.info(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
+
+
+@sql_alchemy_db_func(required_args=['route'])
+def delete_route_from_harvested_routes_by_route(*args, **kwargs):
+    alc = kwargs['alc']
+    val_route = kwargs['route']
+    route_column = alc.Column('route', alc.String)
+    d = kwargs['harvested_routes'].delete().where(route_column == str(val_route))
+    kwargs['engine'].execute(d)
+    log.info(f"Deleted routes '{val_route}' from {c.harvested_routes_table_name} table")
 
 
 @sql_alchemy_db_func(required_args=['val_pid'])
@@ -287,3 +299,5 @@ def initial_db_creation():
     conn = sqlite3.connect(f"{root_path}resources\\{c.db_name}")
     conn.close()
     log.info(f"Database {c.db_name} exists or was created.")
+
+

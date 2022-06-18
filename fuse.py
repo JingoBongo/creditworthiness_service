@@ -29,13 +29,13 @@ def setup_cur_logger():
 
 
 def main():
+    g.recreate_log_foler_if_not_exists()
     setup_cur_logger()
     # print_c(f'Firing fuse..')
     log.info(f'Firing fuse..')
     print(c.fuse_logo)
     # some preconfiguration
     g.clear_busy_ports()
-    g.recreate_log_foler_if_not_exists()
     g.clear_log_folder()
     g.reserve_ports_from_config()
     db_utils.initial_db_creation()

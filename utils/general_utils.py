@@ -276,4 +276,4 @@ def recreate_log_foler_if_not_exists():
     if not isExist:
         # Create a new directory because it does not exist
         os.makedirs(log_folder_name)
-        log.info(f"Recreated log folder")
+        # log.info(f"Recreated log folder")

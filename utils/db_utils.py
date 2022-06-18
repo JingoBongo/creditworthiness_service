@@ -24,50 +24,56 @@ engine_path = c.sql_engine_path
 # drop   - check
 # insert - check, but needs even more testing
 
-def process_one_column(column, kwargs):
+
+def return_column_type_by_name(column, kwargs):
     alc = kwargs['alc']
     generic_type = None
-    column_name = column['name']
-    if column['type'] == 'BigInteger':
+    if column == 'BigInteger':
         generic_type = alc.BigInteger
-    elif column['type'] == 'Date':
+    elif column == 'Date':
         generic_type = alc.Date
-    elif column['type'] == 'Boolean':
+    elif column == 'Boolean':
         generic_type = alc.Boolean
-    elif column['type'] == 'DateTime':
+    elif column == 'DateTime':
         generic_type = alc.DateTime
-    elif column['type'] == 'Enum':
+    elif column == 'Enum':
         generic_type = alc.Enum
-    elif column['type'] == 'Float':
+    elif column == 'Float':
         generic_type = alc.Float
-    elif column['type'] == 'Integer':
+    elif column == 'Integer':
         generic_type = alc.Integer
-    elif column['type'] == 'Interval':
+    elif column == 'Interval':
         generic_type = alc.Interval
-    elif column['type'] == 'LargeBinary':
+    elif column == 'LargeBinary':
         generic_type = alc.LargeBinary
-    elif column['type'] == 'MatchType':
+    elif column == 'MatchType':
         generic_type = alc.MatchType
-    elif column['type'] == 'Numeric':
+    elif column == 'Numeric':
         generic_type = alc.Numeric
-    elif column['type'] == 'PickleType':
+    elif column == 'PickleType':
         generic_type = alc.PickleType
-    elif column['type'] == 'SchemaType':
+    elif column == 'SchemaType':
         generic_type = alc.SchemaType
-    elif column['type'] == 'SmallInteger':
+    elif column == 'SmallInteger':
         generic_type = alc.SmallInteger
-    elif column['type'] == 'String':
+    elif column == 'String':
         generic_type = alc.String
-    elif column['type'] == 'Text':
+    elif column == 'Text':
         generic_type = alc.Text
-    elif column['type'] == 'Time':
+    elif column == 'Time':
         generic_type = alc.Time
-    elif column['type'] == 'Unicode':
+    elif column == 'Unicode':
         generic_type = alc.Unicode
-    elif column['type'] == 'UnicodeText':
+    elif column == 'UnicodeText':
         generic_type = alc.UnicodeText
     else:
         generic_type = alc.String
+    return generic_type
+
+def process_one_column(column, kwargs):
+    alc = kwargs['alc']
+    column_name = column['name']
+    generic_type = return_column_type_by_name(column['type'], kwargs)
 
     # check primary
     if 'primary_key' in column.keys():
@@ -279,6 +285,28 @@ def get_service_port_by_pid(*args, **kwargs):
         # print_c(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
         log.warn(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
     return result1[0]['port']
+
+@sql_alchemy_db_func(required_args=['table_name', 'column_name', 'column_value', 'column_type'])
+def select_from_table_by_one_column(*args, **kwargs):
+    try:
+        alc = kwargs['alc']
+        table_name = kwargs['table_name']
+        column_name = kwargs['column_name']
+        column_value = kwargs['column_value']
+        generic_column = alc.Column(column_name, return_column_type_by_name(kwargs['column_type'],kwargs))
+
+        table = kwargs['alc'].Table(table_name, kwargs['metadata'],
+                                    autoload=True,
+                                    autoload_with=kwargs['engine'])
+
+        query = alc.select([table]).where(generic_column == column_value)
+        proxy = kwargs['connection'].execute(query)
+        result_set = proxy.fetchall()
+        return result_set
+    except Exception as e:
+        log.exception('Something went horribly wrong while executing select from table by one column')
+        log.exception(e)
+
 
 
 @sql_alchemy_db_func(required_args=['val_pid', 'val_status'])

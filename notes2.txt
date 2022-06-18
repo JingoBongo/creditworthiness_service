@@ -5,10 +5,14 @@ SO FAR for docker how-to this link was more useful than entire internet
 https://blog.logrocket.com/build-deploy-flask-app-using-docker/
 
 i do it having desktop docker launched opened in background to rebuild img
- docker image build -t mscebec/simplest_microservice .
+ docker image build -t mscebec/fuse .
 
 to run
 docker run -p 5000:5000 -d mscebec/simplest_microservice
+
+let's try multiple ports
+docker run -p 80:80 -p 5000-5100:5000:5100 -d mscebec/fuse
+
 
 docker stop [container id]   (where con. id is from docker ps)
 

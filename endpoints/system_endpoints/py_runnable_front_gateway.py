@@ -2,11 +2,12 @@ import requests
 from flask import url_for, redirect, make_response
 
 import __init__
-from utils import general_utils as g
+from utils import general_utils as g, db_utils
 from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
 from utils.schedulers_utils import launch_route_harvester_scheduler_if_not_exists, route_harvester_job_body
+from utils import logger_utils as log
 
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
@@ -36,9 +37,23 @@ def test_provider(path):
     # therefore schedulers w/ 5 or 10 minutes interval for it
     # then, if requested path is not in scheduler's list, harvest again
     # then, if requested path is not in scheduler's list, return error in json
-    new_url = 'http://localhost:5000/'+path
-    something = redirect(new_url)
-    return something
+    # get port from service with such route
+    # table_name', 'column_name', 'column_value', 'column_type'
+    try:
+        row = db_utils.select_from_table_by_one_column(c.harvested_routes_table_name, 'route', '/'+path, 'String')
+        res = g.db_utils.select_from_table(c.sys_services_table_name) + g.db_utils.select_from_table(
+        c.business_services_table_name)
+        res2 = ''
+
+        for roww in res:
+            if roww['name'] == row[0]['service_name']:
+                res2 = roww['port']
+        new_url = f"http://localhost:{res2}/{path}"
+        something = redirect(new_url)
+        return something
+    except Exception as e:
+        log.exception(e)
+        return {'msg':'error', 'exception':e}
 
 
 if __name__ == "__main__":

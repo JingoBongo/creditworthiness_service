@@ -7,30 +7,33 @@ general:
 fuse:
   venv_activate_path: "orchestra_env//Scripts//activate"
   first_port: 5000
-  last_port: 6000
+  last_port: 5100
 
 services:
   system:
     test_sys_endpoint:
       path: "endpoints//system_endpoints//py_runnable_system_endpoint_template.py"
-      local: True
+      local: False
       mono: True
       enabled: False
     life_ping_endpoint:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
-      local: True
+      local: False
       port: 5001
     front_gateway_bigger_name:
       path: "endpoints//system_endpoints//py_runnable_front_gateway.py"
-      port: 80
+      port: 5000
+      loca: False
     db_endpoint:
       path: "endpoints//system_endpoints//db_endpoint.py"
       port: 5002
+      local: False
 
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"
       enabled: True
+      local: False
     ml_model_endpoint:
       path: "endpoints//ml_model_endpoint.py"
       enabled: False

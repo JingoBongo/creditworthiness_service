@@ -90,19 +90,22 @@ def check_string_has_no_occurrences_in_the_list(string, list):
 
 
 def get_package_name_from_line(line):
-    line = line.strip()
-    # print(f"Line that got into 'get_package_name_from_file' : {line}")
-    if line.startswith('import'):
-        # print(f"'get_package_name_from_file' returned {line.split(' ')[1]}")
-        return line.split(' ')[1]
-    if 'from' in line:
-        line = line.split('import')[0]
-        line = line.split(' ')[1]
-        line = line.split('.')[0]
-        # print(f"'get_package_name_from_file' returned {line}")
-        return line
-    else:
-        print(f"Dafuq is this line? : {line}")
+    try:
+        line = line.strip()
+        # print(f"Line that got into 'get_package_name_from_file' : {line}")
+        if line.startswith('import'):
+            # print(f"'get_package_name_from_file' returned {line.split(' ')[1]}")
+            return line.split(' ')[1]
+        if 'from' in line:
+            line = line.split('import')[0]
+            line = line.split(' ')[1]
+            line = line.split('.')[0]
+            # print(f"'get_package_name_from_file' returned {line}")
+            return line
+        else:
+            print(f"Dafuq is this line? : {line}")
+    except:
+        return 'os'
 
 
 def is_local_import(line):

@@ -103,8 +103,8 @@ def get_package_name_from_line(line):
             # print(f"'get_package_name_from_file' returned {line}")
             return line
         else:
-            return 'os'
             print(f"Dafuq is this line? : {line}")
+            return 'os'
     except:
         return 'os'
 

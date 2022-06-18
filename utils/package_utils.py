@@ -168,11 +168,13 @@ def run_importing_process():
     except:
         print('PYYAML should be already installed')
     config = read_from_yaml(root_path + conf_path)
-    for module in config['uncommon_modules']:
-        try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
-                                                config['uncommon_modules'][module]['module_name'],
-                                                config['uncommon_modules'][module]['module_version'])
-    print(f"Modules preparation complete")
+    try:
+        for module in config['uncommon_modules']:
+            try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
+                                                    config['uncommon_modules'][module]['module_name'],
+                                                    config['uncommon_modules'][module]['module_version'])
+    except Exception as e:
+        print(f"Modules preparation complete")
 
 # run_importing_process()
 # print('local files')

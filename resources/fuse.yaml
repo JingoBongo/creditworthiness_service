@@ -43,10 +43,10 @@ uncommon_modules:
 #    import_name: pyyaml
 #    module_name: pyyaml
 #    module_version: any
-  sklearn:
-    import_name: sklearn
-    module_name: scikit-learn
-    module_version: 1.0.2
+#  sklearn:
+#    import_name: sklearn
+#    module_name: scikit-learn
+#    module_version: 1.0.2
 
 
 sqlite:

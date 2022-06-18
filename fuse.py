@@ -35,6 +35,7 @@ def main():
     print(c.fuse_logo)
     # some preconfiguration
     g.clear_busy_ports()
+    g.recreate_log_foler_if_not_exists()
     g.clear_log_folder()
     g.reserve_ports_from_config()
     db_utils.initial_db_creation()

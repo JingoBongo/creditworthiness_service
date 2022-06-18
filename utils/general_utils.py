@@ -267,3 +267,13 @@ def remove_folder_contents(folder):
 def clear_log_folder():
     log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
     remove_folder_contents(log_folder_name)
+
+
+def recreate_log_foler_if_not_exists():
+    log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
+    isExist = os.path.exists(log_folder_name)
+
+    if not isExist:
+        # Create a new directory because it does not exist
+        os.makedirs(log_folder_name)
+        log.info(f"Recreated log folder")

@@ -23,7 +23,6 @@ host = config['general']['host']
 sql_engine_path = c.sql_engine_path
 
 
-
 # def print_c(text):
 #     # print(f"[{cur_file_name}] {str(text)}")
 #     c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
@@ -56,7 +55,8 @@ def write_to_json(path, text):
     except Exception as e:
         # print_c(f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
         # print_c(e)
-        log.exception(f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
+        log.exception(
+            f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
         log.exception(e)
 
 
@@ -78,6 +78,7 @@ def reserve_ports_from_config():
     write_to_json(busy_ports_json_path, busy_ports_json)
     log.info('Ports from config were reserved')
 
+
 def delete_port_from_list(port):
     new_json = read_from_json(busy_ports_json_path)
     new_json['busy_ports'].remove(str(port))
@@ -93,6 +94,8 @@ def set_port_busy(port):
         log.info(f"Set port {port} as busy")
     else:
         log.info(f"Did not set port {port} as busy")
+
+
 #         TODO for some reason for predefined ports it says that it didnt set them busy, but  it does it
 #               maybe it does it before
 
@@ -162,6 +165,7 @@ def check_port_is_in_use(port):
     sock.close()
     return result
 
+
 def get_free_port():
     port_start_ind = config['fuse']['first_port']
     port_end_ind = config['fuse']['last_port']
@@ -188,8 +192,9 @@ def init_start_service_procedure(service, sys=False):
         log.error(f"Service '{service}' has no existing file in path '{service_full_path}")
         return
 
-
-    if 'port' in config['services'][type][service].keys() and isinstance(config['services'][type][service]['port'], int) and config['services'][type][service]['port'] > 0:
+    if 'port' in config['services'][type][service].keys() and isinstance(config['services'][type][service]['port'],
+                                                                         int) and config['services'][type][service][
+        'port'] > 0:
         port = config['services'][type][service]['port']
     else:
         port = get_free_port()
@@ -233,29 +238,32 @@ def process_start_service(service_name):
         log.exception(e)
         return 'service failed to start'
 
+
 def check_fuse_logger_file_is_current_logger(filepath):
     fuse_name = 'abobacadabra99912299939993999499959'
     for key in logging.root.manager.loggerDict.keys():
-        if 'fuse-'+str(os.getpid()) in key:
+        if 'fuse-' + str(os.getpid()) in key:
             fuse_name = key
     if fuse_name == filepath:
         return True
     return False
 
+
 def remove_folder_contents(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
-            if not check_fuse_logger_file_is_current_logger(filename):
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
+
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
             log.info(f"Cleared contents of '{folder}' folder")
         except Exception as e:
-            # print('Failed to delete %s. Reason: %s' % (file_path, e))
+        # print('Failed to delete %s. Reason: %s' % (file_path, e))
             log.exception('Failed to delete %s. Reason: %s' % (file_path, e))
 
+
 def clear_log_folder():
-    log_folder_name = c.root_path+'resources//'+c.logs_folder_name
+    log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
     remove_folder_contents(log_folder_name)

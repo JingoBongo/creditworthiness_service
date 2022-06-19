@@ -20,10 +20,10 @@ services:
       path: "endpoints//system_endpoints//life_ping_endpoint.py"
       local: False
       port: 5001
-    front_gateway_bigger_name:
+    front_gateway:
       path: "endpoints//system_endpoints//front_gateway.py"
-      port: 5000
-      loca: False
+      port: 80
+      local: False
     db_endpoint:
       path: "endpoints//system_endpoints//db_endpoint.py"
       port: 5002

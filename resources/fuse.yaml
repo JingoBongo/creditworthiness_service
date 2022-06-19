@@ -21,7 +21,7 @@ services:
       local: False
       port: 5001
     front_gateway_bigger_name:
-      path: "endpoints//system_endpoints//py_runnable_front_gateway.py"
+      path: "endpoints//system_endpoints//front_gateway.py"
       port: 5000
       loca: False
     db_endpoint:

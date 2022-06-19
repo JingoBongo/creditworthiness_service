@@ -29,7 +29,7 @@ log.get_log(c.life_ping_schedule_name)
 #     # print(f"[{cur_file_name}] {str(text)}")
 #     c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
 
-
+# TODO, implement gevent here. or grequests? for now i understand gevent better
 def ping_one(port):
     try:
         r = requests.patch(f"http://localhost:{port}{c.life_ping_endpoint_context}").status_code

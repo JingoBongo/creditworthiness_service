@@ -12,6 +12,8 @@ make some json return dummy available for everything
 
 flask is multithreaded by deafult. find how to specify thread count if what (gates and taskmaster will need more)
 
+add ability to lock multithreading in order to reduce performance hunger. 
+
 Front gateway: 
 it needs to have at least these 2 features:
 1. provide documentation about what this fuse instance can provide and how to use it in general

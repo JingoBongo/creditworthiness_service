@@ -1,3 +1,5 @@
+import re
+
 import __init__
 from utils import general_utils as g, db_utils
 from utils.subprocess_utils import start_generic_subprocess
@@ -59,7 +61,9 @@ def route_harvester_job_body():
                     # if there are >0 routes, add them
                     if line.startswith('@') and '.route(' in line:
                         try:
-                            temp_routes.append(line.split("'")[1])
+                            t_route = line.split("'")[1]
+                            t_route = re.sub(r'<.+>', '<*>', t_route)
+                            temp_routes.append(t_route)
                         except:
                             print(f"while getting temp route, double quotes found and managed")
                             temp_routes.append(line.split('"')[1])

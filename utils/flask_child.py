@@ -79,7 +79,7 @@ class FuseNode(Flask):
         w_log = logging.getLogger('werkzeug')
         w_log.setLevel(logging.DEBUG)
         w_log.addHandler(c.current_rotating_handler)
-        w_log.addHandler(c.current_console_handler)
+        # w_log.addHandler(c.current_console_handler)
         self.logger = log
         return log
 

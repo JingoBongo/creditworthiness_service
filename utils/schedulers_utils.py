@@ -32,6 +32,14 @@ def launch_route_harvester_scheduler_if_not_exists():
     process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.route_harvester_schedule_pyfile_name}"
     launch_scheduler_if_not_exists(process_name, process_full_path)
 
+def route_is_in_routes(route, routs_from_db):
+#     route and function_name, service_name, route
+    for rroute in routs_from_db:
+        if route['route'] == rroute['route'] and route['service_name'] == rroute['service_name'] and route['function_name'] == rroute['function_name']:
+            return True
+#           here we purely assume that duplicates do not exist in harvested route table
+    return False
+
 
 def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")
@@ -43,9 +51,6 @@ def route_harvester_job_body():
     # we need to update corresponding table tho.
     # so, table 'harvested route' with columns
     # service_name, function name, harvested route
-    # TODO, how to handle <string:etc> in harvested routes? for now try to just coyp paste
-    # TODO, harvesting can result in multiple routes for one function, therefore store function name
-    # TODO, actually, I don't want to clean harvested routes. let them be updated only by timer or by error
     # for service_name, service_path from services work with file
     all_routes = []
     for service in services:
@@ -57,16 +62,15 @@ def route_harvester_job_body():
                 lines = py_file.readlines()
                 temp_routes = []
                 for line in lines:
-                    # lets try it like this. collect route as long as func is not met
-                    # if there are >0 routes, add them
                     if line.startswith('@') and '.route(' in line:
                         try:
-                            t_route = line.split("'")[1]
-                            t_route = re.sub(r'<.+>', '<*>', t_route)
-                            temp_routes.append(t_route)
+                            t_route = line.split("'")[1][1:]
                         except:
-                            print(f"while getting temp route, double quotes found and managed")
-                            temp_routes.append(line.split('"')[1])
+                            print(f"while getting temp route, double quotes were found and managed")
+                            t_route = line.split('"')[1][1:]
+
+                        t_route = re.sub(r'<.+>', '<*>', t_route)
+                        temp_routes.append(t_route)
                     if line.startswith('def'):
                         #  we caught all routes for func, add to all routes
                         function = line.split(' ')[1].split('(')[0]
@@ -78,24 +82,18 @@ def route_harvester_job_body():
                                 log.exception(f"Tried to add {route} to all routes, it seems to be a ???")
                                 log.exception(f"All routes until that exception: {all_routes}")
                         temp_routes = []
-                print()  # after all lines`
         except Exception as e:
             log.exception(f"What went wrong during processing {service['name']}?")
             log.exception(e)
 
-        print()  # after file close
-    print()  # to check all routes
     # insert harvested routes into db
-    # TODO, I need to check for non existent routes here.
-    # TODO finish/do logic about deleting non existent routes and adding only those that are new
     # 1. if route is in db but is not in all_routes, delete it
-    routs_from_all_routes = [x['route'] for x in all_routes]
     harvested_routes_from_db = db_utils.select_from_table(c.harvested_routes_table_name)
-    routs_from_db = [x['route'] for x in harvested_routes_from_db]
     for route in harvested_routes_from_db:
         try:
-            if not route['route'] in routs_from_all_routes:
-                #         delete rows with such routes from db
+            # if not route in routs_from_all_routes:
+            if not route_is_in_routes(route, all_routes):
+                # delete rows with such routes from db
                 db_utils.delete_route_from_harvested_routes_by_route(route['route'])
         except Exception as e:
             log.exception(f"Something went wrong while processing route(from db) {route}")
@@ -103,8 +101,8 @@ def route_harvester_job_body():
     # 2. if route is in all_routes but not in db, add it (instead of add all below)
     for route in all_routes:
         try:
-            if not route['route'] in routs_from_db:
-                #         add to db
+            if not route_is_in_routes(route, harvested_routes_from_db):
+                # add to db
                 db_utils.insert_into_table(c.harvested_routes_table_name, route)
         except Exception as e:
             log.exception(f"Something went wrong while processing route(from pyfiles) {route}")

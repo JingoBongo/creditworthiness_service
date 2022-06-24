@@ -18,6 +18,10 @@ make life ping scheduler with gevents for faster requests
 
 think about security and encrypting files and connection
 
+possibly compliment db_utils with 
+a) possibly db copy every 5 mins for failsafe and switch to it in case of problems run-time
+b) possibly have a readers-db copy, but this brings the task of scheduler-copypaster of db.
+
 Front gateway: 
 it needs to have at least these 2 features:
 1. provide documentation about what this fuse instance can provide and how to use it in general

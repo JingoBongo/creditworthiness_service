@@ -1,0 +1,21 @@
+{
+  "task_name": "test_task",
+  "steps": [
+    {
+      "step_number" : 1,
+      "step_name" : "clear harvester table",
+      "service" : "db_endpoint",
+      "route" : "/clear/Harvested_Routes",
+      "provides" : [],
+      "requires" : []
+    },
+    {
+      "step_number" : 2,
+      "step_name" : "trigger harvester endpoint",
+      "service" : "gateway",
+      "route" : "/trigger-harvester",
+      "provides" : [],
+      "requires" : ["step_number_1"]
+    }
+  ]
+}

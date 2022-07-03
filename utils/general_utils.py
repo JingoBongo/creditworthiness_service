@@ -18,6 +18,7 @@ db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
 config = yaml_utils.read_from_yaml(c.root_path + c.conf_path)
 busy_ports_json_path = c.root_path + config['general']['busy_ports_json_file']
+tasks_json_path = c.root_path + config['general']['tasks_json_file']
 debug = config['general']['debug']
 host = config['general']['host']
 sql_engine_path = c.sql_engine_path
@@ -84,6 +85,14 @@ def delete_port_from_list(port):
     new_json['busy_ports'].remove(str(port))
     write_to_json(busy_ports_json_path, new_json)
     log.info(f"Port {port} was deleted from ports file")
+
+def read_from_tasks_json_file():
+    new_json = read_from_json(busy_ports_json_path)
+    return new_json
+
+def write_tasks_to_json_file(body):
+    write_to_json(tasks_json_path, body)
+    log.info(f"Updated tasks file")
 
 
 def set_port_busy(port):

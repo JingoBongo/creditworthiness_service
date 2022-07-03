@@ -9,6 +9,7 @@ from utils import logger_utils as log
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 
+
 def launch_scheduler_if_not_exists(process_name, process_full_path):
     table_results = g.db_utils.select_from_table('Schedulers')
     table_results_names = [x['name'] for x in table_results]
@@ -20,11 +21,16 @@ def launch_scheduler_if_not_exists(process_name, process_full_path):
         log.warn(f"While launching endpoint with scheduler an attempt to add duplicate '{process_name}' was refused")
 
 
+def launch_taskmaster_scheduler_if_not_exists():
+    process_name = c.taskmaster_schedule_name
+    process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.taskmaster_schedule_pyfile_name}"
+    launch_scheduler_if_not_exists(process_name, process_full_path)
+
+
 def launch_life_ping_scheduler_if_not_exists():
     process_name = c.life_ping_schedule_name
     process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.life_ping_schedule_pyfile_name}"
     launch_scheduler_if_not_exists(process_name, process_full_path)
-
 
 
 def launch_route_harvester_scheduler_if_not_exists():
@@ -32,12 +38,14 @@ def launch_route_harvester_scheduler_if_not_exists():
     process_full_path = f"{c.root_path}//{c.schedulers_folder_name}//{c.system_schedulers_folder_name}//{c.route_harvester_schedule_pyfile_name}"
     launch_scheduler_if_not_exists(process_name, process_full_path)
 
+
 def route_is_in_routes(route, routs_from_db):
-#     route and function_name, service_name, route
+    #     route and function_name, service_name, route
     for rroute in routs_from_db:
-        if route['route'] == rroute['route'] and route['service_name'] == rroute['service_name'] and route['function_name'] == rroute['function_name']:
+        if route['route'] == rroute['route'] and route['service_name'] == rroute['service_name'] and route[
+            'function_name'] == rroute['function_name']:
             return True
-#           here we purely assume that duplicates do not exist in harvested route table
+    #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
 

@@ -1,5 +1,6 @@
 general:
   busy_ports_json_file: "resources//busy_ports.json"
+  tasks_json_file: "resources//tasks.json"
   debug: False
   host: "0.0.0.0"
 
@@ -21,7 +22,7 @@ services:
       local: False
       port: 5001
     gateway:
-      path: "endpoints//system_endpoints//front_gateway.py"
+      path: "endpoints//system_endpoints//gateway.py"
       port: 80
       local: False
     db_endpoint:

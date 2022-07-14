@@ -24,7 +24,7 @@ def hello():
     return 'system endpoint'
 
 
-@app.route('/start/<string:taskname>')
+@app.route('/tasks/start/<string:task_name>')
 def start_task(task_name):
 #     probably add new task to corresponding db table
 #     so, table of tasks. TODO?  task name... I don't really like the idea of table.
@@ -35,6 +35,7 @@ def start_task(task_name):
 # THEN, HERE WE START WITH JUST WRITING TO A FILE
     tasks = g.read_from_tasks_json_file()
     tasks['tasks'].append({"task_name": task_name, "status": "new"})
+    g.write_tasks_to_json_file(tasks)
     return {"status": "ok", "msg" : f"task {task_name} sent to pool"}
 
 

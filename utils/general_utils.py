@@ -87,7 +87,7 @@ def delete_port_from_list(port):
     log.info(f"Port {port} was deleted from ports file")
 
 def read_from_tasks_json_file():
-    new_json = read_from_json(busy_ports_json_path)
+    new_json = read_from_json(tasks_json_path)
     return new_json
 
 def write_tasks_to_json_file(body):

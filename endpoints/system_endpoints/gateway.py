@@ -88,7 +88,7 @@ def redir_request(path):
         """
     try:
         result = find_valid_route(path)
-        if len(result)<0:
+        if len(result)<=0:
             return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
         if len(result)>1:
             return {'msg': 'there are multiple matching routes, either try to avoid this during development'

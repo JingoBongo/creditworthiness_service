@@ -1,6 +1,7 @@
 general:
   busy_ports_json_file: "resources//busy_ports.json"
   tasks_json_file: "resources//tasks.json"
+  tasks_folder: "resources//tasks"
   debug: False
   host: "0.0.0.0"
 
@@ -29,6 +30,9 @@ services:
       path: "endpoints//system_endpoints//db_endpoint.py"
       port: 5002
       local: False
+    taskmaster:
+      path: "endpoints//system_endpoints//taskmaster.py"
+      local: True
 
   business:
     endpoint_template:

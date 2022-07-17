@@ -1,3 +1,4 @@
+import os
 import re
 
 import __init__
@@ -8,6 +9,7 @@ from utils import logger_utils as log
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
+config = g.config
 
 
 def launch_scheduler_if_not_exists(process_name, process_full_path):
@@ -48,6 +50,57 @@ def route_is_in_routes(route, routs_from_db):
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
+
+
+def process_new_task(task):
+#     now we need to find if this fuse supports needed task
+    pass
+
+
+def process_task_in_progress(task):
+    log.error(f"Implement me: process_task_in_progress!!!!")
+
+
+def treat_task_according_to_status(task):
+    if task['status'] == c.tasks_status_new:
+        process_new_task(task)
+    elif task['status'] == c.tasks_status_in_progress:
+        process_task_in_progress(task)
+    else:
+        log.info(f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
+
+
+
+def taskmaster_job_body():
+    log.info(f"Scheduled {c.taskmaster_schedule_name} task started..")
+    #     so, we have a file of tasks to check
+    tasks = g.read_from_tasks_json_file()['tasks']
+    #   in theory, we only care about tasks that are new? what to do with in progress frozen/errored?
+    #   let errored stay errored with some data
+    #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
+
+    # we need a list of supported tasks
+    directory_to_iterate = c.root_path + config['general']['tasks_folder']
+    supported_tasks = []
+    for filename in os.listdir(directory_to_iterate):
+        f = os.path.join(directory_to_iterate, filename)
+        # checking if it is a file
+        if os.path.isfile(f):
+            supported_tasks.append(f)
+    print(f"these are supported tasks from folder: {supported_tasks}")
+
+    for task in tasks:
+        try:
+            # check if we have such task at all
+            if task['task_name'].split(c.tasks_name_delimiter)[0] in [t.split('//')[-1].split('\\')[-1].split('/')[-1].replace('.json', '') for t in supported_tasks]:
+                task_file_path = [t for t in supported_tasks if task['task_name'].split(c.tasks_name_delimiter)[0] == t.split('//')[-1]][0]
+                treat_task_according_to_status(task, supported_tasks)
+            else:
+                log.error(f"Task {task['task_name']} is not supported by this fuse.")
+
+        except Exception as e:
+            log.exception(f"Something went horribly wrong while trying to process task {task['task_name']}")
+            log.exception(e)
 
 def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")

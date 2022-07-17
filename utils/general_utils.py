@@ -66,6 +66,11 @@ def clear_busy_ports():
     write_to_json(busy_ports_json_path, new_json)
     log.info('Busy ports file cleared')
 
+def clear_tasks_file():
+    new_json = {"tasks": []}
+    write_tasks_to_json_file(new_json)
+    log.info('Tasks file cleared')
+
 
 def reserve_ports_from_config():
     busy_ports_json = read_from_json(busy_ports_json_path)

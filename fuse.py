@@ -36,6 +36,9 @@ def main():
     print(c.fuse_logo)
     # some preconfiguration
     g.clear_busy_ports()
+    # TODO THIS IS JUST FOR TESTING PURPOSES
+    # in future, probably clear only after task is resolved in any way
+    g.clear_tasks_file()
     g.clear_log_folder()
     g.reserve_ports_from_config()
     db_utils.initial_db_creation()

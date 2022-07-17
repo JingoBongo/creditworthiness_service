@@ -1,5 +1,5 @@
 import __init__
-from utils import general_utils as g
+from utils import general_utils as g, random_utils
 from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
@@ -34,7 +34,7 @@ def start_task(task_name):
 # states to pickles themselves.
 # THEN, HERE WE START WITH JUST WRITING TO A FILE
     tasks = g.read_from_tasks_json_file()
-    tasks['tasks'].append({"task_name": task_name, "status": "new"})
+    tasks['tasks'].append({"task_name": task_name+c.tasks_name_delimiter+random_utils.generate_random_uid4(), "status": "new"})
     g.write_tasks_to_json_file(tasks)
     return {"status": "ok", "msg" : f"task {task_name} sent to pool"}
 

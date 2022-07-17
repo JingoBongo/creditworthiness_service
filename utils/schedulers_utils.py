@@ -52,20 +52,29 @@ def route_is_in_routes(route, routs_from_db):
 
 
 
-def process_new_task(task):
+def process_new_task(task, task_file_content):
 #     now we need to find if this fuse supports needed task
-    pass
+    print()
+    # change status of task with unique name to in progress
+    old_val_tasks = g.read_from_tasks_json_file()
+    for t in old_val_tasks['tasks']:
+        if task['task_name'] == t['task_name']:
+            t['status'] = c.tasks_status_in_progress
+            break
+    g.write_tasks_to_json_file(old_val_tasks)
+    # start making tasks in a pool?
 
 
-def process_task_in_progress(task):
+
+def process_task_in_progress(task, task_file_content):
     log.error(f"Implement me: process_task_in_progress!!!!")
 
 
-def treat_task_according_to_status(task):
+def treat_task_according_to_status(task, task_file_content):
     if task['status'] == c.tasks_status_new:
-        process_new_task(task)
+        process_new_task(task, task_file_content)
     elif task['status'] == c.tasks_status_in_progress:
-        process_task_in_progress(task)
+        process_task_in_progress(task, task_file_content)
     else:
         log.info(f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
 
@@ -93,8 +102,9 @@ def taskmaster_job_body():
         try:
             # check if we have such task at all
             if task['task_name'].split(c.tasks_name_delimiter)[0] in [t.split('//')[-1].split('\\')[-1].split('/')[-1].replace('.json', '') for t in supported_tasks]:
-                task_file_path = [t for t in supported_tasks if task['task_name'].split(c.tasks_name_delimiter)[0] == t.split('//')[-1]][0]
-                treat_task_according_to_status(task, supported_tasks)
+                task_file_path = [t for t in supported_tasks if task['task_name'].split(c.tasks_name_delimiter)[0] == t.split('//')[-1].split('\\')[-1].split('/')[-1].replace('.json', '')][0]
+                task_file_content = g.read_from_json(task_file_path)
+                treat_task_according_to_status(task, task_file_content)
             else:
                 log.error(f"Task {task['task_name']} is not supported by this fuse.")
 

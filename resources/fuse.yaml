@@ -31,7 +31,7 @@ services:
       port: 5002
       local: False
     taskmaster:
-      path: "endpoints//system_endpoints//taskmaster.py"
+      path: "endpoints//system_endpoints//taskmaster_endpoint.py"
       local: True
 
   business:

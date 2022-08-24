@@ -54,7 +54,6 @@ def route_is_in_routes(route, routs_from_db):
 
 def process_new_task(task, task_file_content):
 #     now we need to find if this fuse supports needed task
-    print()
     # change status of task with unique name to in progress
     old_val_tasks = g.read_from_tasks_json_file()
     for t in old_val_tasks['tasks']:

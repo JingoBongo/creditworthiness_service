@@ -11,5 +11,10 @@ class Input_Task:
         self.task_unique_name = t_unique_name
 
 
-def process_task(task: Input_Task):
-    pass
+def taskmaster_main_process(task_obj: Input_Task, data, result = None):
+    # first 'if' in lazy_task case
+    if not result:
+        pass
+    # second else for persistive case
+    else:
+        pass

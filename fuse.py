@@ -38,6 +38,7 @@ def main():
     g.clear_busy_ports()
     # TODO THIS IS JUST FOR TESTING PURPOSES
     # in future, probably clear only after task is resolved in any way
+    # TODO: thing is, on start it should try to relaunch stopped tasks ince, then clear the tasks file
     g.clear_tasks_file()
     g.clear_log_folder()
     g.reserve_ports_from_config()

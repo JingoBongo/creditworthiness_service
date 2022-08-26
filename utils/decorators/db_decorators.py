@@ -9,6 +9,7 @@ SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 SCHEDULERS_TABLE_NAME = c.schedulers_table_name
 HARVESTED_ROUTES_TABLE_NAME = c.harvested_routes_table_name
+TASKMASTER_TASK_NAMES_TABLE_NAME = c.taskmaster_tasks_table_name
 root_path = c.root_path
 engine_path = c.sql_engine_path
 
@@ -39,6 +40,9 @@ def sql_alchemy_db_func(required_args=None):
             kwargs['session'] = sessionmaker(kwargs['engine'])()
             kwargs['connection'] = kwargs['engine'].connect()
             kwargs['metadata'] = kwargs['alc'].MetaData()
+            # TODO. on second thought code lines below are needed mostly for system stuff only, maybe have
+            # separate decorators for system and business?..
+            # like, most probably schedulers, sys services, harvested routes and tasks are needed just for me
             try:
                 kwargs['sys_services'] = kwargs['alc'].Table(SYS_SERVICES_TABLE_NAME, kwargs['metadata'],
                                                              autoload=True,
@@ -50,6 +54,9 @@ def sql_alchemy_db_func(required_args=None):
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
                 kwargs['harvested_routes'] = kwargs['alc'].Table(HARVESTED_ROUTES_TABLE_NAME, kwargs['metadata'],
+                                                                  autoload=True,
+                                                                  autoload_with=kwargs['engine'])
+                kwargs['taskmaster_tasks'] = kwargs['alc'].Table(TASKMASTER_TASK_NAMES_TABLE_NAME, kwargs['metadata'],
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
             except Exception as e:

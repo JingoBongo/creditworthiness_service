@@ -83,5 +83,5 @@ def start_task(task_name):
 
 
 if __name__ == "__main__":
-    # launch_taskmaster_scheduler_if_not_exists()
+    launch_taskmaster_scheduler_if_not_exists()
     app.run()

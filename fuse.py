@@ -47,6 +47,8 @@ def main():
     db_utils.clear_system_services_table()
     db_utils.clear_business_services_table()
     db_utils.clear_schedulers_table()
+    # TODO below is just for testing, as harvester this should just not be deleted
+    # db_utils.clear_tasks_table()
     # fire system endpoints
     # Is all this checking necessary? I am not sure anymore
     if isinstance(config['services']['system'], dict):

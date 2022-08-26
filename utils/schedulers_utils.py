@@ -50,10 +50,17 @@ def route_is_in_routes(route, routs_from_db):
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
+def task_is_in_tasks(task, tasks_from_db):
+    #     route and function_name, service_name, route
+    for ttask in tasks_from_db:
+        if task['task_full_path'] == ttask['task_full_path'] and task['task_name'] == ttask['task_name']:
+            return True
+    #           here we purely assume that duplicates do not exist in harvested route table
+    return False
 
 
 def process_new_task(task, task_file_content):
-#     now we need to find if this fuse supports needed task
+    #     now we need to find if this fuse supports needed task
     # change status of task with unique name to in progress
     old_val_tasks = g.read_from_tasks_json_file()
     for t in old_val_tasks['tasks']:
@@ -62,7 +69,6 @@ def process_new_task(task, task_file_content):
             break
     g.write_tasks_to_json_file(old_val_tasks)
     # start making tasks in a pool?
-
 
 
 def process_task_in_progress(task, task_file_content):
@@ -75,28 +81,54 @@ def treat_task_according_to_status(task, task_file_content):
     elif task['status'] == c.tasks_status_in_progress:
         process_task_in_progress(task, task_file_content)
     else:
-        log.info(f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
-
+        log.info(
+            f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
 
 
 def taskmaster_job_body():
     log.info(f"Scheduled {c.taskmaster_schedule_name} task started..")
     # TODO, the purpose of taskmaster job changed, this is obsolete
-    # #     so, we have a file of tasks to check
+    #     so, we have a file of tasks to check
+    # TODO 2 , schedulers should update sql table with available tasks
     # tasks = g.read_from_tasks_json_file()['tasks']
-    # #   in theory, we only care about tasks that are new? what to do with in progress frozen/errored?
-    # #   let errored stay errored with some data
-    # #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
-    #
-    # # we need a list of supported tasks
-    # directory_to_iterate = c.root_path + config['general']['tasks_folder']
-    # supported_tasks = []
-    # for filename in os.listdir(directory_to_iterate):
-    #     f = os.path.join(directory_to_iterate, filename)
-    #     # checking if it is a file
-    #     if os.path.isfile(f):
-    #         supported_tasks.append(f)
-    # print(f"these are supported tasks from folder: {supported_tasks}")
+    #   in theory, we only care about tasks that are new? what to do with in progress frozen/errored?
+    #   let errored stay errored with some data
+    #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
+
+    # we need a list of supported tasks
+    directory_to_iterate = c.root_path + config['general']['tasks_folder']
+    supported_tasks = []
+    for filename in os.listdir(directory_to_iterate):
+        f = os.path.join(directory_to_iterate, filename)
+        # checking if it is a file
+        if os.path.isfile(f):
+            supported_tasks.append({'task_full_path': f, 'task_name': f.split('/')[-1].split('\\')[-1].split('.')[0]})
+    print(f"these are supported tasks from folder: {supported_tasks}")
+    tasks_from_db = db_utils.select_from_table(c.taskmaster_tasks_table_name)
+    # if there are tasks in db that are not valid, delete them from db
+    # for t in tasks_from_db:
+    #     pass
+
+    for task in tasks_from_db:
+        try:
+            # if not route in routs_from_all_routes:
+            if not task_is_in_tasks(task, supported_tasks):
+                # delete rows with such tasks from db
+                db_utils.delete_task_from_taskmaster_tasks_by_task_name(task['task_name'])
+        except Exception as e:
+            log.exception(f"Something went wrong while processing task(from db) {task}")
+            log.exception(e)
+    # 2. if route is in all_routes but not in db, add it (instead of add all below)
+    for task in supported_tasks:
+        try:
+            if not task_is_in_tasks(task, tasks_from_db):
+                # add to db
+                db_utils.insert_into_table(c.taskmaster_tasks_table_name, task)
+        except Exception as e:
+            log.exception(f"Something went wrong while processing task(from files) {task}")
+            log.exception(e)
+
+
     #
     # for task in tasks:
     #     try:
@@ -111,6 +143,7 @@ def taskmaster_job_body():
     #     except Exception as e:
     #         log.exception(f"Something went horribly wrong while trying to process task {task['task_name']}")
     #         log.exception(e)
+
 
 def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")

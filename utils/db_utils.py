@@ -182,6 +182,15 @@ def clear_schedulers_table(*args, **kwargs):
 
 
 
+@sql_alchemy_db_func()
+def clear_tasks_table(*args, **kwargs):
+    d = kwargs['taskmaster_tasks'].delete()
+    kwargs['engine'].execute(d)
+    # print_c("Cleared Schedulers table")
+    log.info("Cleared Taskmaster Tasks table")
+
+
+
 # Be aware that this function requires a dictionary of insert values
 # where key = column_name and value is inserted value
 @sql_alchemy_db_func(required_args=['table_name', 'values_dict'])
@@ -266,6 +275,16 @@ def delete_route_from_harvested_routes_by_route(*args, **kwargs):
     d = kwargs['harvested_routes'].delete().where(route_column == str(val_route))
     kwargs['engine'].execute(d)
     log.info(f"Deleted routes '{val_route}' from {c.harvested_routes_table_name} table")
+
+
+@sql_alchemy_db_func(required_args=['task_name'])
+def delete_task_from_taskmaster_tasks_by_task_name(*args, **kwargs):
+    alc = kwargs['alc']
+    val_task_name = kwargs['task_name']
+    task_name_column = alc.Column('task_name', alc.String)
+    d = kwargs['taskmaster_tasks'].delete().where(task_name_column == str(val_task_name))
+    kwargs['engine'].execute(d)
+    log.info(f"Deleted task '{val_task_name}' from {c.taskmaster_tasks_table_name} table")
 
 
 @sql_alchemy_db_func(required_args=['val_pid'])

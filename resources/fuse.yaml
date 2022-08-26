@@ -68,4 +68,6 @@ sqlite:
         schema_path: "resources//schemas//schedulers_table_schema.json"
       Harvested_Routes:
         schema_path: "resources//schemas//harvested_routes_table_schema.json"
+      Taskmaster_Tasks:
+        schema_path: "resources//schemas//taskmaster_available_tasks_table_schema.json"
 # these table names are just like constant variables here. TODO: make file with constants

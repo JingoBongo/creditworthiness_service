@@ -12,9 +12,11 @@ class Input_Task:
 
 
 def taskmaster_main_process(task_obj: Input_Task, data, result = None):
-    # first 'if' in lazy_task case
+    # first 'if' in lazy_task case; then save overall result in specific pickle
     if not result:
         pass
     # second else for persistive case
     else:
         pass
+#     check if such task exists.
+

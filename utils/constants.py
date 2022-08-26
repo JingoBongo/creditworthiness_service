@@ -9,6 +9,7 @@ temporary_files_folder_path = os.path.normpath('.//resources//temporary_files//'
 sys_services_table_name = 'Sys_Services'
 business_services_table_name = 'Business_Services'
 schedulers_table_name = 'Schedulers'
+taskmaster_tasks_table_name = 'Taskmaster_Tasks'
 harvested_routes_table_name = 'Harvested_Routes'
 sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 templates_folder_name = 'templates'

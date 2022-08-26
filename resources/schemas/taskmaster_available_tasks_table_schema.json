@@ -1,0 +1,19 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "task_name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "task_full_path",
+      "type": "String",
+      "nullable": "False"
+    }
+  ]
+}

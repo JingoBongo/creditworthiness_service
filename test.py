@@ -61,8 +61,10 @@
 
 import threading
 
-def adder(x, res, i):
-    res[i] += x*i
+
+results = []
+def adder(res: list):
+    res.append('5')
 
 def creator(a, threads, results):
     for i in range(a):
@@ -73,12 +75,23 @@ def creator(a, threads, results):
     for t in threads:
         t.join()
 
-threads = []
-results = []
+# threads = []
 
-mainThread = threading.Thread(target=creator, args=(5, threads, results))
-mainThread.start()
-mainThread.join()
-for i in range(len(results)):
-    print(results[i])
-    print(threads[i])
+
+# mainThread = threading.Thread(target=creator, args=(5, threads, results))
+# mainThread.start()
+# mainThread.join()
+# for i in range(len(results)):
+#     print(results[i])
+#     print(threads[i])
+
+    # ==============================
+threads = []
+for i in range(5):
+    t = threading.Thread(target=adder, args=(results,))
+    threads.append(t)
+for i in threads:
+    i.start()
+for i in threads:
+    i.join()
+print(results)

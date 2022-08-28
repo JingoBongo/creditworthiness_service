@@ -9,7 +9,6 @@ from utils import constants as c
 from utils.flask_child import FuseNode
 from utils import logger_utils as log
 from utils.schedulers_utils import launch_taskmaster_scheduler_if_not_exists
-import json
 
 from utils.taskmaster_utils import Input_Task, taskmaster_main_process
 
@@ -40,7 +39,8 @@ def persistive_task(task_name):
     main_thread.start()
     main_thread.join()
     return str(result)
-#     TODO
+
+
 
 @app.route('/tasks/lazy-start/<string:task_name>', methods=['GET', 'POST'])
 def lazy_task(task_name):
@@ -54,9 +54,11 @@ def lazy_task(task_name):
     return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster."}
 # TODO
 
+#     TODO MAKE RESPONSE HAVE A LINK TO RESULT PAGE FOR LAZY
+
 @app.route('/tasks/lazy-start/get_result/<string:task_name>', methods=['GET', 'POST'])
 def get_lazy_task_result(task_name):
-#     TODO
+#     TODO do we need to get as a result pickle itself? make an option to download a pickle with all 'provides' data
     pass
 
 @app.route('/tasks/start/<string:task_name>')

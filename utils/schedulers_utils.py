@@ -87,9 +87,10 @@ def treat_task_according_to_status(task, task_file_content):
 
 def taskmaster_job_body():
     log.info(f"Scheduled {c.taskmaster_schedule_name} task started..")
-    # TODO, the purpose of taskmaster job changed, this is obsolete
+    # T-O-D-O, the purpose of taskmaster job changed, this is obsolete
     #     so, we have a file of tasks to check
-    # TODO 2 , schedulers should update sql table with available tasks
+    # T-O-D-O-2 , schedulers should update sql table with available tasks
+    # TODO 3, sql table is updated accordingly, task-retry part is actually the only todo here
     # tasks = g.read_from_tasks_json_file()['tasks']
     #   in theory, we only care about tasks that are new? what to do with in progress frozen/errored?
     #   let errored stay errored with some data
@@ -103,7 +104,7 @@ def taskmaster_job_body():
         # checking if it is a file
         if os.path.isfile(f):
             supported_tasks.append({'task_full_path': f, 'task_name': f.split('/')[-1].split('\\')[-1].split('.')[0]})
-    print(f"these are supported tasks from folder: {supported_tasks}")
+    # print(f"these are supported tasks from folder: {supported_tasks}")
     tasks_from_db = db_utils.select_from_table(c.taskmaster_tasks_table_name)
     # if there are tasks in db that are not valid, delete them from db
     # for t in tasks_from_db:
@@ -127,6 +128,7 @@ def taskmaster_job_body():
         except Exception as e:
             log.exception(f"Something went wrong while processing task(from files) {task}")
             log.exception(e)
+    log.info(f"Taskmaster Tasks harvester finished job")
 
 
     #

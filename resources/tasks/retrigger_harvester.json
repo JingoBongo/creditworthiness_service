@@ -1,21 +1,26 @@
 {
   "task_name": "test_task",
+  "init_requires": [],
   "steps": [
     {
       "step_number" : 1,
       "step_name" : "clear harvester table",
       "service" : "db_endpoint",
       "route" : "/clear/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
       "provides" : [],
-      "requires" : []
+      "requires_steps": []
     },
     {
       "step_number" : 2,
       "step_name" : "trigger harvester endpoint",
       "service" : "gateway",
       "route" : "/trigger-harvester",
+      "request_type": "GET",
       "provides" : [],
-      "requires" : ["step_number_1"]
+      "requires" : [],
+      "requires_steps": [1]
     }
   ]
 }

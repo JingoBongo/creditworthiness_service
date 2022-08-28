@@ -1,5 +1,8 @@
 TODO
 
+heck why in initial bd creation sometimes there is no time to create all tables
+and other processes already try to access them. to retest: delete bd
+
 check for busy port while assigning new port doesn't work as intended and needs fix
 
 refactor endpoints to return at least JSON, not just some text

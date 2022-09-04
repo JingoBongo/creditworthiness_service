@@ -51,6 +51,10 @@ def lazy_task(task_name):
         data = request.get_json()
     main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data})
     main_thread.start()
+    # TODO: question rises. should it be a thread or a process?
+    # TODO: because 1) sometimes we will need to kill such things
+    # TODO: 2) we will need to store PIDs of PROCESSES in a db
+    # TODO: 3) we will need a lot of computational power for it as well in theory.
     return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster."}
 # TODO
 

@@ -108,18 +108,20 @@ def taskmaster_main_process(task_obj: Input_task, data, result=None):
         task = Task_from_file(task_type_from_db['task_full_path'], task_obj.task_unique_name)
         # tasks file needs only task name, task unique name and generated from start thingy
         new_dict_task = {"task_name": task_obj.task_name, "task_unique_name" : task_obj.task_unique_name,
-                         c.on_start_unique_fuse_id_name : c.on_start_unique_fuse_id}
+                         c.on_start_unique_fuse_id_name : c.on_start_unique_fuse_id,
+                         "status" : c.tasks_status_in_progress}
         g.write_tasks_to_json_file(new_dict_task)
     #     TODO add in-progress-task to a file? to db? I kinda want in in a file
     #     TODO, it means scheduler will need to check that file. How to get clue that task was abandoned?
     #     TODO, task will havew a unique string that is generated each time Fuse is started, therefore
     #     TODO, anything that has different UUID is from previous era.
     #     TODO, But how to catch errored tasks? just frozen tasks? Errored should stay errored i think, with an option
-    #     TODO, to retry them with same data, THIS IS WHY WE NEED INIT_REQUIRES
+    #     TODO, to retry them with same data, THIS IS WHY WE NEED INIT_REQUIRES (as a pickle)
     #     TODO:: Frozen tasks.. We need a way to kill them. start task work in a new process and kill it in case of emergency?
-    #     TODO we can just kill the thread if it is somehow STORED/MARKED
+    #     TODO we can just kill the thread if it is somehow STORED/MARKED ==> store PROCESSESS?
     else:
         log.error(f"There are no such tasks supported by this Fuse.")
+        log.error(f"Supported tasks: {task_type_from_db}")
 #         TODO, how to report human mistake/errors?
 
 

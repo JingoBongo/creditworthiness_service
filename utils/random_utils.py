@@ -1,7 +1,5 @@
-import uuid
-
 import __init__
-import pickle
+import uuid
 from utils import logger_utils as log
 
 def generate_random_uid4():

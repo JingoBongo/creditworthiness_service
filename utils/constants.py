@@ -1,6 +1,7 @@
 import __init__
 import os
 
+fuse_instance_name = 'Fuse'
 db_name = 'main_db.db'
 life_ping_endpoint_context = '/life_ping'
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
@@ -11,6 +12,7 @@ business_services_table_name = 'Business_Services'
 schedulers_table_name = 'Schedulers'
 taskmaster_tasks_table_name = 'Taskmaster_Tasks'
 harvested_routes_table_name = 'Harvested_Routes'
+all_processes_table_name = 'All_Processes'
 sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 templates_folder_name = 'templates'
 schedulers_folder_name = 'schedulers'

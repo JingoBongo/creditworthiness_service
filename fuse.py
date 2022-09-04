@@ -36,6 +36,7 @@ def main():
     print(c.fuse_logo)
     # some preconfiguration
     g.clear_busy_ports()
+    g.generate_on_start_unique_fuse_id()
     # TODO THIS IS JUST FOR TESTING PURPOSES
     # in future, probably clear only after task is resolved in any way
     # TODO: thing is, on start it should try to relaunch stopped tasks ince, then clear the tasks file

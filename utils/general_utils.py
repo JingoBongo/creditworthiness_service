@@ -13,6 +13,8 @@ import utils.subprocess_utils as custom_subprocess
 from utils import db_utils as db_utils
 from utils import constants as c
 from utils import logger_utils as log
+from utils.random_utils import generate_random_uid4
+import multiprocessing
 
 db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
@@ -196,6 +198,19 @@ def check_file_exists(service_full_path):
     return os.path.exists(service_full_path)
 
 
+def init_start_function_process(function, args = None):
+    if args:
+        p = multiprocessing.Process(target = function, args=args)
+    else:
+        p = multiprocessing.Process(target = function)
+    p.start()
+    dict = {}
+    fsdfvsdv complete dict, repeat for all places with processes
+    # TODO, in future kill by PID, but check process in new all processes table, not in sys/business ones
+    db_utils.insert_into_table(c.all_processes_table_name, )
+    return p
+
+
 def init_start_service_procedure(service, sys=False):
     # TODO. HERE must be checker if file path exists
     type = 'business'
@@ -291,3 +306,7 @@ def recreate_log_foler_if_not_exists():
         # Create a new directory because it does not exist
         os.makedirs(log_folder_name)
         # log.info(f"Recreated log folder")
+
+
+def generate_on_start_unique_fuse_id():
+    c.on_start_unique_fuse_id = c.fuse_instance_name+'-'+generate_random_uid4()

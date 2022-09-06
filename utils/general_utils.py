@@ -199,15 +199,17 @@ def check_file_exists(service_full_path):
 
 
 def init_start_function_process(function, args = None):
+    dic = {}
     if args:
         p = multiprocessing.Process(target = function, args=args)
+        dic['arguments'] = str(args)
     else:
         p = multiprocessing.Process(target = function)
     p.start()
-    dict = {}
-    fsdfvsdv complete dict, repeat for all places with processes
+    dic['pid'] = p.pid
+    dic['function_name'] = function.__name__
     # TODO, in future kill by PID, but check process in new all processes table, not in sys/business ones
-    db_utils.insert_into_table(c.all_processes_table_name, )
+    db_utils.insert_into_table(c.all_processes_table_name, dic)
     return p
 
 
@@ -238,6 +240,7 @@ def init_start_service_procedure(service, sys=False):
         spawn_type = config['services'][type][service]['mono']
     else:
         spawn_type = None
+    #     TODO when mono/multi becomes a things, add that info to arguments
 
     if spawn_type != "multi":
         if local:
@@ -250,6 +253,16 @@ def init_start_service_procedure(service, sys=False):
         db_utils.insert_into_sys_services(service, service_full_path, port, new_process.pid)
     else:
         db_utils.insert_into_business_services(service, service_full_path, port, new_process.pid)
+    dic = {}
+    lis = []
+    lis.append({"port":port})
+    lis.append({"local":local})
+    dic['pid'] = new_process.pid
+    dic['pyfile_path'] = service_full_path
+    dic['pyfile_name'] = service
+    dic['arguments'] = str(lis)
+    db_utils.insert_into_table(c.all_processes_table_name, dic)
+
 
 
 def process_start_service(service_name):

@@ -111,6 +111,13 @@ def taskmaster_main_process(task_obj: Input_task, data, result=None):
                          c.on_start_unique_fuse_id_name : c.on_start_unique_fuse_id,
                          "status" : c.tasks_status_in_progress}
         g.write_tasks_to_json_file(new_dict_task)
+    #     small update to everything below. keeping track of what tasks are from previous run == using unique fuse uuid
+    #     we are going to use threadpool / gevent so no need for a file, output of steps will be stored in unique pickles
+    #       anyway
+    #     errored tasks should stay errored. there should be an endpoint with the list of all current tasks for better use
+    #     and if there is a table with tasks, then use db endpoint probably
+
+
     #     TODO add in-progress-task to a file? to db? I kinda want in in a file
     #     TODO, it means scheduler will need to check that file. How to get clue that task was abandoned?
     #     TODO, task will havew a unique string that is generated each time Fuse is started, therefore

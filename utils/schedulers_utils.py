@@ -15,9 +15,16 @@ config = g.config
 def launch_scheduler_if_not_exists(process_name, process_full_path):
     table_results = g.db_utils.select_from_table('Schedulers')
     table_results_names = [x['name'] for x in table_results]
+    # TODO mention somewhere that schedulers are designed as singletones
     if not process_name in table_results_names:
         local_process = start_generic_subprocess(process_name, process_full_path)
         g.db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
+        dic = {}
+        dic['pid'] = local_process.pid
+        dic['pyfile_path'] = process_full_path
+        dic['pyfile_name'] = process_name
+        db_utils.insert_into_table(c.all_processes_table_name, dic)
+        # TODO decide where to pick db utils from
         log.info(f"Started '{process_name}' scheduler at pid '{local_process.pid}'")
     else:
         log.warn(f"While launching endpoint with scheduler an attempt to add duplicate '{process_name}' was refused")

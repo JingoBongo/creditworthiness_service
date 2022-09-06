@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
 from utils import logger_utils as log
+from utils.general_utils import init_start_function_process
 from utils.schedulers_utils import launch_taskmaster_scheduler_if_not_exists
 
 from utils.taskmaster_utils import Input_Task, taskmaster_main_process
@@ -49,12 +50,16 @@ def lazy_task(task_name):
     data = None
     if request.method == 'POST':
         data = request.get_json()
-    main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data})
-    main_thread.start()
-    # TODO: question rises. should it be a thread or a process?
-    # TODO: because 1) sometimes we will need to kill such things
-    # TODO: 2) we will need to store PIDs of PROCESSES in a db
-    # TODO: 3) we will need a lot of computational power for it as well in theory.
+    # main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data})
+    # main_thread.start()
+    # we for sure change thread to a function.
+    init_start_function_process(taskmaster_main_process, {'task_obj': task_obj, 'data': data})
+
+
+    #  question rises. should it be a thread or a process? .... A PROCESS. removing todo tag, keep for  a while
+    #  because 1) sometimes we will need to kill such things       ..... just as a comment
+    #  2) we will need to store PIDs of PROCESSES in a db
+    #  3) we will need a lot of computational power for it as well in theory.
     return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster."}
 # TODO
 

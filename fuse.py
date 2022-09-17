@@ -14,7 +14,7 @@ from utils import constants as c
 root_path = c.root_path
 conf_path = c.conf_path
 config = g.config
-cur_file_name = os.path.basename(__file__)
+# cur_file_name = os.path.basename(__file__)
 
 
 def setup_cur_logger():
@@ -52,6 +52,7 @@ def main():
     # db_utils.clear_tasks_table()
     # fire system endpoints
     # Is all this checking necessary? I am not sure anymore
+    # TODO: dima, do it in 1 loop.
     if isinstance(config['services']['system'], dict):
         if len(config['services']['system']) > 0:
             for service in config['services']['system']:

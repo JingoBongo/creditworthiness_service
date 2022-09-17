@@ -169,7 +169,7 @@ def start_service(service_short_name, service_full_path, port, local=False, host
 
 
 def check_port_is_in_use(port):
-    # Check if this works at all.
+    # TODO fix after Check if this works at all.
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = False
     try:
@@ -223,9 +223,9 @@ def init_start_service_procedure(service, sys=False):
         log.error(f"Service '{service}' has no existing file in path '{service_full_path}")
         return
 
-    if 'port' in config['services'][type][service].keys() and isinstance(config['services'][type][service]['port'],
-                                                                         int) and config['services'][type][service][
-        'port'] > 0:
+    if 'port' in config['services'][type][service].keys() \
+            and isinstance(config['services'][type][service]['port'], int) \
+            and config['services'][type][service]['port'] > 0:
         port = config['services'][type][service]['port']
     else:
         port = get_free_port()
@@ -261,6 +261,7 @@ def init_start_service_procedure(service, sys=False):
     dic['pyfile_path'] = service_full_path
     dic['pyfile_name'] = service
     dic['arguments'] = str(lis)
+    # TODO for noqw clear all processes on start
     db_utils.insert_into_table(c.all_processes_table_name, dic)
 
 

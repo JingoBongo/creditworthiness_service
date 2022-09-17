@@ -92,10 +92,16 @@ def check_string_has_no_occurrences_in_the_list(string, list):
 def get_package_name_from_line(line):
     line = line.strip()
     # print(f"Line that got into 'get_package_name_from_file' : {line}")
-    if line.startswith('import'):
+    if line.startswith('import '):
         # print(f"'get_package_name_from_file' returned {line.split(' ')[1]}")
+
+        #   script can take any usage of word 'import' meaning that there should be a space after word that
+        # specifies start of module name to import
         return line.split(' ')[1]
-    if 'from' in line:
+
+    #   are you sure it is good idea to set 'from' condition apart from 'import' one? In such a case if line has
+    # 'from' in it, then there can be an error of finding unnecessary 'from' in code
+    if 'from ' in line:
         line = line.split('import')[0]
         line = line.split(' ')[1]
         line = line.split('.')[0]
@@ -125,7 +131,7 @@ def find_used_packages():
             file_full_path = os.path.join(root, file)
             if file.endswith(".py") and check_string_has_no_occurrences_in_the_list(file_full_path, restricted_folders):
                 all_py_local_files.append(file.replace('.py', ''))
-                with open(file_full_path) as f:
+                with open(file_full_path, encoding='utf-8') as f:
                     for line in f.readlines():
                         line = line.strip()
                         if line.startswith('import') or line.startswith('from'):

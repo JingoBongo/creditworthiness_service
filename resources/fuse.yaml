@@ -33,6 +33,7 @@ services:
     taskmaster:
       path: "endpoints//system_endpoints//taskmaster_endpoint.py"
       local: True
+      enabled: False
 
   business:
     endpoint_template:

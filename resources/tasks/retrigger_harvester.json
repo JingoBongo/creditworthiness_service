@@ -1,5 +1,5 @@
 {
-  "task_name": "test_task",
+  "task_name": "retrigger_harvester",
   "init_requires": [],
   "steps": [
     {
@@ -9,7 +9,6 @@
       "route" : "/clear/Harvested_Routes",
       "request_type": "GET",
       "requires" : [],
-      "provides" : [],
       "requires_steps": []
     },
     {
@@ -18,9 +17,8 @@
       "service" : "gateway",
       "route" : "/trigger-harvester",
       "request_type": "GET",
-      "provides" : [],
-      "requires" : [],
-      "requires_steps": [1]
+      "requires_steps": [1],
+      "requires" : []
     }
   ]
 }

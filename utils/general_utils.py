@@ -202,11 +202,13 @@ def check_file_exists(service_full_path):
     return os.path.exists(service_full_path)
 
 
-def init_start_function_process(function, args = None):
+def init_start_function_process(function, *args, **kwargs):
     dic = {}
     if args:
-        p = multiprocessing.Process(target = function, args=args)
-        dic['arguments'] = str(args)
+        p = multiprocessing.Process(target = function, args=args, kwargs=kwargs)
+        # TODO this stores function ref? in db? is this ok?
+        dic['arguments'] = str(args).join(str(kwargs))
+
     else:
         p = multiprocessing.Process(target = function)
     p.start()
@@ -327,4 +329,5 @@ def recreate_log_foler_if_not_exists():
 
 
 def generate_on_start_unique_fuse_id():
+    # TODO, unique ID is NOT sent to constants of other processes; fix
     c.on_start_unique_fuse_id = c.fuse_instance_name+'-'+generate_random_uid4()

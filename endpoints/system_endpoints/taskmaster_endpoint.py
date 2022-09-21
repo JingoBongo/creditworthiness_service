@@ -36,6 +36,8 @@ def persistive_task(task_name):
     if request.method == 'POST':
         data = request.get_json()
     result = []
+    # TODO; such thread is not what I do rn. check lazy method for appropriate approach
+    raise Exception('redo the shit')
     main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data, 'result':result})
     main_thread.start()
     main_thread.join()
@@ -53,7 +55,7 @@ def lazy_task(task_name):
     # main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data})
     # main_thread.start()
     # we for sure change thread to a function.
-    init_start_function_process(taskmaster_main_process, {'task_obj': task_obj, 'data': data})
+    init_start_function_process(taskmaster_main_process, task_obj, data)
 
 
     #  question rises. should it be a thread or a process? .... A PROCESS. removing todo tag, keep for  a while

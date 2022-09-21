@@ -32,7 +32,8 @@ services:
     taskmaster:
       path: "endpoints//system_endpoints//taskmaster_endpoint.py"
       local: True
-      enabled: False
+      port: 5003
+      enabled: True
 
   business:
     endpoint_template:

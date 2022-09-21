@@ -32,13 +32,12 @@ def life_ping_handler():
 
 
 def not_found_handler(e):
-    return 'This is not a thing. But you can see what is available at /apidocs'
+    return '{"kak_kakati": "This is not a thing. But you can see what is available at /apidocs"}'
 
 class FuseNode(Flask):
     def __init__(self, *args, **kwargs):
         try:
-            parser = kwargs['arg_parser']
-            kwargs = removekey(kwargs, 'arg_parser')
+            parser = kwargs.pop("arg_parser")
             super().__init__(*args, **kwargs)
             # adding 2 default thigs: life_ping route and 404 error handler
             self.add_url_rule(c.life_ping_endpoint_context, methods=['PATCH'], view_func=life_ping_handler)

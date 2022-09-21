@@ -19,10 +19,7 @@ def launch_scheduler_if_not_exists(process_name, process_full_path):
     if not process_name in table_results_names:
         local_process = start_generic_subprocess(process_name, process_full_path)
         g.db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
-        dic = {}
-        dic['pid'] = local_process.pid
-        dic['pyfile_path'] = process_full_path
-        dic['pyfile_name'] = process_name
+        dic = {'pid': local_process.pid, 'pyfile_path': process_full_path, 'pyfile_name': process_name}
         db_utils.insert_into_table(c.all_processes_table_name, dic)
         # TODO decide where to pick db utils from
         log.info(f"Started '{process_name}' scheduler at pid '{local_process.pid}'")

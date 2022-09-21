@@ -5,6 +5,7 @@ from utils.decorators.db_decorators import sql_alchemy_db_func
 import sqlite3
 from utils import constants as c
 from utils import logger_utils as log
+import sqlalchemy as alc
 
 from utils.json_utils import read_from_json
 
@@ -12,6 +13,25 @@ cur_file_name = os.path.basename(__file__)
 root_path = c.root_path
 config = yaml_utils.read_from_yaml(root_path + c.conf_path)
 engine_path = c.sql_engine_path
+dict = {}
+dict['BigInteger'] = alc.BigInteger
+dict['Date'] = alc.Date
+dict['Boolean'] = alc.Boolean
+dict['DateTime'] = alc.DateTime
+dict['Enum'] = alc.Enum
+dict['Float'] = alc.Float
+dict['Integer'] = alc.Integer
+dict['Interval'] = alc.Interval
+dict['LargeBinary'] = alc.LargeBinary
+dict['MatchType'] = alc.Date
+dict['Numeric'] = alc.Numeric
+dict['PickleType'] = alc.PickleType
+dict['SmallInteger'] = alc.SmallInteger
+dict['String'] = alc.String
+dict['Text'] = alc.Text
+dict['Time'] = alc.Time
+dict['Unicode'] = alc.Unicode
+dict['UnicodeText'] = alc.UnicodeText
 
 
 # def print_c(text):
@@ -27,48 +47,11 @@ engine_path = c.sql_engine_path
 
 def return_column_type_by_name(column, kwargs):
     alc = kwargs['alc']
-    generic_type = None
-    if column == 'BigInteger':
-        generic_type = alc.BigInteger
-    elif column == 'Date':
-        generic_type = alc.Date
-    elif column == 'Boolean':
-        generic_type = alc.Boolean
-    elif column == 'DateTime':
-        generic_type = alc.DateTime
-    elif column == 'Enum':
-        generic_type = alc.Enum
-    elif column == 'Float':
-        generic_type = alc.Float
-    elif column == 'Integer':
-        generic_type = alc.Integer
-    elif column == 'Interval':
-        generic_type = alc.Interval
-    elif column == 'LargeBinary':
-        generic_type = alc.LargeBinary
-    elif column == 'MatchType':
-        generic_type = alc.MatchType
-    elif column == 'Numeric':
-        generic_type = alc.Numeric
-    elif column == 'PickleType':
-        generic_type = alc.PickleType
-    elif column == 'SchemaType':
-        generic_type = alc.SchemaType
-    elif column == 'SmallInteger':
-        generic_type = alc.SmallInteger
-    elif column == 'String':
-        generic_type = alc.String
-    elif column == 'Text':
-        generic_type = alc.Text
-    elif column == 'Time':
-        generic_type = alc.Time
-    elif column == 'Unicode':
-        generic_type = alc.Unicode
-    elif column == 'UnicodeText':
-        generic_type = alc.UnicodeText
-    else:
-        generic_type = alc.String
-    return generic_type
+
+
+
+    return dict.get(column, alc.String)
+
 
 def process_one_column(column, kwargs):
     alc = kwargs['alc']
@@ -181,14 +164,12 @@ def clear_schedulers_table(*args, **kwargs):
     log.info("Cleared Schedulers table")
 
 
-
 @sql_alchemy_db_func()
 def clear_tasks_table(*args, **kwargs):
     d = kwargs['taskmaster_tasks'].delete()
     kwargs['engine'].execute(d)
     # print_c("Cleared Schedulers table")
     log.info("Cleared Taskmaster Tasks table")
-
 
 
 # Be aware that this function requires a dictionary of insert values
@@ -227,8 +208,6 @@ def clear_table(*args, **kwargs):
         log.exception(
             f"Something went wrong while trying to delete table '{kwargs['table_name']}'. Maybe such tables doesn't exist?")
         log.exception(e)
-
-
 
 
 # TODO, test this
@@ -309,6 +288,7 @@ def get_service_port_by_pid(*args, **kwargs):
         log.exception(e)
         return None
 
+
 @sql_alchemy_db_func(required_args=['table_name', 'column_name', 'column_value', 'column_type'])
 def select_from_table_by_one_column(*args, **kwargs):
     try:
@@ -316,7 +296,7 @@ def select_from_table_by_one_column(*args, **kwargs):
         table_name = kwargs['table_name']
         column_name = kwargs['column_name']
         column_value = kwargs['column_value']
-        generic_column = alc.Column(column_name, return_column_type_by_name(kwargs['column_type'],kwargs))
+        generic_column = alc.Column(column_name, return_column_type_by_name(kwargs['column_type'], kwargs))
 
         table = kwargs['alc'].Table(table_name, kwargs['metadata'],
                                     autoload=True,
@@ -329,7 +309,6 @@ def select_from_table_by_one_column(*args, **kwargs):
     except Exception as e:
         log.exception('Something went horribly wrong while executing select from table by one column')
         log.exception(e)
-
 
 
 @sql_alchemy_db_func(required_args=['val_pid', 'val_status'])
@@ -350,5 +329,3 @@ def initial_db_creation():
     conn = sqlite3.connect(f"{root_path}resources\\{c.db_name}")
     conn.close()
     log.info(f"Database {c.db_name} exists or was created.")
-
-

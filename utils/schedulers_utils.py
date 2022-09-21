@@ -57,39 +57,6 @@ def route_is_in_routes(route, routs_from_db):
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
-def task_is_in_tasks(task, tasks_from_db):
-    #     route and function_name, service_name, route
-    for ttask in tasks_from_db:
-        if task['task_full_path'] == ttask['task_full_path'] and task['task_name'] == ttask['task_name']:
-            return True
-    #           here we purely assume that duplicates do not exist in harvested route table
-    return False
-
-
-def process_new_task(task, task_file_content):
-    #     now we need to find if this fuse supports needed task
-    # change status of task with unique name to in progress
-    old_val_tasks = g.read_from_tasks_json_file()
-    for t in old_val_tasks['tasks']:
-        if task['task_name'] == t['task_name']:
-            t['status'] = c.tasks_status_in_progress
-            break
-    g.write_tasks_to_json_file(old_val_tasks)
-    # start making tasks in a pool?
-
-
-def process_task_in_progress(task, task_file_content):
-    log.error(f"Implement me: process_task_in_progress!!!!")
-
-
-def treat_task_according_to_status(task, task_file_content):
-    if task['status'] == c.tasks_status_new:
-        process_new_task(task, task_file_content)
-    elif task['status'] == c.tasks_status_in_progress:
-        process_task_in_progress(task, task_file_content)
-    else:
-        log.info(
-            f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
 
 
 def taskmaster_job_body():

@@ -289,21 +289,25 @@ def delete_task_from_taskmaster_tasks_by_task_name(*args, **kwargs):
 
 @sql_alchemy_db_func(required_args=['val_pid'])
 def get_service_port_by_pid(*args, **kwargs):
-    alc = kwargs['alc']
-    val_pid = kwargs['val_pid']
-    pid_column = alc.Column('pid', alc.String)
-    port_column = alc.Column('port', alc.String)
-    d = kwargs['business_services'].select(port_column).where(pid_column == int(val_pid))
-    d2 = kwargs['sys_services'].select(port_column).where(pid_column == int(val_pid))
-    prox1 = kwargs['engine'].execute(d)
-    prox2 = kwargs['engine'].execute(d2)
-    result1 = prox1.fetchall()
-    result2 = prox2.fetchall()
-    result1 = result1 + result2
-    if len(result1) > 1:
-        # print_c(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
-        log.warn(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
-    return result1[0]['port']
+    try:
+        alc = kwargs['alc']
+        val_pid = kwargs['val_pid']
+        pid_column = alc.Column('pid', alc.String)
+        port_column = alc.Column('port', alc.String)
+        d = kwargs['business_services'].select(port_column).where(pid_column == int(val_pid))
+        d2 = kwargs['sys_services'].select(port_column).where(pid_column == int(val_pid))
+        prox1 = kwargs['engine'].execute(d)
+        prox2 = kwargs['engine'].execute(d2)
+        result1 = prox1.fetchall()
+        result2 = prox2.fetchall()
+        result1 = result1 + result2
+        if len(result1) > 1:
+            # print_c(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
+            log.warn(f"While getting port by pid {val_pid} we got {len(result1)} results, not one")
+        return result1[0]['port']
+    except Exception as e:
+        log.exception(e)
+        return None
 
 @sql_alchemy_db_func(required_args=['table_name', 'column_name', 'column_value', 'column_type'])
 def select_from_table_by_one_column(*args, **kwargs):

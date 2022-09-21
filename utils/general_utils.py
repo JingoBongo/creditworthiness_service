@@ -131,13 +131,17 @@ def kill_process(pid):
 
 def get_rid_of_service_by_pid(pid):
     try:
-        kill_process(pid)
         port_to_delete = db_utils.get_service_port_by_pid(pid)
-        db_utils.delete_process_from_tables_by_pid(pid)
-        delete_port_from_list(port_to_delete)
-        # print_c(f"Got rid of service with pid {pid} on port {port_to_delete}")
-        log.info(f"Got rid of service with pid {pid} on port {port_to_delete}")
-        return 'removed service'
+        if port_to_delete:
+            kill_process(pid)
+            db_utils.delete_process_from_tables_by_pid(pid)
+            delete_port_from_list(port_to_delete)
+            # print_c(f"Got rid of service with pid {pid} on port {port_to_delete}")
+            log.info(f"Got rid of service with pid {pid} on port {port_to_delete}")
+            return 'removed service'
+        else:
+            log.info(f"Couldn't get rid of service with pid {pid} because it does not belong to Fuse")
+            return 'failed to removed service'
     except Exception as e:
         # print_c(e)
         log.exception(e)

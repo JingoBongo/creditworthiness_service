@@ -59,6 +59,43 @@ class Task_from_file:
 #           GLOBAL PROVIDES has literally all key-values pairs, LOCAL PROVIDES means what step will ADD to global one
 
 
+def task_is_in_tasks(task, tasks_from_db):
+    #     route and function_name, service_name, route
+    for ttask in tasks_from_db:
+        if task['task_full_path'] == ttask['task_full_path'] and task['task_name'] == ttask['task_name']:
+            return True
+    #           here we purely assume that duplicates do not exist in harvested route table
+    return False
+
+
+def process_new_task(task, task_file_content):
+    #     now we need to find if this fuse supports needed task
+    # change status of task with unique name to in progress
+    old_val_tasks = g.read_from_tasks_json_file()
+    for t in old_val_tasks['tasks']:
+        if task['task_name'] == t['task_name']:
+            t['status'] = c.tasks_status_in_progress
+            break
+    g.write_tasks_to_json_file(old_val_tasks)
+    # start making tasks in a pool?
+
+
+def process_task_in_progress(task, task_file_content):
+    log.error(f"Implement me: process_task_in_progress!!!!")
+
+
+def treat_task_according_to_status(task, task_file_content):
+    if task['status'] == c.tasks_status_new:
+        process_new_task(task, task_file_content)
+    elif task['status'] == c.tasks_status_in_progress:
+        process_task_in_progress(task, task_file_content)
+    else:
+        log.info(
+            f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
+
+# TODO remove duplicate methods, make sure schedulers utils gets all right
+
+
 def process_task_in_progress(task, task_file_content):
     log.error(f"Implement me: process_task_in_progress!!!!")
 
@@ -111,6 +148,7 @@ def taskmaster_main_process(task_obj: Input_task, data, result=None):
                          c.on_start_unique_fuse_id_name : c.on_start_unique_fuse_id,
                          "status" : c.tasks_status_in_progress}
         g.write_tasks_to_json_file(new_dict_task)
+
     #     small update to everything below. keeping track of what tasks are from previous run == using unique fuse uuid
     #     we are going to use threadpool / gevent so no need for a file, output of steps will be stored in unique pickles
     #       anyway

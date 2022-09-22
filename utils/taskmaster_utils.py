@@ -106,13 +106,19 @@ def process_new_task(task):
     log.info(f"Created folder '{task_path}' for the task to execute")
     task.task_folder_path = task_path
 
+    # TODO now is the time to create init_requires if needed
+
+    # TODO And global_provides pickle
+
+
     # TODO, write methods to update json tasks according to unique name instead of what i do below
     # TODO, add to schedulers to check for leftover files after tasks? for how long do we store them?
     json_file_tasks = g.read_from_tasks_json_file()
-    for t in json_file_tasks:
+    for t in json_file_tasks['tasks']:
         if t['task_unique_name'] == task.task_unique_name:
             t['status'] == c.tasks_status_in_progress
     g.write_tasks_to_json_file(json_file_tasks)
+    task.steps = c.tasks_status_in_progress
     # TODO, add directory (I think in task obj as well (path))
 
     with ThreadPoolExecutor() as executor:
@@ -170,7 +176,9 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
         new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name": input_task_obj.task_unique_name,
                          c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
                          "status": c.tasks_status_new}
-        g.write_tasks_to_json_file(new_dict_task)
+        tasks_file = g.read_from_tasks_json_file()
+        tasks_file['tasks'].append(new_dict_task)
+        g.write_tasks_to_json_file(tasks_file)
         # TODO, what exact variables I need once again?
         # step-Local and global provides for sure; what about 2 task_names? the code only cares about the file name anyways
         # THEN, I am SURE the better and more compact way is to save all vars from steps, therefore no need in provides at all

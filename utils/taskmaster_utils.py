@@ -1,12 +1,14 @@
-import concurrent
-from concurrent.futures import ThreadPoolExecutor
+import time
+from itertools import repeat
+from pathlib import Path
 
 import __init__
+
+from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
 from utils import db_utils as db
-import concurrent.futures
 
 
 class Input_Task:
@@ -21,7 +23,7 @@ class Input_Task:
 
 class Task_Step_From_File:
     def __init__(self, step_number, step_name, service, route, request_type, requires, requires_steps):
-        self.step_number = step_number
+        self.step_number = int(step_number)
         self.step_name = step_name
         self.service = service
         self.route = route
@@ -44,14 +46,16 @@ class Task_From_File:
         # self.global_provides = []
         self.global_provides = [].append(task_dict_from_file['init_requires'])
         self.steps = []
+        self.task_folder_path = None
+        self.finished_steps = []
         for s in task_dict_from_file['steps']:
-            new_step = Task_Step_From_File(step_number = s['step_number'],
-                                           step_name = s['step_name'],
-                                           service = s['service'],
-                                           route = s['route'],
-                                           request_type = s['request_type'],
-                                           requires = s['requires'],
-                                           requires_steps = s['requires_steps'])
+            new_step = Task_Step_From_File(step_number=s['step_number'],
+                                           step_name=s['step_name'],
+                                           service=s['service'],
+                                           route=s['route'],
+                                           request_type=s['request_type'],
+                                           requires=s['requires'],
+                                           requires_steps=s['requires_steps'])
             self.steps.append(new_step)
             self.status = c.tasks_status_new
             self.error_logs = None
@@ -71,15 +75,49 @@ def task_is_in_tasks(task, tasks_from_db):
     return False
 
 
-def process_task_step(task, index):
+def process_step(task, index):
     print(f"I am inside process new step {index}")
 
+    # check for prerequisities;
+    # check if we have enough data from requires (in init_requires + global_provides)
+    #     If not, end and add error log with enough data to trace
+    # TODO Once again, init requires seems like a thing that needs to exists just in the start
+    # TODO, but again, in rerun of a task we should have it somewhere. So I think we save initial TASK OBJ in a starting pickle as a fallback WITH init requires.
+    # TODO, we should def. check for file size of what we get in taskmaster. Where? How? How much?
+    # if prev. step is not completed, wait for it, so a loop while we sleep and wait
+    local_step = task.steps[index - 1]
+
+
+#
+#     So, for this part we need Client utils or whatever to send requests that we need
+#     TODO, cover every freaking bit in try catch and complete error_logs in catch?
+#     Then we collect the result both in temp step pickle and in overall pickle
+#     If i recall right we either add step to lists of completed steps
+
+#     in the step execution end put the index in the list of finished steps
+
 def process_new_task(task):
-    #     now we need to find if this fuse supports needed task
-    # change status of task with unique name to in progress
+    #     now we need to find if this fuse supports needed task  << already happened before we started
+    # change status of task with unique name to in progress << done below
+
+    # here we add folder to resources and
+    task_path = c.temporary_files_folder_path + '//' + str(task.task_unique_name)
+    Path(task_path).mkdir(parents=True, exist_ok=True)
+    log.info(f"Created folder '{task_path}' for the task to execute")
+    task.task_folder_path = task_path
+
+    # TODO, write methods to update json tasks according to unique name instead of what i do below
+    # TODO, add to schedulers to check for leftover files after tasks? for how long do we store them?
+    json_file_tasks = g.read_from_tasks_json_file()
+    for t in json_file_tasks:
+        if t['task_unique_name'] == task.task_unique_name:
+            t['status'] == c.tasks_status_in_progress
+    g.write_tasks_to_json_file(json_file_tasks)
+    # TODO, add directory (I think in task obj as well (path))
+
     with ThreadPoolExecutor() as executor:
-        [executor.map(process_task_step, (i, task)) for i in range(1, len(task.steps))]
-    executor.shutdown(wait=True)
+        for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):
+            pass
     print('I am inside process new task')
     # old_val_tasks = g.read_from_tasks_json_file()
     # for t in old_val_tasks['tasks']:
@@ -94,7 +132,6 @@ def process_task_in_progress(task, task_file_content):
     log.error(f"Implement me: process_task_in_progress!!!!")
 
 
-
 def treat_task_according_to_status(task, task_file_content):
     if task['status'] == c.tasks_status_new:
         process_new_task(task)
@@ -107,6 +144,7 @@ def treat_task_according_to_status(task, task_file_content):
 
 def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
     # first 'if' in lazy_task case; then save overall result in specific pickle
+    log.get_log(f"taskmaster_task_process")
     if not result:
         pass
     # second else for persistive case
@@ -129,9 +167,9 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
         #   4. ...? result bla bla bla?..
         task = Task_From_File(task_type_from_db['task_full_path'], input_task_obj.task_unique_name)
         # tasks file needs only task name, task unique name and generated from start thingy
-        new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name" : input_task_obj.task_unique_name,
-                         c.on_start_unique_fuse_id_name : c.on_start_unique_fuse_id,
-                         "status" : c.tasks_status_new}
+        new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name": input_task_obj.task_unique_name,
+                         c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
+                         "status": c.tasks_status_new}
         g.write_tasks_to_json_file(new_dict_task)
         # TODO, what exact variables I need once again?
         # step-Local and global provides for sure; what about 2 task_names? the code only cares about the file name anyways
@@ -148,7 +186,6 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
     #       anyway
     #     errored tasks should stay errored. there should be an endpoint with the list of all current tasks for better use
     #     and if there is a table with tasks, then use db endpoint probably
-
 
     #     TODO add in-progress-task to a file? to db? I kinda want in in a file
     #     TODO, it means scheduler will need to check that file. How to get clue that task was abandoned?

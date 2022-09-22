@@ -1,6 +1,6 @@
+import __init__
 import logging
 
-import __init__
 import shutil
 import socket
 

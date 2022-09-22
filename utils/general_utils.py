@@ -214,6 +214,7 @@ def init_start_function_process(function, *args, **kwargs):
     p.start()
     dic['pid'] = p.pid
     dic['function_name'] = function.__name__
+    print('function.__name__')
     # TODO, in future kill by PID, but check process in new all processes table, not in sys/business ones
     db_utils.insert_into_table(c.all_processes_table_name, dic)
     return p

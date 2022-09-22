@@ -1,65 +1,17 @@
-import time
+import __init__
 from itertools import repeat
 from pathlib import Path
 
-import __init__
 
 from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
 from utils import db_utils as db
-from utils.pickle_utils import save_to_pickle
-
-
-class Input_Task:
-    task_name = None
-    task_unique_name = None
-    status = c.tasks_status_new
-
-    def __init__(self, t_name, t_unique_name):
-        self.task_name = t_name
-        self.task_unique_name = t_unique_name
-
-
-class Task_Step_From_File:
-    def __init__(self, step_number, step_name, service, route, request_type, requires, requires_steps):
-        self.step_number = int(step_number)
-        self.step_name = step_name
-        self.service = service
-        self.route = route
-        self.request_type = request_type
-        self.requires = []
-        self.requires.extend(requires)
-        self.requires_steps = []
-        self.requires_steps.extend(requires_steps)
-        self.is_finished = False
-
-
-class Task_From_File:
-    def __init__(self, task_file_path, task_unique_name):
-        task_dict_from_file = g.read_from_json(task_file_path)
-        self.task_name = task_dict_from_file['task_name']
-        self.task_unique_name = task_unique_name
-        # self.init_requires = []
-        self.init_requires = [].append(task_dict_from_file['init_requires'])
-        # TODO: if local requires ends up useless and just goes into global provides, maybe just cut it?
-        # self.global_provides = []
-        self.global_provides = [].append(task_dict_from_file['init_requires'])
-        self.steps = []
-        self.task_folder_path = None
-        self.finished_steps = []
-        for s in task_dict_from_file['steps']:
-            new_step = Task_Step_From_File(step_number=s['step_number'],
-                                           step_name=s['step_name'],
-                                           service=s['service'],
-                                           route=s['route'],
-                                           request_type=s['request_type'],
-                                           requires=s['requires'],
-                                           requires_steps=s['requires_steps'])
-            self.steps.append(new_step)
-            self.status = c.tasks_status_new
-            self.error_logs = None
+from utils.dataclasses.Input_Task import Input_Task
+from utils.dataclasses.Task_From_File import Task_From_File
+from utils.general_utils import read_from_tasks_json_file
+from utils.pickle_utils import save_to_pickle, read_from_pickle
 
 
 #         TODO: still, we probably need to parse these into ALL_requires; better in global_provides(yes)
@@ -75,15 +27,41 @@ def task_is_in_tasks(task, tasks_from_db):
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
+def end_task_procedure(task: Task_From_File, error_reason):
+    log.error(error_reason)
+    task['status'] = c.tasks_status_errored
+    tasks_from_json = read_from_tasks_json_file()
+    for t in tasks_from_json['tasks']:
+        if t['task_unique_name'] == task['task_unique_name']:
+            t['status'] = c.tasks_status_errored
+    task['error_logs'] = error_reason
+    log.error(f"Exiting task {task['task_unique_name']}, saving task object")
+#     save pickle with task
+    save_to_pickle(task['task_path'] + '//' + c.tasks_errored_fallback_file_name, task)
+# get pid of current process
+#     db.select_from_table_by_one_column(c.all_processes_table_name, 'task_unique_name', )
+# remove process from db
 
-def process_step(task, index):
+# TODO, in all processes table I can't find needed process
+
+# kill process. lul, i wonder how it would work
+
+def process_step(task: Task_From_File, index):
     print(f"I am inside process new step {index}")
     local_step = task.steps[index - 1]
 
     # check for prerequisities;
     # check if we have enough data from requires (in init_requires + global_provides)
     #     If not, end and add error log with enough data to trace
-    needed_keys =
+
+    needed_keys = local_step['requires']
+    if needed_keys and len(needed_keys) > 0:
+        provided_keys_from_init_requires = task['init_requires']
+        for key in needed_keys:
+            if key not in provided_keys_from_init_requires:
+                end_task_procedure(task, f"Task {task['task_unique_name']} ended early as required {key} was not provided")
+
+
     # TODO Once again, init requires seems like a thing that needs to exists just in the start
     # TODO, but again, in rerun of a task we should have it somewhere. So I think we save initial TASK OBJ in a starting pickle as a fallback WITH init requires.
     # TODO, we should def. check for file size of what we get in taskmaster. Where? How? How much?

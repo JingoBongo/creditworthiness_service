@@ -48,6 +48,7 @@ def main():
     db_utils.clear_system_services_table()
     db_utils.clear_business_services_table()
     db_utils.clear_schedulers_table()
+    db_utils.clear_table(c.all_processes_table_name)
     # TODO below is just for testing, as harvester this should just not be deleted
     # db_utils.clear_tasks_table()
     # fire system endpoints

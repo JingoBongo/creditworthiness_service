@@ -33,6 +33,7 @@ tasks_status_does_not_exist_locally = 'does_not_exist_locally'
 tasks_name_delimiter = '____'
 tasks_init_requires_file_name = 'init_requires.pickle'
 tasks_global_provides_file_name = 'provides.pickle'
+tasks_errored_fallback_file_name = 'provides.pickle'
 tasks_step_provides_file_name = 'step_provides.pickle'
 on_start_unique_fuse_id = None
 on_start_unique_fuse_id_name = "on_start_unique_fuse_id"

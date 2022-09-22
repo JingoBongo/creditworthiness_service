@@ -9,5 +9,6 @@ __pycache__/
 __init__.cpython-39.pyc
 resources/logs/*
 resources/main_db.db
+resources/temporary_files/
 # exception to the rule
 !resources/logs/.gitkeep

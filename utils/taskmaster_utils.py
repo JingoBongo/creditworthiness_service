@@ -9,6 +9,7 @@ from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
 from utils import db_utils as db
+from utils.pickle_utils import save_to_pickle
 
 
 class Input_Task:
@@ -77,15 +78,16 @@ def task_is_in_tasks(task, tasks_from_db):
 
 def process_step(task, index):
     print(f"I am inside process new step {index}")
+    local_step = task.steps[index - 1]
 
     # check for prerequisities;
     # check if we have enough data from requires (in init_requires + global_provides)
     #     If not, end and add error log with enough data to trace
+    needed_keys =
     # TODO Once again, init requires seems like a thing that needs to exists just in the start
     # TODO, but again, in rerun of a task we should have it somewhere. So I think we save initial TASK OBJ in a starting pickle as a fallback WITH init requires.
     # TODO, we should def. check for file size of what we get in taskmaster. Where? How? How much?
     # if prev. step is not completed, wait for it, so a loop while we sleep and wait
-    local_step = task.steps[index - 1]
 
 
 #
@@ -100,17 +102,6 @@ def process_new_task(task):
     #     now we need to find if this fuse supports needed task  << already happened before we started
     # change status of task with unique name to in progress << done below
 
-    # here we add folder to resources and
-    task_path = c.temporary_files_folder_path + '//' + str(task.task_unique_name)
-    Path(task_path).mkdir(parents=True, exist_ok=True)
-    log.info(f"Created folder '{task_path}' for the task to execute")
-    task.task_folder_path = task_path
-
-    # TODO now is the time to create init_requires if needed
-
-    # TODO And global_provides pickle
-
-
     # TODO, write methods to update json tasks according to unique name instead of what i do below
     # TODO, add to schedulers to check for leftover files after tasks? for how long do we store them?
     json_file_tasks = g.read_from_tasks_json_file()
@@ -119,9 +110,25 @@ def process_new_task(task):
             t['status'] == c.tasks_status_in_progress
     g.write_tasks_to_json_file(json_file_tasks)
     task.steps = c.tasks_status_in_progress
-    # TODO, add directory (I think in task obj as well (path))
 
-    with ThreadPoolExecutor() as executor:
+
+    # TODO, add directory (I think in task obj as well (path))
+    # here we add folder to resources and
+    task_path = c.temporary_files_folder_path + '//' + str(task.task_unique_name)
+    Path(task_path).mkdir(parents=True, exist_ok=True)
+    log.info(f"Created folder '{task_path}' for the task to execute")
+    task.task_folder_path = task_path
+
+    # TODO now is the time to create init_requires if needed
+    if task.init_requires and len(task.init_requires) > 0:
+        save_to_pickle(task_path+'//'+c.tasks_init_requires_file_name, task.init_requires)
+    # TODO And global_provides pickle
+    save_to_pickle(task_path +'//' + c.tasks_global_provides_file_name, {})
+
+
+
+
+    with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
         for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):
             pass
     print('I am inside process new task')

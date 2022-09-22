@@ -13,7 +13,7 @@ def save_to_pickle(full_file_path, contents):
         log.exception(e)
 
 
-def read_from_pickle(full_file_path, contents):
+def read_from_pickle(full_file_path):
     try:
         with open(full_file_path, 'rb') as file:
             result = pickle.load(file)

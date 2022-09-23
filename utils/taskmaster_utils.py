@@ -146,7 +146,7 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
     log.get_log(f"taskmaster_task_process")
     if not result:
         pass
-    # second else for persistive case
+    # TODO second else for persistive case
     else:
         pass
     #     check if such task exists.

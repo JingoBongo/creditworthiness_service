@@ -41,6 +41,8 @@ on_start_unique_fuse_id_name = "on_start_unique_fuse_id"
 current_subprocess_logger = None
 current_rotating_handler = None
 current_console_handler = None
+request_type_get = 'GET'
+request_type_post= 'POST'
 
 
 

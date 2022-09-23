@@ -58,24 +58,36 @@ def end_task_procedure(task: Task_From_File, error_reason):
 
 # kill process. lul, i wonder how it would work if a process kills itself
 
-def process_step(task: Task_From_File, index):
-    print(f"I am inside process new step {index}")
-    local_step = task.steps[index - 1]
-
-    # check for prerequisities;
-    # check if we have enough data from requires (in init_requires + global_provides)
-    #     If not, end and add error log with enough data to trace
-
-    needed_keys = local_step['requires']
+def prepare_data_for_post_request(task, needed_keys):
     if needed_keys and len(needed_keys) > 0:
         provided_keys_from_init_requires = task['init_requires']
         for key in needed_keys:
             if key not in provided_keys_from_init_requires:
-                end_task_procedure(task,
-                                   f"Task {task['task_unique_name']} ended early as required {key} was not provided")
+                end_task_procedure(task,f"Task {task['task_unique_name']} ended early as required {key} was not provided")
+        needed_data = {}
+        for key in needed_keys:
+            needed_data.update(task.global_provides[key])
+def process_step(task: Task_From_File, index):
+    # cover step in try catch?
+    print(f"I am inside process new step {index}")
+    local_step = task.steps[index - 1]
 
-    # TODO Once again, init requires seems like a thing that needs to exists just in the start
-    # TODO, but again, in rerun of a task we should have it somewhere. So I think we save initial TASK OBJ in a starting pickle as a fallback WITH init requires.
+    # grand note here. we don't need additional data and even check for it if we have a GET request
+    if local_step.request_type == c.request_type_post:
+        needed_keys = local_step['requires']
+        data_for_post = prepare_data_for_post_request(task, needed_keys)
+
+    # TODO client utils for get and post requests
+
+    # TODO send post request, get response,
+    #     TODO set all key-value pairs inside provides
+    #     TODO save pickleS, local-step and global provides
+    #     TODO add step to finished
+    #     TODO report in logs about finish
+    #     TODO cover entire step in try catch, in catch I guess we put task to failed
+
+
+
     # TODO, we should def. check for file size of what we get in taskmaster. Where? How? How much?
     # if prev. step is not completed, wait for it, so a loop while we sleep and wait
 

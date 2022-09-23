@@ -10,6 +10,7 @@ BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 SCHEDULERS_TABLE_NAME = c.schedulers_table_name
 HARVESTED_ROUTES_TABLE_NAME = c.harvested_routes_table_name
 TASKMASTER_TASK_NAMES_TABLE_NAME = c.taskmaster_tasks_table_name
+ALL_PROCESSES_TABLE_NAME = c.all_processes_table_name
 root_path = c.root_path
 engine_path = c.sql_engine_path
 
@@ -57,6 +58,9 @@ def sql_alchemy_db_func(required_args=None):
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
                 kwargs['taskmaster_tasks'] = kwargs['alc'].Table(TASKMASTER_TASK_NAMES_TABLE_NAME, kwargs['metadata'],
+                                                                  autoload=True,
+                                                                  autoload_with=kwargs['engine'])
+                kwargs['all_processes'] = kwargs['alc'].Table(ALL_PROCESSES_TABLE_NAME, kwargs['metadata'],
                                                                   autoload=True,
                                                                   autoload_with=kwargs['engine'])
             except Exception as e:

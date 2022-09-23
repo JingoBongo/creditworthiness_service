@@ -238,10 +238,16 @@ def delete_process_from_tables_by_pid(*args, **kwargs):
     alc = kwargs['alc']
     val_pid = kwargs['val_pid']
     pid_column = alc.Column('pid', alc.String)
+    # TODO, at this stage this method looks like the one that needs refactoring of LOGIC.
+    # even now, it doesnt delete scheduler process, I just added all processes one. added schedulers too then
     d = kwargs['business_services'].delete().where(pid_column == int(val_pid))
     d2 = kwargs['sys_services'].delete().where(pid_column == int(val_pid))
+    d3 = kwargs['all_processes'].delete().where(pid_column == int(val_pid))
+    d4 = kwargs['schedulers'].delete().where(pid_column == int(val_pid))
     kwargs['engine'].execute(d)
     kwargs['engine'].execute(d2)
+    kwargs['engine'].execute(d3)
+    kwargs['engine'].execute(d4)
     # print_c(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
     log.info(f"Deleted process by pid {val_pid} both from Sys and Business Tables")
 

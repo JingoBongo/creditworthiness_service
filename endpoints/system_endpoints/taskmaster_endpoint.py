@@ -55,7 +55,8 @@ def lazy_task(task_name):
     # main_thread = threading.Thread(target=taskmaster_main_process, kwargs={'task_obj': task_obj, 'data': data})
     # main_thread.start()
     # we for sure change thread to a function.
-    init_start_function_process(taskmaster_main_process, task_obj, data)
+    init_start_function_process(taskmaster_main_process, task_obj, data,
+                                function_name=c.taskmaster_main_process_name+c.tasks_name_delimiter+task_unique_name)
 
 
     #  question rises. should it be a thread or a process? .... A PROCESS. removing todo tag, keep for  a while

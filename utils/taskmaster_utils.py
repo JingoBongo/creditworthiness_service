@@ -2,7 +2,6 @@ import __init__
 from itertools import repeat
 from pathlib import Path
 
-
 from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c
 from utils import logger_utils as log
@@ -10,7 +9,7 @@ from utils import general_utils as g
 from utils import db_utils as db
 from utils.dataclasses.Input_Task import Input_Task
 from utils.dataclasses.Task_From_File import Task_From_File
-from utils.general_utils import read_from_tasks_json_file
+from utils.general_utils import read_from_tasks_json_file, kill_process
 from utils.pickle_utils import save_to_pickle, read_from_pickle
 
 
@@ -27,6 +26,7 @@ def task_is_in_tasks(task, tasks_from_db):
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
 
+
 def end_task_procedure(task: Task_From_File, error_reason):
     log.error(error_reason)
     task['status'] = c.tasks_status_errored
@@ -35,16 +35,28 @@ def end_task_procedure(task: Task_From_File, error_reason):
         if t['task_unique_name'] == task['task_unique_name']:
             t['status'] = c.tasks_status_errored
     task['error_logs'] = error_reason
-    log.error(f"Exiting task {task['task_unique_name']}, saving task object")
-#     save pickle with task
+    log.error(f"Exiting task {task['task_unique_name']}, saving task fallback object")
+    #     save pickle with task
     save_to_pickle(task['task_path'] + '//' + c.tasks_errored_fallback_file_name, task)
-# get pid of current process
-#     db.select_from_table_by_one_column(c.all_processes_table_name, 'task_unique_name', )
+    # get pid of current process, first find it in db
+    process_from_db = db.select_from_table_by_one_column(c.all_processes_table_name, 'function_name',
+                                                         c.taskmaster_main_process_name + c.tasks_name_delimiter + task[
+                                                             'task_unique_name'], 'String')
+    if not process_from_db or not len(process_from_db) == 1:
+        log.error(
+            f"There were somehow more or none processes with this unique taskname "
+            f"{c.taskmaster_main_process_name + c.tasks_name_delimiter + task['task_unique_name']}, aborting killing it by PID")
+        return
+    process_from_db = process_from_db[0]
+    db.delete_process_from_tables_by_pid(process_from_db['pid'])
+    kill_process(process_from_db['pid'])
+
+
 # remove process from db
 
-# TODO, in all processes table I can't find needed process
+# in all processes table I can't find needed process; solved, removing TODO
 
-# kill process. lul, i wonder how it would work
+# kill process. lul, i wonder how it would work if a process kills itself
 
 def process_step(task: Task_From_File, index):
     print(f"I am inside process new step {index}")
@@ -59,8 +71,8 @@ def process_step(task: Task_From_File, index):
         provided_keys_from_init_requires = task['init_requires']
         for key in needed_keys:
             if key not in provided_keys_from_init_requires:
-                end_task_procedure(task, f"Task {task['task_unique_name']} ended early as required {key} was not provided")
-
+                end_task_procedure(task,
+                                   f"Task {task['task_unique_name']} ended early as required {key} was not provided")
 
     # TODO Once again, init requires seems like a thing that needs to exists just in the start
     # TODO, but again, in rerun of a task we should have it somewhere. So I think we save initial TASK OBJ in a starting pickle as a fallback WITH init requires.
@@ -76,7 +88,7 @@ def process_step(task: Task_From_File, index):
 
 #     in the step execution end put the index in the list of finished steps
 
-def process_new_task(task):
+def process_new_task(task: Task_From_File):
     #     now we need to find if this fuse supports needed task  << already happened before we started
     # change status of task with unique name to in progress << done below
 
@@ -87,8 +99,7 @@ def process_new_task(task):
         if t['task_unique_name'] == task.task_unique_name:
             t['status'] == c.tasks_status_in_progress
     g.write_tasks_to_json_file(json_file_tasks)
-    task.steps = c.tasks_status_in_progress
-
+    task.status = c.tasks_status_in_progress
 
     # TODO, add directory (I think in task obj as well (path))
     # here we add folder to resources and
@@ -99,12 +110,9 @@ def process_new_task(task):
 
     # TODO now is the time to create init_requires if needed
     if task.init_requires and len(task.init_requires) > 0:
-        save_to_pickle(task_path+'//'+c.tasks_init_requires_file_name, task.init_requires)
+        save_to_pickle(task_path + '//' + c.tasks_init_requires_file_name, task.init_requires)
     # TODO And global_provides pickle
-    save_to_pickle(task_path +'//' + c.tasks_global_provides_file_name, {})
-
-
-
+    save_to_pickle(task_path + '//' + c.tasks_global_provides_file_name, {})
 
     with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
         for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):
@@ -156,38 +164,32 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
         #     TODO, for that I need proper task object
         #   3. process the steps in gevent(?), in a thread pool
         #   4. ...? result bla bla bla?..
-        task = Task_From_File(task_type_from_db['task_full_path'], input_task_obj.task_unique_name)
-        # tasks file needs only task name, task unique name and generated from start thingy
+        task = Task_From_File(task_type_from_db['task_full_path'], input_task_obj.task_unique_name, data)
+
+        # tasks file needs only task name, task unique name and generated from start thingy... a status maybe
         new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name": input_task_obj.task_unique_name,
                          c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
                          "status": c.tasks_status_new}
         tasks_file = g.read_from_tasks_json_file()
         tasks_file['tasks'].append(new_dict_task)
         g.write_tasks_to_json_file(tasks_file)
-        # TODO, what exact variables I need once again?
-        # step-Local and global provides for sure; what about 2 task_names? the code only cares about the file name anyways
-        # THEN, I am SURE the better and more compact way is to save all vars from steps, therefore no need in provides at all
-        # I don't really need in progress status then? I mean frozen tasks from scheduler are checked w/ to fuse_id;;; no, I want statuses. Status to in progress will be set
-        # here; done or errored after threadpool finishes. So in future we can rerun failed or whatever. and that is actually done ABOVE, you blind shit
-        # But, I'd add task status as a property
-        # TODO but, in case names overlap, what to do? Handle by putting them under test_step_index_---variable_key_name
-
+    # TODO but, in case names (of vars?) overlap, what to do? Handle by putting them under test_step_index_---variable_key_name
         process_new_task(task)
-
-    #     small update to everything below. keeping track of what tasks are from previous run == using unique fuse uuid
-    #     we are going to use threadpool / gevent so no need for a file, output of steps will be stored in unique pickles
-    #       anyway
-    #     errored tasks should stay errored. there should be an endpoint with the list of all current tasks for better use
+    #     there should be an endpoint with the list of all current tasks for better use
     #     and if there is a table with tasks, then use db endpoint probably
+    #      I actually think we need to store fuse unique id in Task object as well. Why? to save it in pickle for fallback. Why? not sure.
+    #         Nononononononono. We recreate object from pickle, right? But indexing point should be tasks file so we don't browse entire temp folder
 
-    #     TODO add in-progress-task to a file? to db? I kinda want in in a file
-    #     TODO, it means scheduler will need to check that file. How to get clue that task was abandoned?
-    #     TODO, task will havew a unique string that is generated each time Fuse is started, therefore
+    #     TODO add in-progress-task to a file? to db? I kinda want in in a file ;;;; discuss about it being in db. we can't really inspect db while fuse is stopped
+    #     TODO, then file only? duplicate it in db a well?
+    #     TODO  in case internal logic requires it, keep it in db as well.
+
+    #     TODO How to get clue that task was abandoned?
     #     TODO, anything that has different UUID is from previous era.
     #     TODO, But how to catch errored tasks? just frozen tasks? Errored should stay errored i think, with an option
     #     TODO, to retry them with same data, THIS IS WHY WE NEED INIT_REQUIRES (as a pickle)
     #     TODO:: Frozen tasks.. We need a way to kill them. start task work in a new process and kill it in case of emergency?
-    #     TODO we can just kill the thread if it is somehow STORED/MARKED ==> store PROCESSESS?
+    #      we can just process ==> store PROCESSESS? done
     else:
         log.error(f"There are no such tasks supported by this Fuse.")
         log.error(f"Supported tasks: {task_type_from_db}")

@@ -202,19 +202,25 @@ def check_file_exists(service_full_path):
     return os.path.exists(service_full_path)
 
 
-def init_start_function_process(function, *args, **kwargs):
+def init_start_function_process(function, *args,function_name = None, **kwargs):
     dic = {}
-    if args:
-        p = multiprocessing.Process(target = function, args=args, kwargs=kwargs)
-        # TODO this stores function ref? in db? is this ok?
-        dic['arguments'] = str(args).join(str(kwargs))
+    # TODO; check if this if actually was necessary, cutting for now
+    # if args or kwargs:
+    p = custom_subprocess.CustomNamedProcess(target = function, args=args, name=function_name, kwargs=kwargs)
+    # TODO this stores function ref? in db? is this ok?
+    dic['arguments'] = str(args).join(str(kwargs))
 
-    else:
-        p = multiprocessing.Process(target = function)
+    # else:
+    #     p = multiprocessing.Process(target = function)
     p.start()
+    if function_name:
+        dic['function_name'] = str(function_name)
+    else:
+        dic['function_name'] = function.__name__
     dic['pid'] = p.pid
-    dic['function_name'] = function.__name__
-    print('function.__name__')
+    # print(f"Process launched with name {dic['function_name']}")
+    # print(f"Process launched with args {dic['arguments']}")
+    # print(f"Process launched with pid {dic['pid']}")
     # TODO, in future kill by PID, but check process in new all processes table, not in sys/business ones
     db_utils.insert_into_table(c.all_processes_table_name, dic)
     return p

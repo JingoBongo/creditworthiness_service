@@ -26,10 +26,19 @@ import __init__
 # TODO probably add conversion from xml/other stuff into json
 # TODO probably conversion herer or in separate utils
 # TODO what headers?.. do we need them in steps????????????
+# TODO I need response type headers. maybe even as a wrapper-decorator thingy. I NEED IT
 
+# TODO. Think about authorization. like seriously tho
+
+# TODO. make decorator that will count times an endpoint was used for statistics and possible anti-DOS functionality
+# in DOS scenario, somehow I want hide-in-shell scenario, when fuse can be re-opened through secured connection only
+
+# TODO auto code checks
+# TODO ability to async task
 
 # "service": "db_endpoint",   <- we have services tables to check if local exists. we will implement search in other fuses later
 # "route": "/clear/Harvested_Routes", <- context, necessary for request
 # "request_type": "GET", <- request type
 # "requires" : [],       <- what variables we will try to put into json
-def send_request()
+# headers???? in task file??? some default for fuse?
+def send_request(url, context=None, request_type = 'GET'):

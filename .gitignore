@@ -5,6 +5,7 @@
 *.db
 */busy_ports.json
 __pycache__/
+*__pycache__*
 .idea
 __init__.cpython-39.pyc
 resources/logs/*
@@ -12,3 +13,6 @@ resources/main_db.db
 resources/temporary_files/
 # exception to the rule
 !resources/logs/.gitkeep
+
+
+# to remove pychache files for example use this: git rm --cached */__pycache__/*

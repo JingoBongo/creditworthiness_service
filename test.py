@@ -124,14 +124,9 @@ def main():
     #
     #
     # process_new_task(None)
-    context = 3
-    x =  ((context) and (not isinstance(context, str))) and ('=' in context or not str(context).startswith('/') or str(context).endswith('/'))
-
-    if context:
-        if not isinstance(context, str):
-            if '=' in context or not str(context).startswith('/') or str(context).endswith('/'):
-                print(True)
-    print(False)
+    d = {'key' : 'value'}
+    v = None.update(d)
+    print(v)
 
     # print(x)
 

@@ -62,11 +62,26 @@ def prepare_data_for_post_request(task, needed_keys):
     if needed_keys and len(needed_keys) > 0:
         provided_keys_from_init_requires = task['init_requires']
         for key in needed_keys:
-            if key not in provided_keys_from_init_requires:
+            if key not in provided_keys_from_init_requires.keys():
                 end_task_procedure(task,f"Task {task['task_unique_name']} ended early as required {key} was not provided")
         needed_data = {}
         for key in needed_keys:
-            needed_data.update(task.global_provides[key])
+            # i think here we should update with new dict, not just value
+            needed_data.update({key : task.global_provides[key]})
+        return needed_data
+    
+    
+    #     {
+    #   "step_number" : 1,
+    #   "step_name" : "clear harvester table",
+    #   "service" : "db_endpoint",
+    #   "route" : "/clear/Harvested_Routes",
+    #   "request_type": "GET",
+    #   "requires" : [],
+    #   "requires_steps": []
+    # },
+            
+            
 def process_step(task: Task_From_File, index):
     # cover step in try catch?
     print(f"I am inside process new step {index}")

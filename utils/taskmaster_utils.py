@@ -9,8 +9,10 @@ from utils import general_utils as g
 from utils import db_utils as db
 from utils.dataclasses.Input_Task import Input_Task
 from utils.dataclasses.Task_From_File import Task_From_File
+from utils.dataclasses.Task_Step_From_File import Task_Step_From_File
 from utils.general_utils import read_from_tasks_json_file, kill_process
 from utils.pickle_utils import save_to_pickle, read_from_pickle
+from utils import client_utils
 
 
 #         TODO: still, we probably need to parse these into ALL_requires; better in global_provides(yes)
@@ -80,17 +82,42 @@ def prepare_data_for_post_request(task, needed_keys):
     #   "requires" : [],
     #   "requires_steps": []
     # },
-            
+      
+def required_steps_arent_finished(required_steps, task: Task_From_File):
+    for step in required_steps:
+        if not step in task.finished_steps:
+            return True
+    return False            
             
 def process_step(task: Task_From_File, index):
     # cover step in try catch?
     print(f"I am inside process new step {index}")
-    local_step = task.steps[index - 1]
+    local_step : Task_Step_From_File = task.steps[index - 1]
+
+    # sleep untill needed steps are finished
+    if rrequires_steps := local_step.requires_steps and isinstance(local_step.requires_steps, list):
+        while required_steps_arent_finished(local_step.requires_steps, task):
+            time.sleep(1)
+            
 
     # grand note here. we don't need additional data and even check for it if we have a GET request
+    data_for_post = None
+    data_type = None
     if local_step.request_type == c.request_type_post:
         needed_keys = local_step['requires']
         data_for_post = prepare_data_for_post_request(task, needed_keys)
+        data_type = {'Content-Type': 'application/json'}
+        
+        
+    # we should be able to send request now. if we use post request, add content type json
+    resp = client_utils.init_send_request(service=local_step.service, context=local_step.route, 
+                                          request_type=local_step.request_type, headers=headers,
+                                          data=data_for_post, claimed_data_type=data_type)
+    
+    # next, if response is fine try to get needed provides keys from there. if we don't get dict, try to 
+    # save as one key-value pair; 
+    # TODO: don't forget to add step index to the pickle and to move step to finished
+    # TODO: add status check in request method
 
     # TODO client utils for get and post requests
 

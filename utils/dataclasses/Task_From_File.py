@@ -42,7 +42,8 @@ class Task_From_File:
                                            route=s['route'],
                                            request_type=s['request_type'],
                                            requires=s['requires'],
-                                           requires_steps=s['requires_steps'])
+                                           requires_steps=s['requires_steps'],
+                                           needs_to_provide=s['provides'])
             self.steps.append(new_step)
         self.status = c.tasks_status_new
         self.error_logs = None

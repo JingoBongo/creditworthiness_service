@@ -69,6 +69,10 @@ def lazy_task(task_name):
 
 #     TODO MAKE RESPONSE HAVE A LINK TO RESULT PAGE FOR LAZY
 
+
+
+# TODO: clear all the TODOs that are outdated
+# TODO: make tasks.json gitignorable, but recreate on launch
 @app.route('/tasks/get_result/<string:task_unique_name>', methods=['GET', 'POST'])
 def get_lazy_task_result(task_unique_name):
     tasks = read_from_tasks_json_file()

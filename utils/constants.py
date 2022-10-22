@@ -52,6 +52,8 @@ request_type_options= 'OPTIONS'
 request_type_connect= 'CONNECT'
 supported_request_types = [request_type_connect, request_type_head, request_type_options, request_type_patch, request_type_delete,
                            request_type_get, request_type_put, request_type_post]
+double_forward_slash = '//'
+taskmaster_task_object = None
 
 
 

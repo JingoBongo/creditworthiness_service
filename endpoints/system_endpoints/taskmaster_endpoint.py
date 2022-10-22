@@ -8,7 +8,8 @@ from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
 from utils import logger_utils as log
-from utils.general_utils import init_start_function_process
+from utils.general_utils import init_start_function_process, read_from_tasks_json_file
+from utils.pickle_utils import save_to_pickle, read_from_pickle
 from utils.schedulers_utils import launch_taskmaster_scheduler_if_not_exists
 
 from utils.taskmaster_utils import Input_Task, taskmaster_main_process
@@ -63,15 +64,28 @@ def lazy_task(task_name):
     #  because 1) sometimes we will need to kill such things       ..... just as a comment
     #  2) we will need to store PIDs of PROCESSES in a db
     #  3) we will need a lot of computational power for it as well in theory.
-    return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster."}
+    return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster.", 'context':f"/tasks/get_result/{task_unique_name}"}
 # TODO
 
 #     TODO MAKE RESPONSE HAVE A LINK TO RESULT PAGE FOR LAZY
 
-@app.route('/tasks/lazy-start/get_result/<string:task_name>', methods=['GET', 'POST'])
-def get_lazy_task_result(task_name):
-#     TODO do we need to get as a result pickle itself? make an option to download a pickle with all 'provides' data
-    pass
+@app.route('/tasks/get_result/<string:task_unique_name>', methods=['GET', 'POST'])
+def get_lazy_task_result(task_unique_name):
+    tasks = read_from_tasks_json_file()
+    for t in tasks['tasks']:
+        if task_unique_name == t['task_unique_name']:
+            if t['status'] == c.tasks_status_completed:
+                try:
+                    result = read_from_pickle(t['task_folder_path']+c.double_forward_slash+c.tasks_global_provides_file_name)
+                    return {'status':t['status'], "result":result}
+                except Exception as e:
+                    log.exception(f"Something went horribly wrong while getting result of {task_unique_name}")
+                    log.exception(e)
+            else:
+                # TODO this is temporary, I want to return error logs later
+                return {"msg":f"Task status is: {t['status']}"}
+    return {"msg":f"Task {task_unique_name} seems to not exist in tasks file"}
+
 
 @app.route('/tasks/start/<string:task_name>')
 def start_task(task_name):

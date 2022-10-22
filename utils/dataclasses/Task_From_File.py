@@ -47,6 +47,7 @@ class Task_From_File:
             self.steps.append(new_step)
         self.status = c.tasks_status_new
         self.error_logs = None
+    #     TODO: very urgent todo; if there are duplicates of keys, what to do?
 
     def checkThereAreEnoughInitVariables(self, temp_init_requires, data_keys):
         if len(temp_init_requires) > len(data_keys):

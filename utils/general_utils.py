@@ -213,10 +213,10 @@ def init_start_function_process(function, *args,function_name = None, **kwargs):
     # else:
     #     p = multiprocessing.Process(target = function)
     p.start()
+    dic['function_name'] = function.__name__
     if function_name:
         dic['function_name'] = str(function_name)
-    else:
-        dic['function_name'] = function.__name__
+
     dic['pid'] = p.pid
     # print(f"Process launched with name {dic['function_name']}")
     # print(f"Process launched with args {dic['arguments']}")

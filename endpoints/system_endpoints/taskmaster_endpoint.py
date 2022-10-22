@@ -1,6 +1,7 @@
+import socket
 import threading
 
-from flask import request
+from flask import request, redirect, render_template
 
 import __init__
 from utils import general_utils as g, random_utils
@@ -64,7 +65,13 @@ def lazy_task(task_name):
     #  because 1) sometimes we will need to kill such things       ..... just as a comment
     #  2) we will need to store PIDs of PROCESSES in a db
     #  3) we will need a lot of computational power for it as well in theory.
-    return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster.", 'context':f"/tasks/get_result/{task_unique_name}"}
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    # return {'status':'ok', 'msg':f"Task '{task_unique_name}' was sent to taskmaster.", 'context':f"{IPAddr}/redir/tasks/get_result/{task_unique_name}"}
+    # return '<a href="' + IPAddr+ '/redir/tasks/get_result/' + task_unique_name+ '" target="_blank"> get result </a>'
+    # return redirect(f"{IPAddr}/redir/tasks/get_result/{task_unique_name}")
+    # return render_template('hyperlink.html', url = f"{IPAddr}/redir/tasks/get_result/{task_unique_name}")
+    return redirect(f"http://{IPAddr}/redir/tasks/get_result/{task_unique_name}")
 # TODO
 
 #     TODO MAKE RESPONSE HAVE A LINK TO RESULT PAGE FOR LAZY

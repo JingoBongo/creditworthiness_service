@@ -125,7 +125,7 @@ def main():
     #
     # process_new_task(None)
     d = {'key' : 'value'}
-    v = None.update(d)
+
     print(v)
 
     # print(x)

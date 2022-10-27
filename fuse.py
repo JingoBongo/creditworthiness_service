@@ -26,7 +26,14 @@ def setup_cur_logger():
 #     # print(f"[{cur_file_name}] {str(text)}")
 #     c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
 
-
+def try_service_launch(service_name: str, service_config: dict, is_system: bool):
+    if service_config.get('enabled', None) == False:
+        log.warn(f"Service '{service_name}' is disabled in config and therefore will not be launched")
+        return
+    if service_config.get('path', None) == None:
+        log.error(f"Service '{service_name}' has no path specified in config and therefore will not be launched")
+        return
+    g.init_start_service_procedure(service_name, sys=is_system)
 
 def main():
     g.recreate_log_foler_if_not_exists()
@@ -53,36 +60,22 @@ def main():
     # db_utils.clear_tasks_table()
     # fire system endpoints
     # Is all this checking necessary? I am not sure anymore
-    # TODO: dima, do it in 1 loop.
-    if isinstance(config['services']['system'], dict):
-        if len(config['services']['system']) > 0:
-            for service in config['services']['system']:
-                if 'enabled' in config['services']['system'][service].keys():
-                    if config['services']['system'][service]['enabled'] == False:
-                        log.warn(f"Service '{service}' is disabled in config and therefore will not be launched")
-                        continue
-                if not 'path' in config['services']['system'][service].keys():
-                    log.error(f"Service '{service}' has no path specified in config and therefore will not be launched")
-                    continue
-                g.init_start_service_procedure(service, sys=True)
+
+    system_services = config['services']['system']
+    business_services = config['services']['business']
+
+    if isinstance(system_services, dict) and isinstance(business_services, dict):
+        if len(system_services) != 0:
+            for service_name, service_config in zip(system_services.keys(), system_services.values()):
+                try_service_launch(service_name, service_config, True)
         else:
-            # print_c(f"It seems there are no system services to launch, it is not right")
-            log.error(f"It seems there are no system services to launch, it is not right")
-    # fire business endpoints
-    if isinstance(config['services']['business'], dict):
-        if len(config['services']['business']) > 0:
-            for service in config['services']['business']:
-                if 'enabled' in config['services']['business'][service].keys():
-                    if config['services']['business'][service]['enabled'] == False:
-                        log.warn(f"Service '{service}' is disabled in config and therefore will not be launched")
-                        continue
-                if not 'path' in config['services']['business'][service].keys():
-                    log.error(f"Service '{service}' has no path specified in config and therefore will not be launched")
-                    continue
-                g.init_start_service_procedure(service)
+            log.error('No system service found, not right at all')
+
+        if len(business_services) != 0:
+            for service_name, service_config in zip(business_services.keys(), business_services.values()):
+                try_service_launch(service_name, service_config, False)
         else:
-            # print_c(f"It seems there are no business services to launch, is it a test launch?")
-            log.warn(f"It seems there are no business services to launch, is it a test launch?")
+            log.error('No business service found, is it test launch?')
     while True:
         pass
 

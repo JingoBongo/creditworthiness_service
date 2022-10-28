@@ -7,23 +7,9 @@ from utils import constants as c
 from utils import logger_utils as log
 # import sqlalchemy as alc
 
-from sqlalchemy import BigInteger
-from sqlalchemy import Boolean
-from sqlalchemy import DateTime
-from sqlalchemy import Enum
-from sqlalchemy import Float
-from sqlalchemy import Integer
-from sqlalchemy import Interval
-from sqlalchemy import Date
-from sqlalchemy import LargeBinary
-from sqlalchemy import Numeric
-from sqlalchemy import PickleType
-from sqlalchemy import SmallInteger
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy import Time
-from sqlalchemy import Unicode
-from sqlalchemy import UnicodeText
+# meh, takes x times less lines, still a bit ugly
+from sqlalchemy import BigInteger, Boolean, DateTime, Enum, Float, Integer, Interval, Date, LargeBinary, Numeric
+from sqlalchemy import PickleType, SmallInteger, String, Text, Time, Unicode, UnicodeText
 
 
 from utils.json_utils import read_from_json

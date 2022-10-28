@@ -15,7 +15,7 @@ app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, 
 
 @app.route('/send_n')
 def send_n():
-    return 'aboba'
+    return 'sus'
 
 @app.route('/index')
 def index():

@@ -76,13 +76,14 @@ def main():
     system_services = config['services']['system']
     business_services = config['services']['business']
 
-    if isinstance(system_services, dict) and isinstance(business_services, dict):
+    if isinstance(system_services, dict):
         if len(system_services) != 0:
             for service_name, service_config in zip(system_services.keys(), system_services.values()):
                 try_service_launch(service_name, service_config, True)
         else:
             log.error('No system service found, not right at all')
 
+    if isinstance(business_services, dict):
         if len(business_services) != 0:
             for service_name, service_config in zip(business_services.keys(), business_services.values()):
                 try_service_launch(service_name, service_config, False)

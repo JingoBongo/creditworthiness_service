@@ -26,7 +26,7 @@ def job():
 
 
 # schedule.every(15).seconds.do(job)
-schedule.every(10).minutes.do(job)
+schedule.every(2).minutes.do(job)
 
 try:
     while True:

@@ -27,8 +27,8 @@ def job():
     taskmaster_job_body()
 
 
-schedule.every(15).seconds.do(job)
-# schedule.every(1).minute.do(job)
+# schedule.every(15).seconds.do(job)
+schedule.every(1).minute.do(job)
 
 try:
     while True:

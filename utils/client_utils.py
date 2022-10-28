@@ -60,6 +60,28 @@ def check_context(context):
     return False
 
 
+def handle_string_as_file_path(data, claimed_data_type):
+    arg_name = 'files'
+    remade_data = {'file': open(data, 'rb')}
+    confirmed_data_type = claimed_data_type
+    return arg_name, confirmed_data_type, remade_data
+
+
+def handle_string_as_file_content(data, claimed_data_type, detected_data_type_category):
+    arg_name = 'files'
+    ext = detected_data_type_category[claimed_data_type['Content-Type']].split('/')[-1]
+    confirmed_data_type = claimed_data_type
+    remade_data = {'file': (f"data.{ext}", data)}
+    return arg_name, confirmed_data_type, remade_data
+
+
+def handle_not_string_but_file(data, claimed_data_type):
+    arg_name = 'files'
+    remade_data = {'file': data}
+    confirmed_data_type = claimed_data_type
+    return arg_name, confirmed_data_type, remade_data
+
+
 def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data_type', 'remade_data'):
     arg_name = None
     confirmed_data_type = None
@@ -91,170 +113,36 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
     # if we get a string + claimed data type, we check depending on claimed data type;
 
     # TODO, I hate to save these in the code, in future make it some config fileS(not only for text) or whatever
-    text_data_types = {'text/css': '.css',
-                       'text/csv': '.csv',
-                       'text/html': '.html',
-                       'text/calendar': '.ics',
-                       'text/plain': '.txt',
-                       'text/javascript': '.js',
-                       'text/python': '.py',
-                       'text/jupyter': '.ipynb',
-                       'text/java': '.java',
-                       'text/c': '.c',
-                       'text/cpp': '.cpp'}
+
     # text section
     # code file section
     # not sure about c libs tho
-
-    if claimed_data_type['Content-Type'] in text_data_types.keys():
+    if c.text_data_types.get(claimed_data_type['Content-Type'], None) is not None:
         if isinstance(data, str):
             if '.' in data:
-                # Do I even need to check if it is in text_data_types extensions?? for now NOT CHECK and see what happens
-                # if (data_type_of_string_data:= data.split('.')[-1]) in text_data_types.values():
-                #                 then it must be a path to a file
-                arg_name = 'files'
-                remade_data = {'file': open(data, 'rb')}
-                confirmed_data_type = claimed_data_type
-                return arg_name, confirmed_data_type, remade_data
-                # else:
-                #     data_type_of_string_data = '.'+data_type_of_string_data#         dummy attempt to send file as declaredarg_name = 'files'remade_data =
+                return handle_string_as_file_path(data, claimed_data_type)
             else:
-                #       here we treat string as a content of the file.
-                arg_name = 'files'
-                ext = text_data_types[claimed_data_type['Content-Type']].split('/')[-1]
-                confirmed_data_type = claimed_data_type
-                remade_data = {'file': (f"data.{ext}", data)}
-                return arg_name, confirmed_data_type, remade_data
+                return handle_string_as_file_content(data, claimed_data_type, c.text_data_types)
         else:
-            #         here we assume that NOT a string was attempted to be send as text_data_type. Not a path. Then it should be a file?
-            arg_name = 'files'
-            remade_data = {'file': data}
-            confirmed_data_type = claimed_data_type
-            return arg_name, confirmed_data_type, remade_data
+            return handle_not_string_but_file(data, claimed_data_type)
 
-    # despite code being very similar, I want checks for image/video/sound separately for logic division purposes
-
-    # TODO, I hate to save these in the code, in future make it some config fileS(not only for text) or whatever
-    # images, videos, music
-    mm_data_types = {'image/avif': '.avif',
-                     'image/bmp': '.bmp',
-                     'image/gif': '.gif',
-                     'image/vnd.microsoft.icon': '.ico',
-                     'image/jpeg': '.jpeg',
-                     'image/png': '.png',
-                     'image/svg+xml': '.svg',
-                     'image/tiff': '.tiff',
-                     'image/webp': '.webp',
-                     'video/x-msvideo': '.avi',
-                     'video/mp4': '.mp4',
-                     'video/ogg': '.ogv',
-                     'video/mp2t': '.ts',
-                     'video/webm': '.webm',
-                     'video/3gpp': '.3gp',
-                     'video/3gpp2': '.3g2',
-                     'audio/aac': '.aac',
-                     'audio/x-cdf': '.cda',
-                     'audio/x-midi': '.midi',
-                     'audio/midi': '.midi',
-                     'audio/mpeg': '.mp3',
-                     'audio/ogg': '.oga',
-                     'audio/opus': '.opus',
-                     'audio/wav': '.wav',
-                     'audio/webm': '.webm',
-                     'audio/3gpp': '.3gp',
-                     'audio/3gpp2': '.3g2'}
-
-    if claimed_data_type['Content-Type'] in mm_data_types.keys():
+    if c.mm_data_types.get(claimed_data_type['Content-Type'], None) is not None:
         if isinstance(data, str):
             if '.' in data:
-                # Do I even need to check if it is in text_data_types extensions?? for now NOT CHECK and see what happens
-                # if (data_type_of_string_data:= data.split('.')[-1]) in text_data_types.values():
-                #                 then it must be a path to a file
-                arg_name = 'files'
-                remade_data = {'file': open(data, 'rb')}
-                confirmed_data_type = claimed_data_type
-                return arg_name, confirmed_data_type, remade_data
-                # else:
-                #     data_type_of_string_data = '.'+data_type_of_string_data#         dummy attempt to send file as declaredarg_name = 'files'remade_data =
+                return handle_string_as_file_path(data, claimed_data_type)
             else:
-                #       here we treat string as a content of the file.
-                arg_name = 'files'
-                ext = mm_data_types[claimed_data_type['Content-Type']].split('/')[-1]
-                confirmed_data_type = claimed_data_type
-                remade_data = {'file': (f"data.{ext}", data)}
-                return arg_name, confirmed_data_type, remade_data
+                return handle_string_as_file_content(data, claimed_data_type, c.mm_data_types)
         else:
-            # here we assume that NOT a string was attempted to be send as mm_data_type. Not a path. Then it should be a file?
-            arg_name = 'files'
-            remade_data = {'file': data}
-            confirmed_data_type = claimed_data_type
-            return arg_name, confirmed_data_type, remade_data
+            return handle_not_string_but_file(data, claimed_data_type)
 
-    # despite code being very similar, I want checks for content-type application separately for logic division purposes
-    application_data_types = {'application/x-abiword': '.abw',
-                              'application/x-freearc': '.arc',
-                              'application/vnd.amazon.ebook': '.azw',
-                              'application/octet-stream': '.bin',
-                              'application/x-bzip': '.bz',
-                              'application/x-bzip2': '.bz2',
-                              'application/x-x-cdf': '.cda',
-                              'application/x-csh': '.csh',
-                              'application/msword': '.doc',
-                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-                              'application/vnd.ms-fontobject': '.eot',
-                              'application/epub+zip': '.epub',
-                              'application/gzip': '.gz',
-                              'application/java-archive': '.jar',
-                              'application/json': '.json',
-                              'application/ld+json': '.jsonld',
-                              'application/vnd.apple.installer+xml': '.mpkg',
-                              'application/vnd.oasis.opendocument.presentation': '.odp',
-                              'application/vnd.oasis.opendocument.spreadsheet': '.ods',
-                              'application/vnd.oasis.opendocument.text': '.odt',
-                              'application/ogg': '.ogx',
-                              'application/pdf': '.pdf',
-                              'application/x-httpd-php': '.php',
-                              'application/vnd.ms-powerpoint': '.ppt',
-                              'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-                              'application/vnd.rar': '.rar',
-                              'application/rtf': '.rtf',
-                              'application/x-sh': '.sh',
-                              'application/x-tar': '.tar',
-                              'application/vnd.visio': '.vsd',
-                              'application/xhtml+xml': '.xhtml',
-                              'application/vnd.ms-excel': '.xls',
-                              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-                              'application/xml': '.xml',
-                              'application/atom+xml': '.xml',
-                              'application/vnd.mozilla.xul+xml': '.xul',
-                              'application/zip': '.zip',
-                              'application/x-7z-compressed': '.7z'}
-
-    if claimed_data_type['Content-Type'] in application_data_types.keys():
+    if c.application_data_types.get(claimed_data_type['Content-Type'], None) is not None:
         if isinstance(data, str):
             if '.' in data:
-                # Do I even need to check if it is in text_data_types extensions?? for now NOT CHECK and see what happens
-                # if (data_type_of_string_data:= data.split('.')[-1]) in text_data_types.values():
-                #                 then it must be a path to a file
-                arg_name = 'files'
-                remade_data = {'file': open(data, 'rb')}
-                confirmed_data_type = claimed_data_type
-                return arg_name, confirmed_data_type, remade_data
-                # else:
-                #     data_type_of_string_data = '.'+data_type_of_string_data#         dummy attempt to send file as declaredarg_name = 'files'remade_data =
+                return handle_string_as_file_path(data, claimed_data_type)
             else:
-                #       here we treat string as a content of the file.
-                arg_name = 'files'
-                ext = application_data_types[claimed_data_type['Content-Type']].split('/')[-1]
-                confirmed_data_type = claimed_data_type
-                remade_data = {'file': (f"data.{ext}", data)}
-                return arg_name, confirmed_data_type, remade_data
+                return handle_string_as_file_content(data, claimed_data_type, c.application_data_types)
         else:
-            #         here we assume that NOT a string was attempted to be send as mm_data_type. Not a path. Then it should be a file?
-            arg_name = 'files'
-            remade_data = {'file': data}
-            confirmed_data_type = claimed_data_type
-            return arg_name, confirmed_data_type, remade_data
+            return handle_not_string_but_file(data, claimed_data_type)
 
     # if we get array of bytes, lets treat as a file, shall we?
     arg_name = 'files'
@@ -296,7 +184,7 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
     # if method gets wrong url it is fault of upper method.
     url = str(url)
     # prepare request type
-    if not request_type in c.supported_request_types:
+    if request_type not in c.supported_request_types:
         raise Exception(f"Incorrect request method used: {request_type}")
     # prepare params
     # method that will choose url should also treat context. here we just check it is a dict

@@ -98,12 +98,6 @@ def reserve_ports_from_config():
         if services.get('port', None) is not None:
             busy_ports_json['busy_ports'].append(str(service_config[service_name]['port']))
 
-    # for service in config['services']['system']:
-    #     if 'port' in config['services']['system'][service].keys():
-    #         busy_ports_json['busy_ports'].append(str(config['services']['system'][service]['port']))
-    # for service in config['services']['business']:
-    #     if 'port' in config['services']['business'][service].keys():
-    #         busy_ports_json['busy_ports'].append(str(config['services']['business'][service]['port']))
     write_to_json(busy_ports_json_path, busy_ports_json)
     log.info('Ports from config were reserved')
 
@@ -188,8 +182,6 @@ def start_service(service_short_name: str, service_full_path: str, port, local=F
     port_part = ['-port', str(port)]
     local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part,
                                                                service_short_name)
-    # print_c(f"fuse added service to pool: {service_short_name}")
-    # print_c(f"added path: {service_full_path}")
     log.info(f"fuse added service to pool: {service_short_name}")
     log.info(f"added path: {service_full_path}")
     return local_process
@@ -203,7 +195,6 @@ def check_port_is_in_use(port):
         sock.bind(("0.0.0.0", port))
         result = True
     except:
-        # print_c(f"{port} Port is in use")
         pass
     sock.close()
     return result
@@ -226,24 +217,19 @@ def check_file_exists(service_full_path: str):
 
 
 def init_start_function_process(function, *args, function_name=None, **kwargs):
-    dic = {}
     # TODO; check if this if actually was necessary, cutting for now
     # if args or kwargs:
     p = custom_subprocess.CustomNamedProcess(target=function, args=args, name=function_name, kwargs=kwargs)
     # TODO this stores function ref? in db? is this ok?
-    dic['arguments'] = str(args).join(str(kwargs))
+    dic = {'arguments': str(args).join(str(kwargs))}
 
     # else:
     #     p = multiprocessing.Process(target = function)
     p.start()
-    dic['function_name'] = function.__name__
-    if function_name:
-        dic['function_name'] = str(function_name)
 
+    dic['function_name'] = str(function_name) if function_name else function.__name__
     dic['pid'] = p.pid
-    # print(f"Process launched with name {dic['function_name']}")
-    # print(f"Process launched with args {dic['arguments']}")
-    # print(f"Process launched with pid {dic['pid']}")
+
     # TODO, in future kill by PID, but check process in new all processes table, not in sys/business ones
     db_utils.insert_into_table(c.all_processes_table_name, dic)
     return p
@@ -266,25 +252,8 @@ def init_start_service_procedure(service: str, is_sys=False):
         port = get_free_port()
     set_port_busy(port)
 
-    # if 'port' in config['services'][type][service].keys() \
-    #         and isinstance(config['services'][type][service]['port'], int) \
-    #         and config['services'][type][service]['port'] > 0:
-    #     port = config['services'][type][service]['port']
-    # else:
-    #     port = get_free_port()
-    # set_port_busy(port)
     local = service_config.get('local', None)
-
-    # if 'local' in config['services'][type][service].keys():
-    #     local = config['services'][type][service]['local']
-    # else:
-    #     local = None
     spawn_type = service_config.get('mono', None)
-
-    # if 'mono' in config['services'][type][service].keys():
-    #     spawn_type = config['services'][type][service]['mono']
-    # else:
-    #     spawn_type = None
     #     TODO when mono/multi becomes a things, add that info to arguments
 
     if spawn_type != "multi":
@@ -302,10 +271,6 @@ def init_start_service_procedure(service: str, is_sys=False):
     lis = [{"port": port}, {"local": local}]
     dic = {'pid': new_process.pid, 'pyfile_path': service_full_path, 'pyfile_name': service, 'arguments': str(lis)}
 
-    # dic['pid'] = new_process.pid
-    # dic['pyfile_path'] = service_full_path
-    # dic['pyfile_name'] = service
-    # dic['arguments'] = str(lis)
     # TODO for noqw clear all processes on start
     db_utils.insert_into_table(c.all_processes_table_name, dic)
 
@@ -323,19 +288,6 @@ def process_start_service(service_name: str):
     except Exception as e:
         log.exception(e)
         return 'service failed to start'
-    # try:
-    #     if len(config['services']['system']) > 0:
-    #         if service_name in config['services']['system']:
-    #             init_start_service_procedure(service_name, is_sys=True)
-    #     # fire user endpoints
-    #     if len(config['services']['business']) > 0:
-    #         if service_name in config['services']['business']:
-    #             init_start_service_procedure(service_name, is_sys=False)
-    #     return 'service started'
-    # except Exception as e:
-    #     # print_c(e)
-    #     log.exception(e)
-    #     return 'service failed to start'
 
 
 def check_fuse_logger_file_is_current_logger(filepath):

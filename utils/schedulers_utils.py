@@ -17,7 +17,7 @@ def launch_scheduler_if_not_exists(process_name, process_full_path):
     table_results = g.db_utils.select_from_table('Schedulers')
     table_results_names = [x['name'] for x in table_results]
     # TODO mention somewhere that schedulers are designed as singletones
-    if not process_name in table_results_names:
+    if process_name not in table_results_names:
         local_process = start_generic_subprocess(process_name, process_full_path)
         g.db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
         dic = {'pid': local_process.pid, 'pyfile_path': process_full_path, 'pyfile_name': process_name}
@@ -49,12 +49,11 @@ def launch_route_harvester_scheduler_if_not_exists():
 def route_is_in_routes(route, routs_from_db):
     #     route and function_name, service_name, route
     for rroute in routs_from_db:
-        if route['route'] == rroute['route'] and route['service_name'] == rroute['service_name'] and route[
-            'function_name'] == rroute['function_name']:
+        if route['route'] == rroute['route'] and route['service_name'] == rroute['service_name'] \
+                and route['function_name'] == rroute['function_name']:
             return True
     #           here we purely assume that duplicates do not exist in harvested route table
     return False
-
 
 
 def taskmaster_job_body():
@@ -101,7 +100,6 @@ def taskmaster_job_body():
             log.exception(f"Something went wrong while processing task(from files) {task}")
             log.exception(e)
     log.info(f"Taskmaster Tasks harvester finished job")
-
 
     #
     # for task in tasks:

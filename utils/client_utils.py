@@ -32,7 +32,7 @@ from utils import db_utils
 # TODO finally make DYNAMIC config info
 # TODO probably not just get/post to do. other stuff too
 # TODO probably add conversion from xml/other stuff into json
-# TODO probably conversion herer or in separate utils
+# TODO probably conversion here or in separate utils
 # TODO what headers?.. do we need them in steps????????????
 # TODO I need response type headers. maybe even as a wrapper-decorator thingy. I NEED IT
 

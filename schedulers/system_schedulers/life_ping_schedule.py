@@ -18,11 +18,9 @@ SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 cur_file_name = os.path.basename(__file__)
 log.get_log(c.life_ping_schedule_name)
+
+
 # c.current_subprocess_logger = log
-
-
-
-
 
 
 # def print_c(text):
@@ -49,7 +47,7 @@ def process_one_service(n):
         g.get_rid_of_service_by_pid(n['pid'])
         # print_c(f"before life ping init start services")
 
-        if n['name'] in config['services']['system'].keys():
+        if config['services']['system'].get(n['name'], None) is not None:
             g.init_start_service_procedure(n['name'], is_sys=True)
             return
             # for key in config['services']['system'].keys():
@@ -57,7 +55,7 @@ def process_one_service(n):
             #         g.init_start_service_procedure(key, sys=True)
             #         return
             #     break
-        if n['name'] in config['services']['business'].keys():
+        if config['services']['business'].get(n['name'], None) is not None:
             g.init_start_service_procedure(n['name'], is_sys=False)
             return
             # for key in config['services']['business'].keys():
@@ -73,7 +71,8 @@ def process_service_statuses(services_and_statuses):
         try:
             process_one_service(n)
         except Exception as e:
-            log.error(f"Failed to properly process service {n['name']}, pid {n['pid']}, port {n['port']}, status {n['status']}")
+            log.error(
+                f"Failed to properly process service {n['name']}, pid {n['pid']}, port {n['port']}, status {n['status']}")
             log.error(e)
 
 

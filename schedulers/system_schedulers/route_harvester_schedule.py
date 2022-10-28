@@ -21,7 +21,6 @@ cur_file_name = os.path.basename(__file__)
 log.get_log(c.route_harvester_schedule_name)
 
 
-
 def job():
     route_harvester_job_body()
 

@@ -5,7 +5,26 @@ from utils.decorators.db_decorators import sql_alchemy_db_func
 import sqlite3
 from utils import constants as c
 from utils import logger_utils as log
-import sqlalchemy as alc
+# import sqlalchemy as alc
+
+from sqlalchemy import BigInteger
+from sqlalchemy import Boolean
+from sqlalchemy import DateTime
+from sqlalchemy import Enum
+from sqlalchemy import Float
+from sqlalchemy import Integer
+from sqlalchemy import Interval
+from sqlalchemy import Date
+from sqlalchemy import LargeBinary
+from sqlalchemy import Numeric
+from sqlalchemy import PickleType
+from sqlalchemy import SmallInteger
+from sqlalchemy import String
+from sqlalchemy import Text
+from sqlalchemy import Time
+from sqlalchemy import Unicode
+from sqlalchemy import UnicodeText
+
 
 from utils.json_utils import read_from_json
 
@@ -13,24 +32,24 @@ cur_file_name = os.path.basename(__file__)
 root_path = c.root_path
 config = yaml_utils.read_from_yaml(root_path + c.conf_path)
 engine_path = c.sql_engine_path
-alc_dictionary = {'BigInteger': alc.BigInteger,
-                  'Date': alc.Date,
-                  'Boolean': alc.Boolean,
-                  'DateTime': alc.DateTime,
-                  'Enum': alc.Enum,
-                  'Float': alc.Float,
-                  'Integer': alc.Integer,
-                  'Interval': alc.Interval,
-                  'LargeBinary': alc.LargeBinary,
-                  'MatchType': alc.Date,
-                  'Numeric': alc.Numeric,
-                  'PickleType': alc.PickleType,
-                  'SmallInteger': alc.SmallInteger,
-                  'String': alc.String,
-                  'Text': alc.Text,
-                  'Time': alc.Time,
-                  'Unicode': alc.Unicode,
-                  'UnicodeText': alc.UnicodeText}
+alc_dictionary = {'BigInteger': BigInteger,
+                  'Date': Date,
+                  'Boolean': Boolean,
+                  'DateTime': DateTime,
+                  'Enum': Enum,
+                  'Float': Float,
+                  'Integer': Integer,
+                  'Interval': Interval,
+                  'LargeBinary': LargeBinary,
+                  'MatchType': Date,
+                  'Numeric': Numeric,
+                  'PickleType': PickleType,
+                  'SmallInteger': SmallInteger,
+                  'String': String,
+                  'Text': Text,
+                  'Time': Time,
+                  'Unicode': Unicode,
+                  'UnicodeText': UnicodeText}
 
 
 # def print_c(text):
@@ -46,7 +65,6 @@ alc_dictionary = {'BigInteger': alc.BigInteger,
 
 def return_column_type_by_name(column, kwargs):
     alc = kwargs['alc']
-
     return alc_dictionary.get(column, alc.String)
 
 

@@ -39,7 +39,16 @@ def run_cmd_command(command):
     log.info(f'returned value: {returned_value}')
 
 
-def read_from_json(path):
+def read_from_json(path: str):
+    """
+    try read data from json by path, in case of error gives blank JSON
+
+    Args:
+        path (str): path to file
+
+    Returns:
+        JSON dict with received data or blank JSON in case of error
+    """
     try:
         with open(path) as json_file:
             return json.load(json_file)
@@ -51,13 +60,18 @@ def read_from_json(path):
         return {}
 
 
-def write_to_json(path, text):
+def write_to_json(path: str, text):
+    """
+    write data to json file
+
+    Args:
+        path (str): path to file where to save data
+        text (any): data to save into json
+    """
     try:
         with open(path, 'w') as outfile:
             json.dump(text, outfile)
     except Exception as e:
-        # print_c(f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
-        # print_c(e)
         log.exception(
             f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
         log.exception(e)
@@ -68,6 +82,7 @@ def clear_busy_ports():
     write_to_json(busy_ports_json_path, new_json)
     log.info('Busy ports file cleared')
 
+
 def clear_tasks_file():
     new_json = {"tasks": []}
     write_tasks_to_json_file(new_json)
@@ -77,12 +92,18 @@ def clear_tasks_file():
 def reserve_ports_from_config():
     busy_ports_json = read_from_json(busy_ports_json_path)
     # busy_ports_json['busy_ports'].append(str(port))
-    for service in config['services']['system']:
-        if 'port' in config['services']['system'][service].keys():
-            busy_ports_json['busy_ports'].append(str(config['services']['system'][service]['port']))
-    for service in config['services']['business']:
-        if 'port' in config['services']['business'][service].keys():
-            busy_ports_json['busy_ports'].append(str(config['services']['business'][service]['port']))
+
+    services = config['services']['system'] | config['services']['business']
+    for service_name, service_config in zip(services.keys(), services.values()):
+        if services.get('port', None) is not None:
+            busy_ports_json['busy_ports'].append(str(service_config[service_name]['port']))
+
+    # for service in config['services']['system']:
+    #     if 'port' in config['services']['system'][service].keys():
+    #         busy_ports_json['busy_ports'].append(str(config['services']['system'][service]['port']))
+    # for service in config['services']['business']:
+    #     if 'port' in config['services']['business'][service].keys():
+    #         busy_ports_json['busy_ports'].append(str(config['services']['business'][service]['port']))
     write_to_json(busy_ports_json_path, busy_ports_json)
     log.info('Ports from config were reserved')
 
@@ -93,9 +114,11 @@ def delete_port_from_list(port):
     write_to_json(busy_ports_json_path, new_json)
     log.info(f"Port {port} was deleted from ports file")
 
+
 def read_from_tasks_json_file():
     new_json = read_from_json(tasks_json_path)
     return new_json
+
 
 def write_tasks_to_json_file(body):
     write_to_json(tasks_json_path, body)
@@ -112,7 +135,7 @@ def set_port_busy(port):
         log.info(f"Did not set port {port} as busy")
 
 
-#         TODO for some reason for predefined ports it says that it didnt set them busy, but  it does it
+#         TODO for some reason for predefined ports it says that it didn't set them busy, but it does it
 #               maybe it does it before
 
 
@@ -160,7 +183,7 @@ def get_rid_of_service_by_pid_and_port_dirty(pid):
         return 'failed to remove service dirty'
 
 
-def start_service(service_short_name, service_full_path, port, local=False, host=host):
+def start_service(service_short_name: str, service_full_path: str, port, local=False, host=host):
     local_part = ['-local', str(local)]
     port_part = ['-port', str(port)]
     local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part,
@@ -198,15 +221,15 @@ def get_free_port():
             return str_port
 
 
-def check_file_exists(service_full_path):
+def check_file_exists(service_full_path: str):
     return os.path.exists(service_full_path)
 
 
-def init_start_function_process(function, *args,function_name = None, **kwargs):
+def init_start_function_process(function, *args, function_name=None, **kwargs):
     dic = {}
     # TODO; check if this if actually was necessary, cutting for now
     # if args or kwargs:
-    p = custom_subprocess.CustomNamedProcess(target = function, args=args, name=function_name, kwargs=kwargs)
+    p = custom_subprocess.CustomNamedProcess(target=function, args=args, name=function_name, kwargs=kwargs)
     # TODO this stores function ref? in db? is this ok?
     dic['arguments'] = str(args).join(str(kwargs))
 
@@ -226,33 +249,42 @@ def init_start_function_process(function, *args,function_name = None, **kwargs):
     return p
 
 
-def init_start_service_procedure(service, sys=False):
+def init_start_service_procedure(service: str, is_sys=False):
     # TODO. HERE must be checker if file path exists
-    type = 'business'
-    if sys:
-        type = 'system'
+    type = 'system' if is_sys else 'business'
     service_full_path = c.root_path + config['services'][type][service]['path']
+
     if not check_file_exists(service_full_path):
         log.error(f"Service '{service}' has no existing file in path '{service_full_path}")
         return
 
-    if 'port' in config['services'][type][service].keys() \
-            and isinstance(config['services'][type][service]['port'], int) \
-            and config['services'][type][service]['port'] > 0:
-        port = config['services'][type][service]['port']
-    else:
+    service_config = config['services'][type][service]
+
+    #   port verification
+    port = service_config.get('port', None)
+    if port is None or not isinstance(port, int) or port <= 0:
         port = get_free_port()
     set_port_busy(port)
 
-    if 'local' in config['services'][type][service].keys():
-        local = config['services'][type][service]['local']
-    else:
-        local = None
+    # if 'port' in config['services'][type][service].keys() \
+    #         and isinstance(config['services'][type][service]['port'], int) \
+    #         and config['services'][type][service]['port'] > 0:
+    #     port = config['services'][type][service]['port']
+    # else:
+    #     port = get_free_port()
+    # set_port_busy(port)
+    local = service_config.get('local', None)
 
-    if 'mono' in config['services'][type][service].keys():
-        spawn_type = config['services'][type][service]['mono']
-    else:
-        spawn_type = None
+    # if 'local' in config['services'][type][service].keys():
+    #     local = config['services'][type][service]['local']
+    # else:
+    #     local = None
+    spawn_type = service_config.get('mono', None)
+
+    # if 'mono' in config['services'][type][service].keys():
+    #     spawn_type = config['services'][type][service]['mono']
+    # else:
+    #     spawn_type = None
     #     TODO when mono/multi becomes a things, add that info to arguments
 
     if spawn_type != "multi":
@@ -262,37 +294,48 @@ def init_start_service_procedure(service, sys=False):
             new_process = start_service(service, service_full_path, port)
     else:
         raise Exception('Implement multi endpoint stuff')
-    if sys:
+    if is_sys:
         db_utils.insert_into_sys_services(service, service_full_path, port, new_process.pid)
     else:
         db_utils.insert_into_business_services(service, service_full_path, port, new_process.pid)
-    dic = {}
-    lis = []
-    lis.append({"port":port})
-    lis.append({"local":local})
-    dic['pid'] = new_process.pid
-    dic['pyfile_path'] = service_full_path
-    dic['pyfile_name'] = service
-    dic['arguments'] = str(lis)
+
+    lis = [{"port": port}, {"local": local}]
+    dic = {'pid': new_process.pid, 'pyfile_path': service_full_path, 'pyfile_name': service, 'arguments': str(lis)}
+
+    # dic['pid'] = new_process.pid
+    # dic['pyfile_path'] = service_full_path
+    # dic['pyfile_name'] = service
+    # dic['arguments'] = str(lis)
     # TODO for noqw clear all processes on start
     db_utils.insert_into_table(c.all_processes_table_name, dic)
 
 
-
-def process_start_service(service_name):
+def process_start_service(service_name: str):
     try:
-        if len(config['services']['system']) > 0:
-            if service_name in config['services']['system']:
-                init_start_service_procedure(service_name, sys=True)
-        # fire user endpoints
-        if len(config['services']['business']) > 0:
-            if service_name in config['services']['business']:
-                init_start_service_procedure(service_name, sys=False)
-        return 'service started'
+        service_config = config['services']['system'].get(service_name, None)
+        if service_config is not None:
+            init_start_service_procedure(service_name, is_sys=True)
+            return 'service started'
+        service_config = config['services']['business'].get(service_name, None)
+        if service_config is not None:
+            init_start_service_procedure(service_name, is_sys=False)
+            return 'service started'
     except Exception as e:
-        # print_c(e)
         log.exception(e)
         return 'service failed to start'
+    # try:
+    #     if len(config['services']['system']) > 0:
+    #         if service_name in config['services']['system']:
+    #             init_start_service_procedure(service_name, is_sys=True)
+    #     # fire user endpoints
+    #     if len(config['services']['business']) > 0:
+    #         if service_name in config['services']['business']:
+    #             init_start_service_procedure(service_name, is_sys=False)
+    #     return 'service started'
+    # except Exception as e:
+    #     # print_c(e)
+    #     log.exception(e)
+    #     return 'service failed to start'
 
 
 def check_fuse_logger_file_is_current_logger(filepath):
@@ -309,14 +352,13 @@ def remove_folder_contents(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
-
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.unlink(file_path)
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
             log.info(f"Cleared contents of '{folder}' folder")
         except Exception as e:
-        # print('Failed to delete %s. Reason: %s' % (file_path, e))
+            # print('Failed to delete %s. Reason: %s' % (file_path, e))
             log.exception('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
@@ -325,7 +367,7 @@ def clear_log_folder():
     remove_folder_contents(log_folder_name)
 
 
-def recreate_log_foler_if_not_exists():
+def recreate_log_folder_if_not_exists():
     log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
     isExist = os.path.exists(log_folder_name)
 
@@ -337,4 +379,4 @@ def recreate_log_foler_if_not_exists():
 
 def generate_on_start_unique_fuse_id():
     # TODO, unique ID is NOT sent to constants of other processes; fix
-    c.on_start_unique_fuse_id = c.fuse_instance_name+'-'+generate_random_uid4()
+    c.on_start_unique_fuse_id = c.fuse_instance_name + '-' + generate_random_uid4()

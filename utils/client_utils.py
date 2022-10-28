@@ -51,7 +51,7 @@ from utils import db_utils
 # "request_type": "GET", <- request type
 # "requires" : [],       <- what variables we will try to put into json
 # headers???? in task file??? some default for fuse?
-def checkContext(context):
+def check_context(context):
     if context:
         if not isinstance(context, str):
             return True
@@ -91,20 +91,19 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
     # if we get a string + claimed data type, we check depending on claimed data type;
 
     # TODO, I hate to save these in the code, in future make it some config fileS(not only for text) or whatever
-    text_data_types = {}
+    text_data_types = {'text/css': '.css',
+                       'text/csv': '.csv',
+                       'text/html': '.html',
+                       'text/calendar': '.ics',
+                       'text/plain': '.txt',
+                       'text/javascript': '.js',
+                       'text/python': '.py',
+                       'text/jupyter': '.ipynb',
+                       'text/java': '.java',
+                       'text/c': '.c',
+                       'text/cpp': '.cpp'}
     # text section
-    text_data_types['text/css'] = '.css'
-    text_data_types['text/csv'] = '.csv'
-    text_data_types['text/html'] = '.html'
-    text_data_types['text/calendar'] = '.ics'
-    text_data_types['text/plain'] = '.txt'
     # code file section
-    text_data_types['text/javascript'] = '.js'
-    text_data_types['text/python'] = '.py'
-    text_data_types['text/jupyter'] = '.ipynb'
-    text_data_types['text/java'] = '.java'
-    text_data_types['text/c'] = '.c'
-    text_data_types['text/cpp'] = '.cpp'
     # not sure about c libs tho
 
     if claimed_data_type['Content-Type'] in text_data_types.keys():
@@ -137,34 +136,33 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
 
     # TODO, I hate to save these in the code, in future make it some config fileS(not only for text) or whatever
     # images, videos, music
-    mm_data_types = {}
-    mm_data_types['image/avif'] = '.avif'
-    mm_data_types['image/bmp'] = '.bmp'
-    mm_data_types['image/gif'] = '.gif'
-    mm_data_types['image/vnd.microsoft.icon'] = '.ico'
-    mm_data_types['image/jpeg'] = '.jpeg'
-    mm_data_types['image/png'] = '.png'
-    mm_data_types['image/svg+xml'] = '.svg'
-    mm_data_types['image/tiff'] = '.tiff'
-    mm_data_types['image/webp'] = '.webp'
-    mm_data_types['video/x-msvideo'] = '.avi'
-    mm_data_types['video/mp4'] = '.mp4'
-    mm_data_types['video/ogg'] = '.ogv'
-    mm_data_types['video/mp2t'] = '.ts'
-    mm_data_types['video/webm'] = '.webm'
-    mm_data_types['video/3gpp'] = '.3gp'
-    mm_data_types['video/3gpp2'] = '.3g2'
-    mm_data_types['audio/aac'] = '.aac'
-    mm_data_types['audio/x-cdf'] = '.cda'
-    mm_data_types['audio/x-midi'] = '.midi'
-    mm_data_types['audio/midi'] = '.midi'
-    mm_data_types['audio/mpeg'] = '.mp3'
-    mm_data_types['audio/ogg'] = '.oga'
-    mm_data_types['audio/opus'] = '.opus'
-    mm_data_types['audio/wav'] = '.wav'
-    mm_data_types['audio/webm'] = '.weba'
-    mm_data_types['audio/3gpp'] = '.3gp'
-    mm_data_types['audio/3gpp2'] = '.3g2'
+    mm_data_types = {'image/avif': '.avif',
+                     'image/bmp': '.bmp',
+                     'image/gif': '.gif',
+                     'image/vnd.microsoft.icon': '.ico',
+                     'image/jpeg': '.jpeg',
+                     'image/png': '.png',
+                     'image/svg+xml': '.svg',
+                     'image/tiff': '.tiff',
+                     'image/webp': '.webp',
+                     'video/x-msvideo': '.avi',
+                     'video/mp4': '.mp4',
+                     'video/ogg': '.ogv',
+                     'video/mp2t': '.ts',
+                     'video/webm': '.webm',
+                     'video/3gpp': '.3gp',
+                     'video/3gpp2': '.3g2',
+                     'audio/aac': '.aac',
+                     'audio/x-cdf': '.cda',
+                     'audio/x-midi': '.midi',
+                     'audio/midi': '.midi',
+                     'audio/mpeg': '.mp3',
+                     'audio/ogg': '.oga',
+                     'audio/opus': '.opus',
+                     'audio/wav': '.wav',
+                     'audio/webm': '.webm',
+                     'audio/3gpp': '.3gp',
+                     'audio/3gpp2': '.3g2'}
 
     if claimed_data_type['Content-Type'] in mm_data_types.keys():
         if isinstance(data, str):
@@ -186,52 +184,51 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
                 remade_data = {'file': (f"data.{ext}", data)}
                 return arg_name, confirmed_data_type, remade_data
         else:
-            #         here we assume that NOT a string was attempted to be send as mm_data_type. Not a path. Then it should be a file?
+            # here we assume that NOT a string was attempted to be send as mm_data_type. Not a path. Then it should be a file?
             arg_name = 'files'
             remade_data = {'file': data}
             confirmed_data_type = claimed_data_type
             return arg_name, confirmed_data_type, remade_data
 
     # despite code being very similar, I want checks for content-type application separately for logic division purposes
-    application_data_types = {}
-    application_data_types['application/x-abiword'] = '.abw'
-    application_data_types['application/x-freearc'] = '.arc'
-    application_data_types['application/vnd.amazon.ebook'] = '.azw'
-    application_data_types['application/octet-stream'] = '.bin'
-    application_data_types['application/x-bzip'] = '.bz'
-    application_data_types['application/x-bzip2'] = '.bz2'
-    application_data_types['application/x-x-cdf'] = '.cda'
-    application_data_types['application/x-csh'] = '.csh'
-    application_data_types['application/msword'] = '.doc'
-    application_data_types['application/vnd.openxmlformats-officedocument.wordprocessingml.document'] = '.docx'
-    application_data_types['application/vnd.ms-fontobject'] = '.eot'
-    application_data_types['application/epub+zip'] = '.epub'
-    application_data_types['application/gzip'] = '.gz'
-    application_data_types['application/java-archive'] = '.jar'
-    application_data_types['application/json'] = '.json'
-    application_data_types['application/ld+json'] = '.jsonld'
-    application_data_types['application/vnd.apple.installer+xml'] = '.mpkg'
-    application_data_types['application/vnd.oasis.opendocument.presentation'] = '.odp'
-    application_data_types['application/vnd.oasis.opendocument.spreadsheet'] = '.ods'
-    application_data_types['application/vnd.oasis.opendocument.text'] = '.odt'
-    application_data_types['application/ogg'] = '.ogx'
-    application_data_types['application/pdf'] = '.pdf'
-    application_data_types['application/x-httpd-php'] = '.php'
-    application_data_types['application/vnd.ms-powerpoint'] = '.ppt'
-    application_data_types['application/vnd.openxmlformats-officedocument.presentationml.presentation'] = '.pptx'
-    application_data_types['application/vnd.rar'] = '.rar'
-    application_data_types['application/rtf'] = '.rtf'
-    application_data_types['application/x-sh'] = '.sh'
-    application_data_types['application/x-tar'] = '.tar'
-    application_data_types['application/vnd.visio'] = '.vsd'
-    application_data_types['application/xhtml+xml'] = '.xhtml'
-    application_data_types['application/vnd.ms-excel'] = '.xls'
-    application_data_types['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'] = '.xlsx'
-    application_data_types['application/xml'] = '.xml'
-    application_data_types['application/atom+xml'] = '.xml'
-    application_data_types['application/vnd.mozilla.xul+xml'] = '.xul'
-    application_data_types['application/zip'] = '.zip'
-    application_data_types['application/x-7z-compressed'] = '.7z'
+    application_data_types = {'application/x-abiword': '.abw',
+                              'application/x-freearc': '.arc',
+                              'application/vnd.amazon.ebook': '.azw',
+                              'application/octet-stream': '.bin',
+                              'application/x-bzip': '.bz',
+                              'application/x-bzip2': '.bz2',
+                              'application/x-x-cdf': '.cda',
+                              'application/x-csh': '.csh',
+                              'application/msword': '.doc',
+                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+                              'application/vnd.ms-fontobject': '.eot',
+                              'application/epub+zip': '.epub',
+                              'application/gzip': '.gz',
+                              'application/java-archive': '.jar',
+                              'application/json': '.json',
+                              'application/ld+json': '.jsonld',
+                              'application/vnd.apple.installer+xml': '.mpkg',
+                              'application/vnd.oasis.opendocument.presentation': '.odp',
+                              'application/vnd.oasis.opendocument.spreadsheet': '.ods',
+                              'application/vnd.oasis.opendocument.text': '.odt',
+                              'application/ogg': '.ogx',
+                              'application/pdf': '.pdf',
+                              'application/x-httpd-php': '.php',
+                              'application/vnd.ms-powerpoint': '.ppt',
+                              'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+                              'application/vnd.rar': '.rar',
+                              'application/rtf': '.rtf',
+                              'application/x-sh': '.sh',
+                              'application/x-tar': '.tar',
+                              'application/vnd.visio': '.vsd',
+                              'application/xhtml+xml': '.xhtml',
+                              'application/vnd.ms-excel': '.xls',
+                              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+                              'application/xml': '.xml',
+                              'application/atom+xml': '.xml',
+                              'application/vnd.mozilla.xul+xml': '.xul',
+                              'application/zip': '.zip',
+                              'application/x-7z-compressed': '.7z'}
 
     if claimed_data_type['Content-Type'] in application_data_types.keys():
         if isinstance(data, str):
@@ -308,7 +305,7 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
 
     # prepare context... if we find equals there we assume previous method of getting params out of there made an oopsie
     # also context should start with / and not finish with it
-    if checkContext(context):
+    if check_context(context):
         raise Exception(f"Incorrect context used: {context}")
 
     # prepare data. now then. I want data-type header
@@ -339,7 +336,7 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
     return resp
 
 
-def localFuseHasNeededService(service):
+def local_fuse_has_needed_service(service):
     rows1 = db_utils.select_from_table_by_one_column(c.sys_services_table_name, 'name', service, 'String')
     rows2 = db_utils.select_from_table_by_one_column(c.business_services_table_name, 'name', service, 'String')
     rows1.extend(rows2)
@@ -360,7 +357,7 @@ def provide_url_from_service(service):
     else:  # it should be a fuse node name then, first try to find it locally then try to address other fuses
         # also remember about load balancing
         # without '.' means it is a fuse node
-        if services_from_db := localFuseHasNeededService(service):
+        if services_from_db := local_fuse_has_needed_service(service):
             # address to local + load banalnce
             if len(services_from_db) > 1:  # need to load balance
                 raise Exception('Implement me')

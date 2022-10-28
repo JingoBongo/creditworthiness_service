@@ -13,25 +13,24 @@ cur_file_name = os.path.basename(__file__)
 root_path = c.root_path
 config = yaml_utils.read_from_yaml(root_path + c.conf_path)
 engine_path = c.sql_engine_path
-dict = {}
-dict['BigInteger'] = alc.BigInteger
-dict['Date'] = alc.Date
-dict['Boolean'] = alc.Boolean
-dict['DateTime'] = alc.DateTime
-dict['Enum'] = alc.Enum
-dict['Float'] = alc.Float
-dict['Integer'] = alc.Integer
-dict['Interval'] = alc.Interval
-dict['LargeBinary'] = alc.LargeBinary
-dict['MatchType'] = alc.Date
-dict['Numeric'] = alc.Numeric
-dict['PickleType'] = alc.PickleType
-dict['SmallInteger'] = alc.SmallInteger
-dict['String'] = alc.String
-dict['Text'] = alc.Text
-dict['Time'] = alc.Time
-dict['Unicode'] = alc.Unicode
-dict['UnicodeText'] = alc.UnicodeText
+alc_dictionary = {'BigInteger': alc.BigInteger,
+                  'Date': alc.Date,
+                  'Boolean': alc.Boolean,
+                  'DateTime': alc.DateTime,
+                  'Enum': alc.Enum,
+                  'Float': alc.Float,
+                  'Integer': alc.Integer,
+                  'Interval': alc.Interval,
+                  'LargeBinary': alc.LargeBinary,
+                  'MatchType': alc.Date,
+                  'Numeric': alc.Numeric,
+                  'PickleType': alc.PickleType,
+                  'SmallInteger': alc.SmallInteger,
+                  'String': alc.String,
+                  'Text': alc.Text,
+                  'Time': alc.Time,
+                  'Unicode': alc.Unicode,
+                  'UnicodeText': alc.UnicodeText}
 
 
 # def print_c(text):
@@ -48,9 +47,7 @@ dict['UnicodeText'] = alc.UnicodeText
 def return_column_type_by_name(column, kwargs):
     alc = kwargs['alc']
 
-
-
-    return dict.get(column, alc.String)
+    return alc_dictionary.get(column, alc.String)
 
 
 def process_one_column(column, kwargs):

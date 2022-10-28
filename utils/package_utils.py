@@ -3,8 +3,6 @@ import subprocess
 import tempfile
 from utils import constants as c
 
-
-
 import os
 
 all_py_local_files = []
@@ -15,21 +13,18 @@ root_path = c.root_path
 conf_path = c.conf_path
 
 
-
 def progress_bar(progress, total, text=''):
-    percent = 100* (progress / float(total))
-    bar = '■' * int(percent) + '-'*(100-int(percent))
-    print(f"\r|{bar}| {percent:.2f}% : {str(text)}", end = "\r")
+    percent = 100 * (progress / float(total))
+    bar = '■' * int(percent) + '-' * (100 - int(percent))
+    print(f"\r|{bar}| {percent:.2f}% : {str(text)}", end="\r")
 
 
 def try_import_and_install_package(package_name):
     try:
         if package_name:
             str = f"import {package_name}"
-            if str:
-                if len(str) > 0:
-                    exec(str)
-                    # print(f"{package_name} is already installed")
+            if str and len(str) > 0:
+                exec(str)
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name} --user")
@@ -39,24 +34,30 @@ def try_import_and_install_package(package_name):
             print(e)
 
 
-def try_import_and_install_uncommon_package(import_name, pac_name, pac_ver):
-    # pac_name
-    if not pac_ver == 'any':
-        module_postfix = '=='+pac_ver
-    else:
-        module_postfix = ''
+def try_import_install_uncommon_packages(pac_name, pac_ver):
+    module_postfix = ('==' + pac_ver) if not pac_ver == 'any' else ''
     try:
-        try:
-            # tries to find module locally
-            cmd = ['pip3', 'show', pac_name]
-            with tempfile.TemporaryFile() as tempf:
-                proc = subprocess.Popen(cmd, stdout=tempf)
-                proc.wait()
-                tempf.seek(0)
-                version = tempf.read()
-        except:
-            version = None
+        # try:
+        #     # tries to find module locally
+        #     cmd = ['pip3', 'show', pac_name]
+        #     with tempfile.TemporaryFile() as tempf:
+        #         proc = subprocess.Popen(cmd, stdout=tempf)
+        #         proc.wait()
+        #         tempf.seek(0)
+        #         version = tempf.read()
+        # except:
+        #     version = None
+
+        version = None
+        cmd = ['pip3', 'show', pac_name]
+        with tempfile.TemporaryFile() as tempf:
+            proc = subprocess.Popen(cmd, stdout=tempf)
+            proc.wait()
+            tempf.seek(0)
+            version = tempf.read()
+
         version = str(version)
+
         # if module isn't installed locally, install it
         if not version or len(version) < 20:
             os.system(f"pip3 install -Iv {pac_name}{module_postfix}")
@@ -80,27 +81,37 @@ def try_import_and_install_uncommon_package(import_name, pac_name, pac_ver):
         print(e)
 
 
-def check_string_has_no_occurrences_in_the_list(string, list):
-    has_occurrence = True
-    for l in list:
-        if l in string:
-            # print(f"{l} IN {string}????")
-            has_occurrence = False
-    return has_occurrence
+def check_restricted_folders_to_be_in_path(path: str, restricted_folders: list):
+    """
+    check if any of restricted folders is in path
+
+    Args:
+        path (str): file path
+        restricted_folders (list): folders not to scan for modules installation
+
+    Returns:
+        does file path contain any restricted folder
+    """
+    for restricted_folder in restricted_folders:
+        if restricted_folder in path:
+            return False
+    return True
 
 
-def get_package_name_from_line(line):
+def get_package_name_from_line(line: str):
+    """
+    get name of package to install using pip
+
+    Args:
+        line (str): line that may contain import of package
+
+    Returns:
+        string-formatted name of package to import
+    """
     line = line.strip()
-    # print(f"Line that got into 'get_package_name_from_file' : {line}")
+
     if line.startswith('import '):
-        # print(f"'get_package_name_from_file' returned {line.split(' ')[1]}")
-
-        #   script can take any usage of word 'import' meaning that there should be a space after word that
-        # specifies start of module name to import
         return line.split(' ')[1]
-
-    #   are you sure it is good idea to set 'from' condition apart from 'import' one? In such a case if line has
-    # 'from' in it, then there can be an error of finding unnecessary 'from' in code
     if 'from ' in line:
         line = line.split('import')[0]
         line = line.split(' ')[1]
@@ -111,25 +122,32 @@ def get_package_name_from_line(line):
         print(f"Dafuq is this line? : {line}")
 
 
-def is_local_import(line):
-    for py in all_py_local_files:
-        if py in line:
-            # print(f"{line} is local")
+def is_local_import(line: str):
+    """
+    check if import is a local file that is imported
+
+    Args:
+        line (str): line that may contain import of module
+
+    Returns:
+        is this import a local file?
+    """
+    for local_file_name in all_py_local_files:
+        if local_file_name in line:
             return True
-    # print(f"{line} is NOT local")
     return False
 
 
 def find_used_packages():
     global all_py_local_files
     global all_imports
-    restricted_folders = ['orchestra_env', 'test1env_withoutml', 'empty_env']
+    restricted_folders = ['orchestra_env', 'test1env_withoutml', 'empty_env', 'venv']
     root_path = c.root_path
 
     for root, dirs, files in os.walk(root_path):
         for file in files:
             file_full_path = os.path.join(root, file)
-            if file.endswith(".py") and check_string_has_no_occurrences_in_the_list(file_full_path, restricted_folders):
+            if file.endswith(".py") and check_restricted_folders_to_be_in_path(file_full_path, restricted_folders):
                 all_py_local_files.append(file.replace('.py', ''))
                 with open(file_full_path, encoding='utf-8') as f:
                     for line in f.readlines():
@@ -141,8 +159,6 @@ def find_used_packages():
     all_imports = [im for im in all_imports if not is_local_import(im)]
     all_imports = [get_package_name_from_line(im) for im in all_imports]
     all_imports = list(set(all_imports))
-    # print('all non local imports')
-    # print(all_imports)
     return all_imports
 
 
@@ -152,10 +168,9 @@ def read_from_yaml(file_path):
         with open(file_path) as f:
             return yaml.safe_load(f)
     except Exception as e:
-        # print(e)
-        # print(f"*not a proper print* error reading {file_path} file")
         print(e)
         print(f"*not a proper print* error reading {file_path} file")
+
 
 def run_importing_process():
     print(f"Checking installed modules")
@@ -166,19 +181,19 @@ def run_importing_process():
         progress_bar(ind, len(used_packages), f"processing : {im}")
         try_import_and_install_package(im)
         ind += 1
-    print()
-    print(f"Checking installed uncommon modules from config")
+
+    print(f"\nChecking installed uncommon modules from config")
     try:
         # os.system(f"pip3 install -Iv pyyaml")
-        try_import_and_install_uncommon_package('pyyaml', 'pyyaml', 'any')
-    except:
+        try_import_install_uncommon_packages('pyyaml', 'any')
+    except Exception as e:
         print('PYYAML should be already installed')
+
     config = read_from_yaml(root_path + conf_path)
     try:
         for module in config['uncommon_modules']:
-            try_import_and_install_uncommon_package(config['uncommon_modules'][module]['import_name'],
-                                                    config['uncommon_modules'][module]['module_name'],
-                                                    config['uncommon_modules'][module]['module_version'])
+            try_import_install_uncommon_packages(config['uncommon_modules'][module]['module_name'],
+                                                 config['uncommon_modules'][module]['module_version'])
     except Exception as e:
         print(f"Modules preparation complete")
 

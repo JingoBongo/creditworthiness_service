@@ -22,10 +22,12 @@ class EndpointAction(object):
         self.action()
         return self.response
 
-def removekey(d, key):
+
+def remove_key(d, key):
     r = dict(d)
     del r[key]
     return r
+
 
 def life_ping_handler():
     return '{"status":"alive"}'
@@ -33,6 +35,7 @@ def life_ping_handler():
 
 def not_found_handler(e):
     return '{"kak_kakati": "This is not a thing. But you can see what is available at /apidocs"}'
+
 
 class FuseNode(Flask):
     def __init__(self, *args, **kwargs):
@@ -46,10 +49,7 @@ class FuseNode(Flask):
             parser.add_argument('-local')
             args = parser.parse_args()
             endpoint_port = args.port
-            if args.local == "True":
-                host = "127.0.0.1"
-            else:
-                host = g.host
+            host = "127.0.0.1" if args.local == 'True' else g.host
             self.debug = g.debug
             self.host = host
             self.port = endpoint_port
@@ -62,7 +62,6 @@ class FuseNode(Flask):
             print(e)
             self.logger.info(f"Something went wrong while launching fuse node")
             self.logger.info(e)
-
 
     def run(self, *args, **kwargs):
         if 'port' in kwargs.keys():
@@ -78,8 +77,7 @@ class FuseNode(Flask):
         w_log = logging.getLogger('werkzeug')
         w_log.setLevel(logging.DEBUG)
         w_log.addHandler(c.current_rotating_handler)
+
         # w_log.addHandler(c.current_console_handler)
         self.logger = log
         return log
-
-

@@ -50,7 +50,7 @@ def process_one_service(n):
         # print_c(f"before life ping init start services")
 
         if n['name'] in config['services']['system'].keys():
-            g.init_start_service_procedure(n['name'], sys=True)
+            g.init_start_service_procedure(n['name'], is_sys=True)
             return
             # for key in config['services']['system'].keys():
             #     if key == n['name']:
@@ -58,7 +58,7 @@ def process_one_service(n):
             #         return
             #     break
         if n['name'] in config['services']['business'].keys():
-            g.init_start_service_procedure(n['name'], sys=False)
+            g.init_start_service_procedure(n['name'], is_sys=False)
             return
             # for key in config['services']['business'].keys():
             #     if key == n['name']:

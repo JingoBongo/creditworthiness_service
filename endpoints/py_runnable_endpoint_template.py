@@ -19,7 +19,7 @@ def send_n():
 
 @app.route('/index')
 def index():
-    return 'Did you expect a default page or something?))'
+    return 'Did you expect a default page or something? amogus'
 
 
 

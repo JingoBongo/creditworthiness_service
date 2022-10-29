@@ -13,7 +13,7 @@ from utils.general_utils import init_start_function_process, read_from_tasks_jso
 from utils.pickle_utils import save_to_pickle, read_from_pickle
 from utils.schedulers_utils import launch_taskmaster_scheduler_if_not_exists
 
-from utils.taskmaster_utils import Input_Task, taskmaster_main_process
+from utils.taskmaster_utils import InputTask, taskmaster_main_process
 
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
@@ -33,7 +33,7 @@ def hello():
 @app.route('/tasks/persistive-start/<string:task_name>', methods=['GET', 'POST'])
 def persistive_task(task_name):
     task_unique_name = str(task_name) + c.tasks_name_delimiter + random_utils.generate_random_uid4()
-    task_obj = Input_Task(task_name, task_unique_name)
+    task_obj = InputTask(task_name, task_unique_name)
     data = None
     if request.method == 'POST':
         data = request.get_json()
@@ -50,7 +50,7 @@ def persistive_task(task_name):
 @app.route('/tasks/lazy-start/<string:task_name>', methods=['GET', 'POST'])
 def lazy_task(task_name):
     task_unique_name = str(task_name) + c.tasks_name_delimiter + random_utils.generate_random_uid4()
-    task_obj = Input_Task(task_name, task_unique_name)
+    task_obj = InputTask(task_name, task_unique_name)
     data = None
     if request.method == 'POST':
         data = request.get_json()
@@ -114,7 +114,7 @@ def start_task(task_name):
     # scheduler will check if there are unfinished tasks, then it has sense AND can be done less frequently
     tasks = g.read_from_tasks_json_file()
     task_unique_name = str(task_name) + c.tasks_name_delimiter + random_utils.generate_random_uid4()
-    task_obj = Input_Task(task_name, task_unique_name)
+    task_obj = InputTask(task_name, task_unique_name)
     tasks['tasks'].append(task_obj)
     g.write_tasks_to_json_file(tasks)
 

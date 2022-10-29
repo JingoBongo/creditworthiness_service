@@ -2,7 +2,8 @@ from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
 
-class Input_Task:
+
+class InputTask:
     task_name = None
     task_unique_name = None
     status = c.tasks_status_new

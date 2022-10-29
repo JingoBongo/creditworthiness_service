@@ -5,7 +5,12 @@ from utils.decorators.db_decorators import sql_alchemy_db_func
 import sqlite3
 from utils import constants as c
 from utils import logger_utils as log
-import sqlalchemy as alc
+# import sqlalchemy as alc
+
+# meh, takes x times less lines, still a bit ugly
+from sqlalchemy import BigInteger, Boolean, DateTime, Enum, Float, Integer, Interval, Date, LargeBinary, Numeric
+from sqlalchemy import PickleType, SmallInteger, String, Text, Time, Unicode, UnicodeText
+
 
 from utils.json_utils import read_from_json
 
@@ -13,25 +18,24 @@ cur_file_name = os.path.basename(__file__)
 root_path = c.root_path
 config = yaml_utils.read_from_yaml(root_path + c.conf_path)
 engine_path = c.sql_engine_path
-dict = {}
-dict['BigInteger'] = alc.BigInteger
-dict['Date'] = alc.Date
-dict['Boolean'] = alc.Boolean
-dict['DateTime'] = alc.DateTime
-dict['Enum'] = alc.Enum
-dict['Float'] = alc.Float
-dict['Integer'] = alc.Integer
-dict['Interval'] = alc.Interval
-dict['LargeBinary'] = alc.LargeBinary
-dict['MatchType'] = alc.Date
-dict['Numeric'] = alc.Numeric
-dict['PickleType'] = alc.PickleType
-dict['SmallInteger'] = alc.SmallInteger
-dict['String'] = alc.String
-dict['Text'] = alc.Text
-dict['Time'] = alc.Time
-dict['Unicode'] = alc.Unicode
-dict['UnicodeText'] = alc.UnicodeText
+alc_dictionary = {'BigInteger': BigInteger,
+                  'Date': Date,
+                  'Boolean': Boolean,
+                  'DateTime': DateTime,
+                  'Enum': Enum,
+                  'Float': Float,
+                  'Integer': Integer,
+                  'Interval': Interval,
+                  'LargeBinary': LargeBinary,
+                  'MatchType': Date,
+                  'Numeric': Numeric,
+                  'PickleType': PickleType,
+                  'SmallInteger': SmallInteger,
+                  'String': String,
+                  'Text': Text,
+                  'Time': Time,
+                  'Unicode': Unicode,
+                  'UnicodeText': UnicodeText}
 
 
 # def print_c(text):
@@ -47,10 +51,7 @@ dict['UnicodeText'] = alc.UnicodeText
 
 def return_column_type_by_name(column, kwargs):
     alc = kwargs['alc']
-
-
-
-    return dict.get(column, alc.String)
+    return alc_dictionary.get(column, alc.String)
 
 
 def process_one_column(column, kwargs):

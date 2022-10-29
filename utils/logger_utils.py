@@ -7,9 +7,7 @@ import logging
 from utils import constants as c
 
 
-
 def setup_logger(name, log_file, level=logging.INFO):
-
     def decorate_emit(fn):
         def new(*args):
             levelno = args[0].levelno
@@ -25,29 +23,31 @@ def setup_logger(name, log_file, level=logging.INFO):
                 color = '\x1b[35;1m'
             else:
                 color = '\x1b[0m'
+
             # add colored *** in the beginning of the message
             args[0].msg = "{0}***\x1b[0m {1}".format(color, args[0].msg)
 
             # new feature i like: bolder each args of message
             args[0].args = tuple('\x1b[1m' + arg + '\x1b[0m' for arg in args[0].args)
             return fn(*args)
+
         return new
 
-    # logFormatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(filename)s] [%(levelname)-s] %(message)s")
-    logFormatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(levelname)-s] %(message)s")
+    # log_formatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(filename)s] [%(levelname)-s] %(message)s")
+    log_formatter = logging.Formatter("[%(asctime)s] [%(name)-s] [%(levelname)-s] %(message)s")
     # handler = logging.FileHandler(log_file)
-    handler = RotatingFileHandler(log_file, maxBytes=50*1024, backupCount=2)
-    handler.setFormatter(logFormatter)
-    consoleHandler = logging.StreamHandler(sys.stdout)
-    consoleHandler.setFormatter(logFormatter)
-    consoleHandler.emit = decorate_emit(consoleHandler.emit)
+    handler = RotatingFileHandler(log_file, maxBytes=50 * 1024, backupCount=2)
+    handler.setFormatter(log_formatter)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(log_formatter)
+    console_handler.emit = decorate_emit(console_handler.emit)
 
     c.current_rotating_handler = handler
-    c.current_console_handler = consoleHandler
+    c.current_console_handler = console_handler
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
-    logger.addHandler(consoleHandler)
+    logger.addHandler(console_handler)
 
     return logger
 
@@ -61,6 +61,7 @@ def get_log(name):
     sys.excepthook = handle_exception
     return log
 
+
 def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -72,17 +73,22 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 def info(text):
     c.current_subprocess_logger.info(text)
 
+
 def debug(text):
     c.current_subprocess_logger.debug(text)
+
 
 def error(text):
     c.current_subprocess_logger.error(text)
 
+
 def warn(text):
     c.current_subprocess_logger.warn(text)
 
+
 def critical(text):
     c.current_subprocess_logger.critical(text)
+
 
 def exception(text):
     c.current_subprocess_logger.exception(text)

@@ -8,8 +8,8 @@ from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
 from utils import db_utils as db
-from utils.dataclasses.Input_Task import Input_Task
-from utils.dataclasses.Task_From_File import Task_From_File
+from utils.dataclasses.Input_Task import InputTask
+from utils.dataclasses.Task_From_File import TaskFromFile
 from utils.dataclasses.Task_Step_From_File import Task_Step_From_File
 from utils.general_utils import read_from_tasks_json_file, kill_process, write_tasks_to_json_file
 from utils.pickle_utils import save_to_pickle, read_from_pickle
@@ -25,7 +25,7 @@ def task_is_in_tasks(task, tasks_from_db):
     return False
 
 
-def end_task_procedure(task: Task_From_File, error_reason):
+def end_task_procedure(task: TaskFromFile, error_reason):
     log.error(error_reason)
     task.status = c.tasks_status_errored
     tasks_from_json = read_from_tasks_json_file()
@@ -70,14 +70,14 @@ def prepare_data_for_post_request(task, needed_keys):
         return needed_data
 
 
-def required_steps_arent_finished(required_steps, task: Task_From_File):
+def required_steps_arent_finished(required_steps, task: TaskFromFile):
     for step in required_steps:
         if not step in task.finished_steps:
             return True
     return False
 
 
-def process_step(task: Task_From_File, index):
+def process_step(task: TaskFromFile, index):
     # task: Task_From_File = c.taskmaster_task_object
     # cover step in try catch?
     print(f"I am inside process new step {index}")
@@ -137,7 +137,7 @@ def process_step(task: Task_From_File, index):
     print('debug point')
 
 
-def process_new_task(task: Task_From_File):
+def process_new_task(task: TaskFromFile):
     # i have concerns that working with task object and not having it as global bariables means I need to set it in
     # constants
     # upd: given we work in a threadpool, it shares data this method has and provides task object as it should
@@ -194,7 +194,7 @@ def treat_task_according_to_status(task, task_file_content):
             f"Task {task['task_name']} was ignored by taskmaster scheduler since it was not 'new' or 'in progress'")
 
 
-def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
+def taskmaster_main_process(input_task_obj: InputTask, data, result=None):
     try:
         # first 'if' in lazy_task case; then save overall result in specific pickle
         log.get_log(f"taskmaster_task_process")
@@ -209,7 +209,7 @@ def taskmaster_main_process(input_task_obj: Input_Task, data, result=None):
                                                                "String")
         if len(task_type_from_db) == 1:
             task_type_from_db = task_type_from_db[0]
-            task = Task_From_File(task_type_from_db['task_full_path'], input_task_obj.task_unique_name, data)
+            task = TaskFromFile(task_type_from_db['task_full_path'], input_task_obj.task_unique_name, data)
 
             new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name": input_task_obj.task_unique_name,
                              c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,

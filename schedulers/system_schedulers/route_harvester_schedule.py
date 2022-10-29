@@ -21,13 +21,12 @@ cur_file_name = os.path.basename(__file__)
 log.get_log(c.route_harvester_schedule_name)
 
 
-
 def job():
     route_harvester_job_body()
 
 
 # schedule.every(15).seconds.do(job)
-schedule.every(10).minutes.do(job)
+schedule.every(2).minutes.do(job)
 
 try:
     while True:

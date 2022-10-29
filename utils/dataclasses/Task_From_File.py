@@ -6,7 +6,7 @@ from utils import general_utils as g
 from utils.dataclasses.Task_Step_From_File import Task_Step_From_File
 
 
-class Task_From_File:
+class TaskFromFile:
     def __init__(self, task_file_path, task_unique_name, data):
         task_dict_from_file = g.read_from_json(task_file_path)
         self.task_name = task_dict_from_file['task_name']
@@ -22,8 +22,8 @@ class Task_From_File:
         if task_dict_from_file['init_requires']:
             temp_init_requires_keys = task_dict_from_file['init_requires']
 
-        self.checkThereAreEnoughInitVariables(temp_init_requires_keys, data_keys)
-        self.checkNeededArgumentKeysAreProvided(temp_init_requires_keys, data_keys)
+        self.check_there_are_enough_init_variables(temp_init_requires_keys, data_keys)
+        self.check_if_needed_argument_keys_provided(temp_init_requires_keys, data_keys)
         # 2. we loop through init requires because client can send extra data that we don't need
         temp_init_requires_dict = {}
         for key in temp_init_requires_keys:
@@ -52,17 +52,17 @@ class Task_From_File:
         self.error_logs = None
     #     TODO: very urgent todo; if there are duplicates of keys, what to do?
 
-    def checkThereAreEnoughInitVariables(self, temp_init_requires, data_keys):
+    def check_there_are_enough_init_variables(self, temp_init_requires, data_keys):
         if len(temp_init_requires) > len(data_keys):
             log.error(
-                f"Failed to create {Task_From_File.__name__}; Task needed next arguments:{temp_init_requires}, but got: {data_keys}")
+                f"Failed to create {TaskFromFile.__name__}; Task needed next arguments:{temp_init_requires}, but got: {data_keys}")
             raise Exception(
-                f"Failed to create {Task_From_File.__name__}; Task needed next arguments:{temp_init_requires}, but got: {data_keys}")
+                f"Failed to create {TaskFromFile.__name__}; Task needed next arguments:{temp_init_requires}, but got: {data_keys}")
 
-    def checkNeededArgumentKeysAreProvided(self, temp_init_requires, data_keys):
+    def check_if_needed_argument_keys_provided(self, temp_init_requires, data_keys):
         for key in temp_init_requires:
             if key not in data_keys:
                 log.error(
-                    f"Failed to create {Task_From_File.__name__}; Task needed argument:{key}, but got: {data_keys}")
+                    f"Failed to create {TaskFromFile.__name__}; Task needed argument:{key}, but got: {data_keys}")
                 raise Exception(
-                    f"Failed to create {Task_From_File.__name__}; Task needed argument:{key}, but got: {data_keys}")
+                    f"Failed to create {TaskFromFile.__name__}; Task needed argument:{key}, but got: {data_keys}")

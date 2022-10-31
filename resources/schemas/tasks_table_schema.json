@@ -6,29 +6,29 @@
       "primary_key": "True"
     },
     {
-      "name": "function_name",
+      "name": "task_name",
       "type": "String",
-      "nullable": "True"
-    },
-    {
-      "name": "pyfile_name",
-      "type": "String",
-      "nullable": "True"
-    },
-    {
-      "name": "pyfile_path",
-      "type": "String",
-      "nullable": "True"
-    },
-    {
-      "name": "arguments",
-      "type": "String",
-      "nullable": "True"
-    },
-    {
-      "name": "pid",
-      "type": "Integer",
       "nullable": "False"
+    },
+    {
+      "name": "task_unique_name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "on_start_unique_fuse_id",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "status",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "task_folder_path",
+      "type": "String",
+      "nullable": "True"
     }
   ]
 }

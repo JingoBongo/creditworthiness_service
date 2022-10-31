@@ -19,8 +19,8 @@ import multiprocessing
 db_name = 'main_db.db'
 cur_file_name = os.path.basename(__file__)
 config = yaml_utils.read_from_yaml(c.root_path + c.conf_path)
-busy_ports_json_path = c.root_path + config['general']['busy_ports_json_file']
-tasks_json_path = c.root_path + config['general']['tasks_json_file']
+# busy_ports_json_path = c.root_path + config['general']['busy_ports_json_file']
+# tasks_json_path = c.root_path + config['general']['tasks_json_file']
 debug = config['general']['debug']
 host = config['general']['host']
 sql_engine_path = c.sql_engine_path
@@ -78,52 +78,52 @@ def write_to_json(path: str, text):
 
 
 def clear_busy_ports():
-    new_json = {"busy_ports": []}
-    write_to_json(busy_ports_json_path, new_json)
-    log.info('Busy ports file cleared')
+    # new_json = {"busy_ports": []}
+    # write_to_json(busy_ports_json_path, new_json)
+    # log.info('Busy ports file cleared')
+    db_utils.clear_table(c.busy_ports_table_name)
 
 
 def clear_tasks_file():
-    new_json = {"tasks": []}
-    write_tasks_to_json_file(new_json)
+    # new_json = {"tasks": []}
+    # write_tasks_to_json_file(new_json)
     log.info('Tasks file cleared')
 
 
 def reserve_ports_from_config():
-    busy_ports_json = read_from_json(busy_ports_json_path)
+    # busy_ports_json = read_from_json(busy_ports_json_path)
+    # busy_ports_table = db_utils.select_from_table(c.busy_ports_table_name)
     # busy_ports_json['busy_ports'].append(str(port))
-
+    # busy_ports = [p['port'] for p in busy_ports_table]
     services = config['services']['system'] | config['services']['business']
     for service_name, service_config in zip(services.keys(), services.values()):
         if services.get('port', None) is not None:
-            busy_ports_json['busy_ports'].append(str(service_config[service_name]['port']))
+            # busy_ports_json['busy_ports'].append(str(service_config[service_name]['port']))
+            db_utils.insert_into_table(c.busy_ports_table_name, {'port':service_config[service_name]['port']})
 
-    write_to_json(busy_ports_json_path, busy_ports_json)
+    # write_to_json(busy_ports_json_path, busy_ports_json)
     log.info('Ports from config were reserved')
 
 
-def delete_port_from_list(port):
-    new_json = read_from_json(busy_ports_json_path)
-    new_json['busy_ports'].remove(str(port))
-    write_to_json(busy_ports_json_path, new_json)
-    log.info(f"Port {port} was deleted from ports file")
+# def read_from_tasks_json_file():
+#     new_json = read_from_json(tasks_json_path)
+#     return new_json
+#
+#
+# def write_tasks_to_json_file(body):
+#     write_to_json(tasks_json_path, body)
+#     log.info(f"Updated tasks file")
 
 
-def read_from_tasks_json_file():
-    new_json = read_from_json(tasks_json_path)
-    return new_json
-
-
-def write_tasks_to_json_file(body):
-    write_to_json(tasks_json_path, body)
-    log.info(f"Updated tasks file")
-
-
-def set_port_busy(port):
-    busy_ports_json = read_from_json(busy_ports_json_path)
-    if not str(port) in busy_ports_json['busy_ports']:
-        busy_ports_json['busy_ports'].append(str(port))
-        write_to_json(busy_ports_json_path, busy_ports_json)
+def set_port_busy(port: int):
+    # busy_ports_json = read_from_json(busy_ports_json_path)
+    busy_ports_table = db_utils.select_from_table(c.busy_ports_table_name)
+    busy_ports = [p['port'] for p in busy_ports_table]
+    # int_port = int(port)
+    if not port in busy_ports:
+        db_utils.insert_into_table(c.busy_ports_table_name, {"port": port})
+        # busy_ports_json['busy_ports'].append(str(port))
+        # write_to_json(busy_ports_json_path, busy_ports_json)
         log.info(f"Set port {port} as busy")
     else:
         log.info(f"Did not set port {port} as busy")
@@ -152,7 +152,7 @@ def get_rid_of_service_by_pid(pid):
         if port_to_delete:
             kill_process(pid)
             db_utils.delete_process_from_tables_by_pid(pid)
-            delete_port_from_list(port_to_delete)
+            db_utils.delete_port_from_busy_ports_by_port(port_to_delete)
             # print_c(f"Got rid of service with pid {pid} on port {port_to_delete}")
             log.info(f"Got rid of service with pid {pid} on port {port_to_delete}")
             return 'removed service'
@@ -177,7 +177,7 @@ def get_rid_of_service_by_pid_and_port_dirty(pid):
         return 'failed to remove service dirty'
 
 
-def start_service(service_short_name: str, service_full_path: str, port, local=False, host=host):
+def start_service(service_short_name: str, service_full_path: str, port, local=False):
     local_part = ['-local', str(local)]
     port_part = ['-port', str(port)]
     local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part,
@@ -187,29 +187,27 @@ def start_service(service_short_name: str, service_full_path: str, port, local=F
     return local_process
 
 
-def check_port_is_in_use(port):
-    # TODO fix after Check if this works at all.
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = False
-    try:
-        sock.bind(("0.0.0.0", port))
-        result = True
-    except:
-        pass
-    sock.close()
-    return result
+def check_port_is_in_use(port: int):
+    # TODO check this in linux and mac
+    used_str_ports = [str(line).split('port=')[1].split(')')[0] for line in psutil.net_connections()]
+    if str(port) in used_str_ports:
+        return True
+    return False
+
 
 
 def get_free_port():
     port_start_ind = config['fuse']['first_port']
     port_end_ind = config['fuse']['last_port']
-    busy_ports_json = read_from_json(busy_ports_json_path)
-
+    busy_ports_table = db_utils.select_from_table(c.busy_ports_table_name)
+    # busy_ports_json = read_from_json(busy_ports_json_path)
+    busy_ports = [p['port'] for p in busy_ports_table]
     for i in range(port_start_ind, port_end_ind + 1):
-        str_port = str(i)
-        if not (str_port in busy_ports_json['busy_ports']) and not check_port_is_in_use(str_port):
-            log.info(f"Got new free port: {str_port}")
-            return str_port
+        if not i in busy_ports and not check_port_is_in_use(i):
+            # if not (str_port in busy_ports_json['busy_ports']) and not check_port_is_in_use(str_port):
+            log.info(f"Got new free port: {i}")
+            return i
+    log.exception(f"No ports found AT ALL; Something is really fucked up")
 
 
 def check_file_exists(service_full_path: str):
@@ -247,7 +245,7 @@ def init_start_service_procedure(service: str, is_sys=False):
     service_config = config['services'][type][service]
 
     #   port verification
-    port = service_config.get('port', None)
+    port: int = service_config.get('port', None)
     if port is None or not isinstance(port, int) or port <= 0:
         port = get_free_port()
     set_port_busy(port)
@@ -332,3 +330,7 @@ def recreate_log_folder_if_not_exists():
 def generate_on_start_unique_fuse_id():
     # TODO, unique ID is NOT sent to constants of other processes; fix
     c.on_start_unique_fuse_id = c.fuse_instance_name + '-' + generate_random_uid4()
+    # db_utils.bulk_upsert_common_strings_table(c.on_start_unique_fuse_id_name, c.on_start_unique_fuse_id)
+    # db_utils.delete_port_from_busy_ports_by_port
+    # db_utils.delete_value_by_key_from_common_strings()
+    db_utils.upsert_key_value_pair_from_common_strings_table(c.on_start_unique_fuse_id_name, c.on_start_unique_fuse_id)

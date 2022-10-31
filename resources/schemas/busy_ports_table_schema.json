@@ -1,0 +1,14 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "port",
+      "type": "Integer",
+      "nullable": "False"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ from utils import db_utils as db
 from utils.dataclasses.Input_Task import InputTask
 from utils.dataclasses.Task_From_File import TaskFromFile
 from utils.dataclasses.Task_Step_From_File import Task_Step_From_File
-from utils.general_utils import read_from_tasks_json_file, kill_process, write_tasks_to_json_file
+from utils.general_utils import kill_process
 from utils.pickle_utils import save_to_pickle, read_from_pickle
 from utils import client_utils
 
@@ -26,12 +26,23 @@ def task_is_in_tasks(task, tasks_from_db):
 
 
 def end_task_procedure(task: TaskFromFile, error_reason):
+    log.error(f"Starting end task procedure for task {task.task_unique_name}")
     log.error(error_reason)
     task.status = c.tasks_status_errored
-    tasks_from_json = read_from_tasks_json_file()
-    for t in tasks_from_json['tasks']:
-        if t['task_unique_name'] == task.task_unique_name:
-            t['status'] = c.tasks_status_errored
+
+    # tasks_from_json = read_from_tasks_json_file()
+    # for t in tasks_from_json['tasks']:
+    #     if t['task_unique_name'] == task.task_unique_name:
+    #         t['status'] = c.tasks_status_errored
+
+    task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
+                                                      'String')[0]
+    # TODO: once again, instead of this select-delete-insert i'd like to have update. but it is janky now
+    task_from_db = dict(task_from_db)
+    task_from_db['status'] = c.tasks_status_errored
+    db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
+    db.insert_into_table(c.tasks_table_name, task_from_db)
+
     task.error_logs = error_reason
     log.error(f"Exiting task {task.task_unique_name}, saving task fallback object")
     #     save pickle with task
@@ -80,7 +91,7 @@ def required_steps_arent_finished(required_steps, task: TaskFromFile):
 def process_step(task: TaskFromFile, index):
     # task: Task_From_File = c.taskmaster_task_object
     # cover step in try catch?
-    print(f"I am inside process new step {index}")
+    log.info(f"I am inside process new step {index}")
     local_step: Task_Step_From_File = task.steps[index - 1]
 
     # sleep untill needed steps are finished
@@ -134,7 +145,6 @@ def process_step(task: TaskFromFile, index):
             task.task_folder_path + c.double_forward_slash + local_step.step_number + c.tasks_step_provides_delimiter + 'response',
             local_dict)
     task.finished_steps.append(local_step.step_number)
-    print('debug point')
 
 
 def process_new_task(task: TaskFromFile):
@@ -142,11 +152,22 @@ def process_new_task(task: TaskFromFile):
     # constants
     # upd: given we work in a threadpool, it shares data this method has and provides task object as it should
 
-    json_file_tasks = g.read_from_tasks_json_file()
-    for t in json_file_tasks['tasks']:
-        if t['task_unique_name'] == task.task_unique_name:
-            t['status'] = c.tasks_status_in_progress
-    g.write_tasks_to_json_file(json_file_tasks)
+    # json_file_tasks = g.read_from_tasks_json_file()
+    # for t in json_file_tasks['tasks']:
+    #     if t['task_unique_name'] == task.task_unique_name:
+    #         t['status'] = c.tasks_status_in_progress
+    # g.write_tasks_to_json_file(json_file_tasks)
+
+    # what happens above: we get tasks from file, we change status of current one to in progress by unique name
+    # for db: we select by unique name, then upsert by unique name with new status
+    task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
+                                                      'String')[0]
+    task_from_db = dict(task_from_db)
+    task_from_db['status'] = c.tasks_status_in_progress
+    db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
+    db.insert_into_table(c.tasks_table_name, task_from_db)
+    # TODO: Thing is, I wanted to replace delete+ insert with update, but update isnt tested
+
     task.status = c.tasks_status_in_progress
 
     task.task_folder_path = c.temporary_files_folder_path + c.double_forward_slash + str(task.task_unique_name)
@@ -171,13 +192,37 @@ def process_new_task(task: TaskFromFile):
     # we have all pickles we need, now update task status
     # TODO make sure end task procedure also updates task status
     task.status = c.tasks_status_completed
-    tasks = read_from_tasks_json_file()
-    for t in tasks['tasks']:
-        if t['task_unique_name'] == task.task_unique_name:
-            t['status'] = task.status
-            t['task_folder_path'] = task.task_folder_path
-    write_tasks_to_json_file(tasks)
-    print('Threadpool threads finished working')
+    # tasks = read_from_tasks_json_file()
+    # for t in tasks['tasks']:
+    #     if t['task_unique_name'] == task.task_unique_name:
+    #         t['status'] = task.status
+    #         t['task_folder_path'] = task.task_folder_path
+    # write_tasks_to_json_file(tasks)
+
+    task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
+                                                      'String')[0]
+    task_from_db = dict(task_from_db)
+    task_from_db['status'] = task.status
+    task_from_db['task_folder_path'] = task.task_folder_path
+    # TODO: third time, instead of dumb select-delete-insert i'd like to have update, but that method is janky and untested
+    db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
+    db.insert_into_table(c.tasks_table_name, task_from_db)
+
+    # db.delete_process_from_tables_by_pid(task.)
+    # TODO. remove process from all processes table
+    # TODO: ass fuse id to a unique constants table and pick at evrywhere it is currently picked
+    log.info(f"Task {task.task_unique_name} finished execution with status {task.status}")
+    process_from_db = db.select_from_table_by_one_column(c.all_processes_table_name, 'function_name',
+                                                         c.taskmaster_main_process_name + c.tasks_name_delimiter + task.task_unique_name,
+                                                         'String')
+    if not process_from_db or not len(process_from_db) == 1:
+        log.error(
+            f"There were somehow more or none processes with this unique taskname "
+            f"{c.taskmaster_main_process_name + c.tasks_name_delimiter + task.task_unique_name}, aborting killing it by PID")
+        return
+    process_from_db = process_from_db[0]
+    db.delete_process_from_tables_by_pid(process_from_db['pid'])
+    kill_process(process_from_db['pid'])
 
 
 def process_task_in_progress(task, task_file_content):
@@ -198,12 +243,13 @@ def taskmaster_main_process(input_task_obj: InputTask, data, result=None):
     try:
         # first 'if' in lazy_task case; then save overall result in specific pickle
         log.get_log(f"taskmaster_task_process")
-        if not result:
-            pass
-        # TODO second else for persistive case
-        else:
-            pass
-        task_type_from_db = db.select_from_table_by_one_column(c.taskmaster_tasks_table_name,
+        # TODO: below if seems unused and not needed
+        # if not result:
+        #     pass
+        # # TODO second else for persistive case
+        # else:
+        #     pass
+        task_type_from_db = db.select_from_table_by_one_column(c.taskmaster_tasks_types_table_name,
                                                                "task_name",
                                                                input_task_obj.task_name,
                                                                "String")
@@ -211,17 +257,22 @@ def taskmaster_main_process(input_task_obj: InputTask, data, result=None):
             task_type_from_db = task_type_from_db[0]
             task = TaskFromFile(task_type_from_db['task_full_path'], input_task_obj.task_unique_name, data)
 
+            c.on_start_unique_fuse_id = db.select_from_table_by_one_column(c.common_strings_table_name, 'key',
+                                                                           c.on_start_unique_fuse_id_name,
+                                                                            'String')[0]['value']
             new_dict_task = {"task_name": input_task_obj.task_name, "task_unique_name": input_task_obj.task_unique_name,
                              c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
                              "status": c.tasks_status_new}
-            tasks_file = g.read_from_tasks_json_file()
-            tasks_file['tasks'].append(new_dict_task)
-            g.write_tasks_to_json_file(tasks_file)
+            # tasks_file = g.read_from_tasks_json_file()
+            # tasks_file['tasks'].append(new_dict_task)
+            # g.write_tasks_to_json_file(tasks_file)
+            # TODO: uncomment db version, comment file version
+            db.insert_into_table(c.tasks_table_name, new_dict_task)
             process_new_task(task)
 
         else:
             log.error(f"There are no such tasks (or too many somehow) supported by this Fuse.")
-            log.error(f"Supported tasks: {db.select_from_table(c.taskmaster_tasks_table_name)}")
+            log.error(f"Supported tasks: {db.select_from_table(c.taskmaster_tasks_types_table_name)}")
     except Exception as e:
         log.exception(f"Something went horribly wrong while trying to work with {input_task_obj.task_unique_name}")
         log.exception(e)

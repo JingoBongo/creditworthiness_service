@@ -38,7 +38,7 @@ def try_service_launch(service_name: str, service_config: dict, is_system: bool)
         service_config (dict): configuration of the service to be launched
         is_system (bool): is service system one, or business one
     """
-    if not service_config.get('enabled', None):
+    if not service_config.get('enabled', True):
         log.warn(f"Service '{service_name}' is disabled in config and therefore will not be launched")
         return
     if service_config.get('path', None) is None:
@@ -54,16 +54,15 @@ def main():
     log.info(f'Firing fuse..')
     print(c.fuse_logo)
     # some preconfiguration
+    db_utils.initial_db_creation()
+    db_utils.initial_table_creation()
     g.clear_busy_ports()
     g.generate_on_start_unique_fuse_id()
     # TODO THIS IS JUST FOR TESTING PURPOSES
     # in future, probably clear only after task is resolved in any way
     # TODO: thing is, on start it should try to relaunch stopped tasks ince, then clear the tasks file
-    g.clear_tasks_file()
     g.clear_log_folder()
     g.reserve_ports_from_config()
-    db_utils.initial_db_creation()
-    db_utils.initial_table_creation()
     db_utils.clear_system_services_table()
     db_utils.clear_business_services_table()
     db_utils.clear_schedulers_table()

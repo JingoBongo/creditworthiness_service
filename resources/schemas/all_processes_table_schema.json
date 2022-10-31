@@ -28,8 +28,7 @@
     {
       "name": "pid",
       "type": "Integer",
-      "nullable": "False",
-      "primary_key": "True"
+      "nullable": "False"
     }
   ]
 }

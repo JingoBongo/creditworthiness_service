@@ -1,0 +1,19 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "key",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "value",
+      "type": "String",
+      "nullable": "False"
+    }
+  ]
+}

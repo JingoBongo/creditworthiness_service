@@ -1,6 +1,4 @@
 general:
-  busy_ports_json_file: "resources//busy_ports.json"
-  tasks_json_file: "resources//tasks.json"
   tasks_folder: "resources//tasks"
   debug: False
   host: "0.0.0.0"
@@ -31,7 +29,7 @@ services:
       local: False
     taskmaster:
       path: "endpoints//system_endpoints//taskmaster_endpoint.py"
-      local: True
+      local: False
       port: 5003
       enabled: True
 
@@ -73,4 +71,10 @@ sqlite:
         schema_path: "resources//schemas//taskmaster_available_tasks_table_schema.json"
       All_Processes:
         schema_path: "resources//schemas//all_processes_table_schema.json"
+      Busy_Ports:
+        schema_path: "resources//schemas//busy_ports_table_schema.json"
+      Tasks:
+        schema_path: "resources//schemas//tasks_table_schema.json"
+      Common_Strings:
+        schema_path: "resources//schemas//commonly_used_strings_table_schema.json"
 # these table names are just like constant variables here. TODO: make file with constants

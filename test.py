@@ -103,31 +103,16 @@
 #
 # def process_result(future):
 #     print(future.result())
+import psutil
 import requests
 
 
 def main():
-    # def step(index, i):
-    #     print(f"I am inside process new step {index};;;{i}")
-    #
-    # def process_new_task(task):
-    #     print(f"kek {str(range(1, 3))}")
-    #     #     now we need to find if this fuse supports needed task
-    #     # change status of task with unique name to in progress
-    #     with ThreadPoolExecutor() as executor:
-    #         # [executor.map(step, [i, i+1]) for i in range(1, 3)]
-    #         # executor.map(step, (range(1, 3)))
-    #         for result in executor.map(step, repeat(5), range(1, 3)):
-    #             pass
-    #     for n in range(3):
-    #         print(f"below print {n}")
-    #
-    #
-    # process_new_task(None)
-    d = {'key' : 'value'}
+    print(psutil.net_connections())
+    for line in psutil.net_connections():
+        print(str(line).split('port=')[1].split(')')[0])
 
-    print(v)
-
+    used_str_ports = [str(line).split('port=')[1].split(')')[0] for line in psutil.net_connections()]
     # print(x)
 
 if __name__ == '__main__':

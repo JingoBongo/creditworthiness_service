@@ -76,7 +76,7 @@ def taskmaster_job_body():
         if os.path.isfile(f):
             supported_tasks.append({'task_full_path': f, 'task_name': f.split('/')[-1].split('\\')[-1].split('.')[0]})
     # print(f"these are supported tasks from folder: {supported_tasks}")
-    tasks_from_db = db_utils.select_from_table(c.taskmaster_tasks_table_name)
+    tasks_from_db = db_utils.select_from_table(c.taskmaster_tasks_types_table_name)
     # if there are tasks in db that are not valid, delete them from db
     # for t in tasks_from_db:
     #     pass
@@ -95,7 +95,7 @@ def taskmaster_job_body():
         try:
             if not task_is_in_tasks(task, tasks_from_db):
                 # add to db
-                db_utils.insert_into_table(c.taskmaster_tasks_table_name, task)
+                db_utils.insert_into_table(c.taskmaster_tasks_types_table_name, task)
         except Exception as e:
             log.exception(f"Something went wrong while processing task(from files) {task}")
             log.exception(e)

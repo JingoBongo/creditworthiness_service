@@ -17,14 +17,13 @@
     },
     {
       "name": "port",
-      "type": "String",
+      "type": "Integer",
       "nullable": "False"
     },
     {
       "name": "pid",
       "type": "Integer",
-      "nullable": "False",
-      "primary_key": "True"
+      "nullable": "False"
     },
     {
       "name": "status",

@@ -9,6 +9,7 @@ from utils.schedulers_utils import launch_scheduler_if_not_exists, launch_life_p
 from utils.subprocess_utils import start_generic_subprocess
 from utils import constants as c
 from utils import logger_utils as log
+from utils import db_utils as db
 
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
@@ -45,6 +46,8 @@ def get_rid_of_service(pid):
       200:
         description: 99% caution
     """
+    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid',  pid, 'Integer')) == 1:
+        return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid(pid)
     else:
@@ -60,6 +63,8 @@ def remove_service_wrong(pid):
       200:
         description: 99% caution
     """
+    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) == 1:
+        return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid_and_port_dirty(pid)
     else:

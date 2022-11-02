@@ -1,11 +1,8 @@
-import sys
-
 import __init__
 from utils import logger_utils as log
 from utils.package_utils import run_importing_process
 
 run_importing_process()
-import os
 
 from utils import general_utils as g
 from utils import db_utils
@@ -13,21 +10,11 @@ from utils import constants as c
 
 root_path = c.root_path
 conf_path = c.conf_path
-config = g.config
-
-
-# cur_file_name = os.path.basename(__file__)
 
 
 def setup_cur_logger():
     log.get_log('fuse')
-    # c.current_subprocess_logger = log
-    # sys.excepthook = handle_exception
 
-
-# def print_c(text):
-#     # print(f"[{cur_file_name}] {str(text)}")
-#     c.current_subprocess_logger.info(f"[{cur_file_name}] {str(text)}")
 
 def try_service_launch(service_name: str, service_config: dict, is_system: bool):
     """
@@ -71,7 +58,7 @@ def main():
     # db_utils.clear_tasks_table()
     # fire system endpoints
     # Is all this checking necessary? I am not sure anymore
-
+    config = g.getConfig()
     system_services = config['services']['system']
     business_services = config['services']['business']
 

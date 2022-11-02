@@ -5,9 +5,13 @@ import sys
 
 import logging
 from utils import constants as c
+from utils.config_utils import getDebugFlagFromConfig
 
 
 def setup_logger(name, log_file, level=logging.INFO):
+    # level = (logging.INFO ? not getDebugFlagFromConfig() : logging.DEBUG)
+    # level = (bool(getDebugFlagFromConfig()) ? logging.DEBUG : logging.INFO)
+    level = logging.DEBUG if getDebugFlagFromConfig() else logging.INFO
     def decorate_emit(fn):
         def new(*args):
             levelno = args[0].levelno

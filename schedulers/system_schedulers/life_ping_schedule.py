@@ -15,7 +15,7 @@ from utils import db_utils
 # DO NOT IMPORT. (his file) !@!!!!!!
 
 root_path = c.root_path
-config = g.config
+
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
@@ -44,7 +44,7 @@ def ping_one(port):
 
 def process_one_service(n):
     try:
-
+        config = g.getConfig()
         # n['status'] = 'dead'
         if n['status'] == 'dead':
             # define if is sys service
@@ -95,7 +95,7 @@ def process_service_statuses(services_and_statuses):
 
 def job():
     log.info("Scheduled life_ping task started..")
-    services = g.db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + g.db_utils.select_from_table(
+    services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(
         BUSINESS_SERVICES_TABLE_NAME)
     services_and_statuses = []
     # for i in services:

@@ -2,7 +2,8 @@ import os
 import re
 
 import __init__
-from utils import general_utils as g, db_utils
+from utils import general_utils as g
+from utils import db_utils
 from utils.subprocess_utils import start_generic_subprocess
 from utils import constants as c
 from utils import logger_utils as log
@@ -10,21 +11,21 @@ from utils.taskmaster_utils import task_is_in_tasks
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
-config = g.config
 
 
 def launch_scheduler_if_not_exists(process_name, process_full_path):
-    table_results = g.db_utils.select_from_table('Schedulers')
+    table_results = db_utils.select_from_table('Schedulers')
     table_results_names = [x['name'] for x in table_results]
     # TODO mention somewhere that schedulers are designed as singletones
     if process_name not in table_results_names:
         local_process = start_generic_subprocess(process_name, process_full_path)
-        g.db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
+        db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
         dic = {'pid': local_process.pid, 'pyfile_path': process_full_path, 'pyfile_name': process_name}
         db_utils.insert_into_table(c.all_processes_table_name, dic)
         # TODO decide where to pick db utils from
         log.info(f"Started '{process_name}' scheduler at pid '{local_process.pid}'")
     else:
+        # TODO: if debug == true this happens, investigate
         log.warn(f"While launching endpoint with scheduler an attempt to add duplicate '{process_name}' was refused")
 
 
@@ -68,7 +69,7 @@ def taskmaster_job_body():
     #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
 
     # we need a list of supported tasks
-    directory_to_iterate = c.root_path + config['general']['tasks_folder']
+    directory_to_iterate = c.root_path + g.getConfig()['general']['tasks_folder']
     supported_tasks = []
     for filename in os.listdir(directory_to_iterate):
         f = os.path.join(directory_to_iterate, filename)
@@ -121,7 +122,7 @@ def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")
     # what exactly do we expect to harvest here?
     # we probably only run through alive services. k.
-    services = g.db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + g.db_utils.select_from_table(
+    services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(
         BUSINESS_SERVICES_TABLE_NAME)
     # so we still get services from tables.
     # we need to update corresponding table tho.

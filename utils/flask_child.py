@@ -10,6 +10,7 @@ from utils import constants as c
 from utils import general_utils as g
 from utils import logger_utils
 from utils import constants as c
+from utils import config_utils
 
 
 class EndpointAction(object):
@@ -49,8 +50,8 @@ class FuseNode(Flask):
             parser.add_argument('-local')
             args = parser.parse_args()
             endpoint_port = args.port
-            host = "127.0.0.1" if args.local == 'True' else g.host
-            self.debug = g.debug
+            host = "127.0.0.1" if args.local == 'True' else config_utils.getHostFromConfig()
+            self.debug = config_utils.getDebugFlagFromConfig()
             self.host = host
             self.port = endpoint_port
             self.swagger = Swagger(self)
@@ -75,6 +76,7 @@ class FuseNode(Flask):
         # // test part
         # TODO: this worked to collect request logs, but not perfectly. probably needs refactoring
         w_log = logging.getLogger('werkzeug')
+        # TODO: why is level = DEBUG here? investigate. we have level from configs now
         w_log.setLevel(logging.DEBUG)
         w_log.addHandler(c.current_rotating_handler)
 

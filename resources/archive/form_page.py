@@ -69,7 +69,7 @@
 #     print_c("New json file is created from the form data")
 #
 #   headers = {"Content-Type": "application/json; charset=utf-8"}
-#   services = g.db_utils.select_from_table(
+#   services = db_utils.select_from_table(
 #         BUSINESS_SERVICES_TABLE_NAME)
 #   port = ""
 #

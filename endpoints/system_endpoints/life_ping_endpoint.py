@@ -23,7 +23,7 @@ def get_shedulers_list():
       200:
            description: 99% caution
         """
-    return str(g.db_utils.select_from_table('schedulers'))
+    return str(db_utils.select_from_table('schedulers'))
 
 
 @app.route('/services/statuses')
@@ -34,7 +34,7 @@ def get_services_list():
       200:
         description: 99% caution
         """
-    return str(g.db_utils.select_from_table('Business_services') + g.db_utils.select_from_table('Sys_services'))
+    return str(db_utils.select_from_table('Business_services') + db_utils.select_from_table('Sys_services'))
 
 
 @app.route('/services/remove/<int:pid>')

@@ -13,7 +13,7 @@ from utils import db_utils
 from utils.schedulers_utils import route_harvester_job_body
 
 root_path = c.root_path
-config = g.config
+
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name

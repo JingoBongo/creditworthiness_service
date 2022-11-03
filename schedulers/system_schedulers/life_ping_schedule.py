@@ -44,7 +44,7 @@ def ping_one(port):
 
 def process_one_service(n):
     try:
-        config = g.getConfig()
+        config = g.get_config()
         # n['status'] = 'dead'
         if n['status'] == 'dead':
             # define if is sys service

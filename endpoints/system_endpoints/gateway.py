@@ -2,7 +2,7 @@ import __init__
 import requests
 from flask import url_for, redirect, make_response, request
 
-from utils import general_utils as g, db_utils
+from utils import general_utils as g
 from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
@@ -48,8 +48,8 @@ def test_provider(path):
                     'status': 'ambiguous result',
                     'possible resolution': 'remove duplicates and re-run harvester OR pick specific result from the list'}
         # pick service port by service name from result from db and go by path
-        rows1 = db_utils.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
-        rows2 = db_utils.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
         rows = rows2 + rows1
         for row in rows:
             #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
@@ -96,8 +96,8 @@ def redir_request(path):
                             'status':'ambiguous result',
                             'possible resolution':'remove duplicates and re-run harvester OR pick specific result from the list'}
         # pick service port by service name from result from db and go by path
-        rows1 = db_utils.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
-        rows2 = db_utils.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
         rows = rows2 + rows1
         for row in rows:
         #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)

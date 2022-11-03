@@ -69,7 +69,7 @@ def taskmaster_job_body():
     #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
 
     # we need a list of supported tasks
-    directory_to_iterate = c.root_path + g.getConfig()['general']['tasks_folder']
+    directory_to_iterate = c.root_path + g.get_config()['general']['tasks_folder']
     supported_tasks = []
     for filename in os.listdir(directory_to_iterate):
         f = os.path.join(directory_to_iterate, filename)

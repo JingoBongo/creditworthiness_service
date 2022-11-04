@@ -1,6 +1,6 @@
 import __init__
 import requests
-from flask import url_for, redirect, make_response, request
+from flask import redirect, request
 
 from utils import general_utils as g
 from argparse import ArgumentParser

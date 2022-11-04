@@ -1,9 +1,11 @@
 import __init__
+
 from utils.package_utils import run_importing_process
 
 run_importing_process()
 
 from utils import logger_utils as log
+from utils import yaml_utils
 from utils import general_utils as g
 from utils import db_utils
 from utils import constants as c
@@ -47,7 +49,7 @@ def main():
     db_utils.clear_business_services_table()
     db_utils.clear_schedulers_table()
     db_utils.clear_table(c.all_processes_table_name)
-    config = g.get_config()
+    config = yaml_utils.get_config()
     system_services = config['services']['system']
     business_services = config['services']['business']
 

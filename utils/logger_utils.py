@@ -1,3 +1,5 @@
+import yaml
+
 import __init__
 from logging.handlers import RotatingFileHandler
 import os
@@ -5,13 +7,19 @@ import sys
 
 import logging
 from utils import constants as c
-from utils.config_utils import get_debug_flag_from_config
+
+
+# A shame and an important note to take: there is a circular import error between logs and yaml utils.
+# Solution? get config flag here by code duplicating. ew, right?
+# TODO: search for better solution
+def get_debug_flag_from_config():
+    with open(c.root_path + c.conf_path) as f:
+        return yaml.safe_load(f)['general']['debug']
 
 
 def setup_logger(name, log_file, level=logging.INFO):
-    # level = (logging.INFO ? not getDebugFlagFromConfig() : logging.DEBUG)
-    # level = (bool(getDebugFlagFromConfig()) ? logging.DEBUG : logging.INFO)
     level = logging.DEBUG if get_debug_flag_from_config() else logging.INFO
+
     def decorate_emit(fn):
         def new(*args):
             levelno = args[0].levelno

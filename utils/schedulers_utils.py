@@ -1,9 +1,8 @@
+import __init__
 import os
 import re
 
-import __init__
-from utils import general_utils as g
-from utils import db_utils
+from utils import db_utils, yaml_utils
 from utils.subprocess_utils import start_generic_subprocess
 from utils import constants as c
 from utils import logger_utils as log
@@ -69,7 +68,7 @@ def taskmaster_job_body():
     #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
 
     # we need a list of supported tasks
-    directory_to_iterate = c.root_path + g.get_config()['general']['tasks_folder']
+    directory_to_iterate = c.root_path + yaml_utils.get_config()['general']['tasks_folder']
     supported_tasks = []
     for filename in os.listdir(directory_to_iterate):
         f = os.path.join(directory_to_iterate, filename)

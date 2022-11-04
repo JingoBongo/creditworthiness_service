@@ -1,6 +1,6 @@
 import __init__
 
-from utils.config_utils import get_config
+from utils.yaml_utils import get_config
 from utils.decorators.db_decorators import sql_alchemy_db_func
 import sqlite3
 from utils import constants as c

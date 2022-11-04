@@ -6,11 +6,10 @@ from flask.logging import default_handler
 
 import __init__
 from flask import Flask, app, Response
-from utils import constants as c
-from utils import general_utils as g
+
+import utils.yaml_utils
 from utils import logger_utils
 from utils import constants as c
-from utils import config_utils
 
 
 class EndpointAction(object):
@@ -50,8 +49,8 @@ class FuseNode(Flask):
             parser.add_argument('-local')
             args = parser.parse_args()
             endpoint_port = args.port
-            host = "127.0.0.1" if args.local == 'True' else config_utils.get_host_from_config()
-            self.debug = config_utils.get_debug_flag_from_config()
+            host = "127.0.0.1" if args.local == 'True' else utils.yaml_utils.get_host_from_config()
+            self.debug = utils.yaml_utils.get_debug_flag_from_config()
             self.host = host
             self.port = endpoint_port
             self.swagger = Swagger(self)

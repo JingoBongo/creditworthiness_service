@@ -4,7 +4,7 @@ from functools import wraps
 from utils import logger_utils as log
 import time
 
-
+# TODO: add file to dump these readings and some sorting+return algorithm+function in the end
 
 def func_timeit(func):
     @wraps(func)

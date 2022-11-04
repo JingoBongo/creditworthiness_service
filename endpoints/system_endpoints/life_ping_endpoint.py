@@ -1,14 +1,12 @@
 import __init__
-from utils import general_utils as g
+
 from argparse import ArgumentParser
 
 from utils.flask_child import FuseNode
-from utils.general_utils import get_rid_of_service_by_pid, process_start_service, \
-    get_rid_of_service_by_pid_and_port_dirty
-from utils.schedulers_utils import launch_scheduler_if_not_exists, launch_life_ping_scheduler_if_not_exists
-from utils.subprocess_utils import start_generic_subprocess
+from utils.general_utils import get_rid_of_service_by_pid, process_start_service
+from utils.general_utils import get_rid_of_service_by_pid_and_port_dirty, db
+from utils.schedulers_utils import launch_life_ping_scheduler_if_not_exists
 from utils import constants as c
-from utils import logger_utils as log
 
 
 parser = ArgumentParser()
@@ -23,7 +21,7 @@ def get_shedulers_list():
       200:
            description: 99% caution
         """
-    return str(g.db.select_from_table('schedulers'))
+    return str(db.select_from_table('schedulers'))
 
 
 @app.route('/services/statuses')
@@ -34,7 +32,7 @@ def get_services_list():
       200:
         description: 99% caution
         """
-    return str(g.db.select_from_table('Business_services') + g.db.select_from_table('Sys_services'))
+    return str(db.select_from_table('Business_services') + db.select_from_table('Sys_services'))
 
 
 @app.route('/services/remove/<int:pid>')
@@ -46,7 +44,7 @@ def get_rid_of_service(pid):
       200:
         description: 99% caution
     """
-    if not len(g.db.select_from_table_by_one_column(c.all_processes_table_name, 'pid',  pid, 'Integer')) == 1:
+    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid',  pid, 'Integer')) == 1:
         return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid(pid)
@@ -63,7 +61,7 @@ def remove_service_wrong(pid):
       200:
         description: 99% caution
     """
-    if not len(g.db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) == 1:
+    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) == 1:
         return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid_and_port_dirty(pid)

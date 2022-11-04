@@ -5,7 +5,9 @@ import __init__
 import schedule
 import time
 import utils.general_utils as g
-from utils import constants as c
+
+from utils import constants as c, yaml_utils
+from utils import yaml_utils
 import os
 import requests
 from utils import logger_utils as log
@@ -19,7 +21,6 @@ root_path = c.root_path
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
-cur_file_name = os.path.basename(__file__)
 log.get_log(c.life_ping_schedule_name)
 
 
@@ -44,7 +45,7 @@ def ping_one(port):
 
 def process_one_service(n):
     try:
-        config = g.get_config()
+        config = yaml_utils.get_config()
         # n['status'] = 'dead'
         if n['status'] == 'dead':
             # define if is sys service

@@ -9,10 +9,9 @@ import utils.subprocess_utils as custom_subprocess
 from utils import db_utils as db
 from utils import constants as c
 from utils import logger_utils as log
-from utils.config_utils import get_config
+from utils.yaml_utils import get_config
 from utils.random_utils import generate_random_uid4
 
-cur_file_name = os.path.basename(__file__)
 
 
 def run_cmd_command(command):

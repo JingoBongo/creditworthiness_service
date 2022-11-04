@@ -1,8 +1,6 @@
+import __init__
 import json
 
-from sqlalchemy import true
-
-import __init__
 import requests
 from utils import constants as c
 from utils import db_utils
@@ -224,7 +222,7 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
     return resp
 
 
-def local_fuse_has_needed_service(service):
+def local_fuse_has_needed_service(service: str):
     rows1 = db_utils.select_from_table_by_one_column(c.sys_services_table_name, 'name', service, 'String')
     rows2 = db_utils.select_from_table_by_one_column(c.business_services_table_name, 'name', service, 'String')
     rows1.extend(rows2)
@@ -233,19 +231,17 @@ def local_fuse_has_needed_service(service):
     return False
 
 
-def provide_url_from_service(service):
+def provide_url_from_service(service: str):
     if not service or not isinstance(service, str):
         raise Exception(f"Service variable should be a str, but got {service} : {type(service)}")
-    # url always has dot, fuse service/node is a name, supposedly without '/' etc
-    # TODO: make this a regex check probably
+    # url 'always' has dot, fuse service/node is a name, supposedly without '/' etc
     if '.' in service:  # we assume that it is an url. We will also try to clean the url
         if not service.startswith('http'):  # thing is, we can try to add http, and proper servers will try
-            service = "http://" + service  # redirect http requests to https automatically
+            service = "http://" + service  # to redirect http requests to https automatically
         return service
     else:  # it should be a fuse node name then, first try to find it locally then try to address other fuses
-        # also remember about load balancing
-        # without '.' means it is a fuse node
-        if services_from_db := local_fuse_has_needed_service(service):
+        # TODO: after multi-instanced services are implemented, add load balanced
+        if services_from_db := local_fuse_has_needed_service(service):  # return False OR list of acceptable services
             # address to local + load banalnce
             if len(services_from_db) > 1:  # need to load balance
                 raise Exception('Implement me')
@@ -253,32 +249,34 @@ def provide_url_from_service(service):
             # TODO: [FFD-35] https for fuse
             port = services_from_db[0]['port']
             return f"http://localhost:{port}"
+        #         TODO:. the only case left is the one where local fuse needs to call foreign fuse
+        raise Exception("Implement me")
 
 
-def get_params_from_context_after_question_mark(raw_string):
-    return [{s.split['='][0]: s.split['='][1]} for s in raw_string.split('&')]
+def get_params_from_context_after_question_mark(raw_string: str):
+    return [{s.split('=')[0]: s.split('=')[1]} for s in raw_string.split('&')]
 
 
-def cleanup_context(context):
+def cleanup_context(context: str):
     if not context or not isinstance(context, str):
         return '/'
     if not context.startswith('/'):  # we can try to just add it
-        context = '/' + context
+        context= '/' + context
     #  it appears that here I actually check length of correct context.
-    #  I really want to re-ask myself and my thoughtprocess while writing this code
-    if len(context.split('?')[0]) > 1 and context.split('?')[0].endswith(
-            '/'):  # we can try to just remove '/' in the end of context
-        context = context.replace(context.split('?')[0],
-                                  context.split('?')[0][:-1])  # this way we do no accidentally touch parameters
+    #  I really want to re-ask myself and my thought process while writing this code
+    if len(context.split('?')[0]) > 1 and context.split('?')[0].endswith('/'):
+        # we can try to just remove '/' in the end of context if unneeded slash exists
+        context = context.replace(context.split('?')[0], context.split('?')[0][:-1])
+        # this way we do no accidentally touch parameters
     if '?' in context:  # everything before is a context, everything after ARE params
-        context, raw_string_of_params = context.split[
-            '?']  # it will probably fail if we have more than 1 '?' which is totally fine with me
+        context, raw_string_of_params = context.split('?')
+        # it will probably fail if we have more than 1 '?' which is totally fine with me
         params = get_params_from_context_after_question_mark(raw_string_of_params)
         return context, params
     return context, None
 
 
-def cleanup_request_type(request_type):
+def cleanup_request_type(request_type: str):
     if not request_type or not isinstance(request_type, str):
         raise Exception(f"Invalid request type variable")
     if not request_type.upper() in c.supported_request_types:
@@ -302,8 +300,6 @@ def prepare_parameters(params, possible_params):
         raise Exception(f"Params variable should be a dict, but got {type(params)}")
     if possible_params and not isinstance(possible_params, dict):
         raise Exception(f"Possible params variable should be a dict, but got {type(possible_params)}")
-        # or should we just straight ignore them then?... naah. this is a section we get if user made a mistake
-        # therefore no guarantee this is fulfilled properly 
     if params and not possible_params:
         return params
     if not params and possible_params:
@@ -335,25 +331,3 @@ def init_send_request(service, context=None, request_type='GET', headers=None, d
 
     return send_request(url=url, context=context, request_type=request_type, headers=headers, data=data, params=params,
                         cookies=cookies, claimed_data_type=claimed_data_type)
-
-    # result = find_valid_route(path)
-    #     if len(result)<=0:
-    #         return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
-    #     if len(result)>1:
-    #         return {'msg': 'there are multiple matching routes, either try to avoid this during development'
-    #                        'or try to pick route by service_name or function_name from result list.',
-    #                         'status':'ambiguous result',
-    #                         'possible resolution':'remove duplicates and re-run harvester OR pick specific result from the list'}
-    #     # pick service port by service name from result from db and go by path
-    #     rows1 = db_utils.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
-    #     rows2 = db_utils.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
-    #     rows = rows2 + rows1
-    #     for row in rows:
-    #     #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
-    #     #     TODO this includes selects from db as well
-    #         port = row['port']
-    #         new_url = f"http://localhost:{port}/{path}"
-    #         something = redirect(new_url)
-    #         return something
-    #     # return below should be unreachable in theory, but... still
-    #     return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}

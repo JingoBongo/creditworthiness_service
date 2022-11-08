@@ -7,10 +7,6 @@ import os
 
 all_py_local_files = []
 all_imports = []
-# root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
-root_path = c.root_path
-# conf_path = os.path.normpath('.//resources//fuse.yaml')
-conf_path = c.conf_path
 
 
 def progress_bar(progress, total, text=''):
@@ -19,12 +15,12 @@ def progress_bar(progress, total, text=''):
     print(f"\r|{bar}| {percent:.2f}% : {str(text)}", end="\r")
 
 
-def try_import_and_install_package(package_name):
+def try_import_and_install_package(package_name: str):
     try:
         if package_name:
-            str = f"import {package_name}"
-            if str and len(str) > 0:
-                exec(str)
+            command = f"import {package_name}"
+            if command and len(command) > 0:
+                exec(command)
     except ImportError:
         try:
             print(f"Trying to Install required module: {package_name} --user")
@@ -34,20 +30,9 @@ def try_import_and_install_package(package_name):
             print(e)
 
 
-def try_import_install_uncommon_packages(pac_name, pac_ver):
-    module_postfix = ('==' + pac_ver) if not pac_ver == 'any' else ''
+def try_import_install_uncommon_packages(pac_name: str, pac_ver):
+    module_postfix = ('==' + pac_ver) if pac_ver != 'any' else ''
     try:
-        # try:
-        #     # tries to find module locally
-        #     cmd = ['pip3', 'show', pac_name]
-        #     with tempfile.TemporaryFile() as tempf:
-        #         proc = subprocess.Popen(cmd, stdout=tempf)
-        #         proc.wait()
-        #         tempf.seek(0)
-        #         version = tempf.read()
-        # except:
-        #     version = None
-
         version = None
         cmd = ['pip3', 'show', pac_name]
         with tempfile.TemporaryFile() as tempf:
@@ -66,17 +51,13 @@ def try_import_install_uncommon_packages(pac_name, pac_ver):
         for line in version.split('\\r\\n'):
             if 'Version' in line:
                 # if version corresponds to config version
-                if line.split(' ')[1] == pac_ver or pac_ver == 'any':
-                    pass
-                else:
+                if not (line.split(' ')[1] == pac_ver or pac_ver == 'any'):
                     #     uninstall previous version
                     os.system(f"pip3 uninstall {pac_name} -y")
                     #     install specified version
                     os.system(f"pip3 install -Iv {pac_name}{module_postfix}")
 
     except Exception as e:
-        # print(f"Failed to install {pac_name}, check the details yourselves")
-        # print(e)
         print(f"Failed to install {pac_name}, check the details yourselves")
         print(e)
 
@@ -116,7 +97,6 @@ def get_package_name_from_line(line: str):
         line = line.split('import')[0]
         line = line.split(' ')[1]
         line = line.split('.')[0]
-        # print(f"'get_package_name_from_file' returned {line}")
         return line
     else:
         print(f"Dafuq is this line? : {line}")
@@ -172,6 +152,7 @@ def read_from_yaml(file_path):
         print(f"*not a proper print* error reading {file_path} file")
 
 
+# main function to call of this entire module
 def run_importing_process():
     print(f"Checking installed modules")
     ind = 1
@@ -184,19 +165,14 @@ def run_importing_process():
 
     print(f"\nChecking installed uncommon modules from config")
     try:
-        # os.system(f"pip3 install -Iv pyyaml")
         try_import_install_uncommon_packages('pyyaml', 'any')
     except Exception as e:
         print('PYYAML should be already installed')
 
-    config = read_from_yaml(root_path + conf_path)
+    config = read_from_yaml(c.root_path + c.conf_path)
     try:
         for module in config['uncommon_modules']:
             try_import_install_uncommon_packages(config['uncommon_modules'][module]['module_name'],
                                                  config['uncommon_modules'][module]['module_version'])
     except Exception as e:
         print(f"Modules preparation complete")
-
-# run_importing_process()
-# print('local files')
-# print(all_py_local_files)

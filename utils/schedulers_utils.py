@@ -21,10 +21,9 @@ def launch_scheduler_if_not_exists(process_name, process_full_path):
         db_utils.insert_into_schedulers(process_name, process_full_path, local_process.pid)
         dic = {'pid': local_process.pid, 'pyfile_path': process_full_path, 'pyfile_name': process_name}
         db_utils.insert_into_table(c.all_processes_table_name, dic)
-        # TODO decide where to pick db utils from
         log.info(f"Started '{process_name}' scheduler at pid '{local_process.pid}'")
     else:
-        # TODO: if debug == true this happens, investigate
+        # TODO: if debug == true in config this happens, investigate
         log.warn(f"While launching endpoint with scheduler an attempt to add duplicate '{process_name}' was refused")
 
 
@@ -53,19 +52,20 @@ def route_is_in_routes(route, routs_from_db):
                 and route['function_name'] == rroute['function_name']:
             return True
     #           here we purely assume that duplicates do not exist in harvested route table
+    # upd: they shouldn't, given all schedulers are singletons and must be designed as most robust code pieces of
+    # the framework
     return False
 
 
 def taskmaster_job_body():
     log.info(f"Scheduled {c.taskmaster_schedule_name} task started..")
-    # T-O-D-O, the purpose of taskmaster job changed, this is obsolete
-    #     so, we have a file of tasks to check
-    # T-O-D-O-2 , schedulers should update sql table with available tasks
-    # TODO 3, sql table is updated accordingly, task-retry part is actually the only todo here
-    # tasks = g.read_from_tasks_json_file()['tasks']
-    #   in theory, we only care about tasks that are new? what to do with in progress frozen/errored?
-    #   let errored stay errored with some data
-    #   let frozen.. hm. I need to check if there is a pool working on the task. if not, work with in progress too
+    # TODO: sql table is updated accordingly, task-retry part is actually the only todo here
+    # a bit more data about task-retry. For now I don't see a reason to do it as I am planning
+    # to partially get rid of pickles in case they slow task execution
+
+    # so TODO ( }=) ) if we DON'T get rid of pickles in some task scenarios, then implement here a mechanic,
+    # where task, started by previous run of Fuse gets renewed. Or just relaunched?... then no need of pickles
+    # just see through tasks table..........
 
     # we need a list of supported tasks
     directory_to_iterate = c.root_path + yaml_utils.get_config()['general']['tasks_folder']
@@ -75,12 +75,9 @@ def taskmaster_job_body():
         # checking if it is a file
         if os.path.isfile(f):
             supported_tasks.append({'task_full_path': f, 'task_name': f.split('/')[-1].split('\\')[-1].split('.')[0]})
-    # print(f"these are supported tasks from folder: {supported_tasks}")
     tasks_from_db = db_utils.select_from_table(c.taskmaster_tasks_types_table_name)
-    # if there are tasks in db that are not valid, delete them from db
-    # for t in tasks_from_db:
-    #     pass
 
+    # if there are tasks in db that are not valid, delete them from db
     for task in tasks_from_db:
         try:
             # if not route in routs_from_all_routes:
@@ -101,26 +98,10 @@ def taskmaster_job_body():
             log.exception(e)
     log.info(f"Taskmaster Tasks harvester finished job")
 
-    #
-    # for task in tasks:
-    #     try:
-    #         # check if we have such task at all
-    #         if task['task_name'].split(c.tasks_name_delimiter)[0] in [t.split('//')[-1].split('\\')[-1].split('/')[-1].replace('.json', '') for t in supported_tasks]:
-    #             task_file_path = [t for t in supported_tasks if task['task_name'].split(c.tasks_name_delimiter)[0] == t.split('//')[-1].split('\\')[-1].split('/')[-1].replace('.json', '')][0]
-    #             task_file_content = g.read_from_json(task_file_path)
-    #             treat_task_according_to_status(task, task_file_content)
-    #         else:
-    #             log.error(f"Task {task['task_name']} is not supported by this fuse.")
-    #
-    #     except Exception as e:
-    #         log.exception(f"Something went horribly wrong while trying to process task {task['task_name']}")
-    #         log.exception(e)
 
 
 def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")
-    # what exactly do we expect to harvest here?
-    # we probably only run through alive services. k.
     services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(
         BUSINESS_SERVICES_TABLE_NAME)
     # so we still get services from tables.
@@ -133,7 +114,7 @@ def route_harvester_job_body():
         try:
             service_path = service['path']
             service_name = service['name']
-            log.info(f"Harvesting {service_name} - {service_path}")
+            log.debug(f"Harvesting {service_name} - {service_path}")
             with open(service_path) as py_file:
                 lines = py_file.readlines()
                 temp_routes = []
@@ -142,18 +123,18 @@ def route_harvester_job_body():
                         try:
                             t_route = line.split("'")[1][1:]
                         except:
-                            print(f"while getting temp route, double quotes were found and managed")
+                            log.debug(f"While getting temp route, double quotes were found and managed")
                             t_route = line.split('"')[1][1:]
 
                         t_route = re.sub(r'<.+>', '<*>', t_route)
                         temp_routes.append(t_route)
                     if line.startswith('def'):
                         #  we caught all routes for func, add to all routes
-                        function = line.split(' ')[1].split('(')[0]
+                        function_name = line.split(' ')[1].split('(')[0]
                         for route in temp_routes:
                             try:
                                 all_routes.append(
-                                    {'service_name': service_name, 'function_name': function, 'route': route})
+                                    {'service_name': service_name, 'function_name': function_name, 'route': route})
                             except:
                                 log.exception(f"Tried to add {route} to all routes, it seems to be a ???")
                                 log.exception(f"All routes until that exception: {all_routes}")

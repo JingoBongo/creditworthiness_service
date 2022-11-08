@@ -76,7 +76,7 @@ def reserve_ports_from_config():
 def set_port_busy(port: int):
     busy_ports_table = db.select_from_table(c.busy_ports_table_name)
     busy_ports = [p['port'] for p in busy_ports_table]
-    if not port in busy_ports:
+    if port not in busy_ports:
         db.insert_into_table(c.busy_ports_table_name, {"port": port})
         log.debug(f"Set port {port} as busy")
     else:

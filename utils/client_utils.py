@@ -23,7 +23,7 @@ from utils import db_utils
 # in DOS scenario, somehow I want hide-in-shell scenario, when fuse can be re-opened through secured connection only
 
 
-def check_context(context):
+def check_context(context: str):
     if context:
         if (not isinstance(context, str)) or \
                 ('=' in context or not context.startswith('/') or (len(context) > 1 and context.endswith('/'))):
@@ -83,8 +83,6 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
 
     # if we get a string + claimed data type, we check depending on claimed data type;
 
-    # TODO, I hate to save these in the code, in future make it some config fileS(not only for text) or whatever
-
     # text section
     # code file section
     # not sure about c libs tho
@@ -122,15 +120,14 @@ def recognize_data_type(data, claimed_data_type) -> ('arg_name', 'confirmed_data
     return arg_name, confirmed_data_type, remade_data
 
 
-def send_request(url, context=None, request_type='GET', headers=None, data=None, params=None, cookies=None,
+# this is a lower level function called from init_send_request
+def send_request(url: str, context=None, request_type='GET', headers=None, data=None, params=None, cookies=None,
                  claimed_data_type=None):
-    # TODO: this was planned to be a lower leve requests caller, so in case variable checks here duplicate checks from the above method in the 
+    # TODO: this was planned to be a lower leve requests caller, so in case variable checks here duplicate checks from the above method in the
     # end, remove them
 
     # we need to prepare data somehow. let's say get MUST HAVE headers, make sure we have cookie session or whatever
     # TODO: how to authenticate in other fuses?
-
-    # TODO: if our data is dict, try to send it as json?
 
     # TODO: if we send a file, try to send it in chunks? So, if data is a string and is a path, send a file
     # files = {'file': open('report.xls', 'rb')}
@@ -139,20 +136,12 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
     # files = {'file': ('report.csv', 'some,data,to,send\nanother,row,to,send\n')}
     # we can avoid creating a file, but passing a string and filename instead
 
-    # r.status_code == requests.codes.ok
-    # True
-    # we can use requests's check for ok status codes, neet
-
-    # or try bad_r.raise_for_status() just to catch it automatically
-    #
     # some good info about cookies: https://requests.readthedocs.io/en/latest/user/quickstart/
 
     # SESSION OBJECTS (cookies) will help track user and return him only tasks he needs
     # https://requests.readthedocs.io/en/latest/user/advanced/#advanced
     # TODO: this means fuse will give session cookies to whoever requests it and check session cookie later
 
-    # prepare url. this method will be a low level one, meaning the one above should take care about how to get url
-    # if method gets wrong url it is fault of upper method.
     url = str(url)
     # prepare request type
     if request_type not in c.supported_request_types:
@@ -167,13 +156,6 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
     if check_context(context):
         raise Exception(f"Incorrect context used: {context}")
 
-    # prepare data. now then. I want data-type header
-    # thing is. there are so many data types that trying to handle them all here is dumb. let user specify this and make json default
-    # However, if it contains 'audio', 'video', 'image' treat it as a file
-    # If it is a text, try to treat string as a new file with specific .extension
-    # if it application
-
-    # wait. can we treat any data type user provides and try to send a file?
     if request_type == c.request_type_post or request_type == c.request_type_patch or request_type == c.request_type_put:
         kwarg_name, confirmed_data_type, remade_data = recognize_data_type(data, claimed_data_type)
         headers.update(confirmed_data_type)
@@ -184,13 +166,6 @@ def send_request(url, context=None, request_type='GET', headers=None, data=None,
         kwarg_name, confirmed_data_type, remade_data = None, None, None
         resp: requests.Response = requests.request(request_type, url=url + context,
                                                    params=params, cookies=cookies)
-    # confirmed data type is a header that we want to send as well
-
-    # prepare headers. if there would be any additional headers we always want to use: this is the place for it
-    # for now check if is dict
-
-    # TODO: authentication can be specifically defined in a call; figure it out
-
     resp.raise_for_status()
     return resp
 
@@ -222,7 +197,7 @@ def provide_url_from_service(service: str):
             # TODO: [FFD-35] https for fuse
             port = services_from_db[0]['port']
             return f"http://localhost:{port}"
-        #         TODO:. the only case left is the one where local fuse needs to call foreign fuse
+        # the only case left is the one where local fuse needs to call foreign fuse
         raise Exception("Implement me")
 
 
@@ -252,14 +227,12 @@ def cleanup_context(context: str):
 def cleanup_request_type(request_type: str):
     if not request_type or not isinstance(request_type, str):
         raise Exception(f"Invalid request type variable")
-    if not request_type.upper() in c.supported_request_types:
+    if request_type.upper() not in c.supported_request_types:
         raise Exception(f"Incorrect request method used: {request_type}")
     return request_type.upper()
 
 
 def prepare_headers(headers):
-    # TODO: when we actually will start using and working with headers, make a way to define dafault ones for fuses and other urls
-    # UPD: i actually want headers sometimes to be null, so allow it
     if headers and not isinstance(headers, dict):
         raise Exception(f"Headers should be a dict: {headers}")
     return headers
@@ -286,7 +259,6 @@ def prepare_cookies(cookies):
     if cookies and not isinstance(cookies, dict):
         raise Exception(
             f"Cookies variables should be a dict, but got {type(cookies)}")  # I hope this line itself doesnt fall
-    # TODO: Implement actual cookies that we can do if we need. do we need them when we are SENDING requests? not sure. Probably not, anyhow..
     return cookies
 
 

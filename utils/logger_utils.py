@@ -1,6 +1,5 @@
-import yaml
-
 import __init__
+import yaml
 from logging.handlers import RotatingFileHandler
 import os
 import sys

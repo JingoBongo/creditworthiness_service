@@ -1,11 +1,9 @@
-import logging
-import os
-
-from flasgger import Swagger
-from flask.logging import default_handler
-
 import __init__
-from flask import Flask, app, Response
+
+import logging
+from flasgger import Swagger
+
+from flask import Flask, Response
 
 import utils.yaml_utils
 from utils import logger_utils
@@ -34,7 +32,7 @@ def life_ping_handler():
 
 
 def not_found_handler(e):
-    return '{"kak_kakati": "This is not a thing. But you can see what is available at /apidocs"}'
+    return '{"kak_to_throw_like_a_monke": "This is not a thing. But you can see what is available at /apidocs"}'
 
 
 class FuseNode(Flask):
@@ -56,7 +54,6 @@ class FuseNode(Flask):
             self.swagger = Swagger(self)
             self.get_log()
             self.logger.info(f"Started FuseNode {self.name} at {host}:{endpoint_port}")
-            # app.run(debug=g.debug, host=host, port=endpoint_port)
         except Exception as e:
             print(f"Something went wrong while launching fuse node")
             print(e)
@@ -79,6 +76,5 @@ class FuseNode(Flask):
         w_log.setLevel(logging.DEBUG)
         w_log.addHandler(c.current_rotating_handler)
 
-        # w_log.addHandler(c.current_console_handler)
         self.logger = log
         return log

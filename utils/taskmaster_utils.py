@@ -6,7 +6,6 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c
 from utils import logger_utils as log
-from utils import general_utils as g
 from utils import db_utils as db
 from utils.dataclasses.Input_Task import InputTask
 from utils.dataclasses.Task_From_File import TaskFromFile
@@ -21,7 +20,7 @@ def task_is_in_tasks(task, tasks_from_db):
     for ttask in tasks_from_db:
         if task['task_full_path'] == ttask['task_full_path'] and task['task_name'] == ttask['task_name']:
             return True
-    #           here we purely assume that duplicates do not exist in harvested route table
+    #           here we purely assume that duplicates do not exist in taskmaster_tasks_types_table_name table
     return False
 
 
@@ -29,11 +28,6 @@ def end_task_procedure(task: TaskFromFile, error_reason):
     log.error(f"Starting end task procedure for task {task.task_unique_name}")
     log.error(error_reason)
     task.status = c.tasks_status_errored
-
-    # tasks_from_json = read_from_tasks_json_file()
-    # for t in tasks_from_json['tasks']:
-    #     if t['task_unique_name'] == task.task_unique_name:
-    #         t['status'] = c.tasks_status_errored
 
     task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
                                                       'String')[0]
@@ -51,7 +45,7 @@ def end_task_procedure(task: TaskFromFile, error_reason):
     process_from_db = db.select_from_table_by_one_column(c.all_processes_table_name, 'function_name',
                                                          c.taskmaster_main_process_name + c.tasks_name_delimiter + task.task_unique_name,
                                                          'String')
-    if not process_from_db or not len(process_from_db) == 1:
+    if not process_from_db or len(process_from_db) != 1:
         log.error(
             f"There were somehow more or none processes with this unique taskname "
             f"{c.taskmaster_main_process_name + c.tasks_name_delimiter + task.task_unique_name}, aborting killing it by PID")
@@ -60,12 +54,6 @@ def end_task_procedure(task: TaskFromFile, error_reason):
     db.delete_process_from_tables_by_pid(process_from_db['pid'])
     kill_process(process_from_db['pid'])
 
-
-# remove process from db
-
-# in all processes table I can't find needed process; solved, removing TODO
-
-# kill process. lul, i wonder how it would work if a process kills itself
 
 def prepare_data_for_post_request(task, needed_keys):
     if needed_keys and len(needed_keys) > 0:
@@ -83,7 +71,7 @@ def prepare_data_for_post_request(task, needed_keys):
 
 def required_steps_arent_finished(required_steps, task: TaskFromFile):
     for step in required_steps:
-        if not step in task.finished_steps:
+        if step not in task.finished_steps:
             return True
     return False
 
@@ -91,7 +79,7 @@ def required_steps_arent_finished(required_steps, task: TaskFromFile):
 def process_step(task: TaskFromFile, index):
     # task: Task_From_File = c.taskmaster_task_object
     # cover step in try catch?
-    log.info(f"I am inside process new step {index}")
+    log.debug(f"I am inside process new step {index}")
     local_step: Task_Step_From_File = task.steps[index - 1]
 
     # sleep untill needed steps are finished

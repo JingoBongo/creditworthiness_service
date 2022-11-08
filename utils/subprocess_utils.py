@@ -1,3 +1,4 @@
+import __init__
 import multiprocessing
 import subprocess
 import sys

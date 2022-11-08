@@ -267,7 +267,7 @@ def delete_rows_from_table_by_column(*args, **kwargs):
     val_column_value = kwargs['val_column_value']
     val_table_name = kwargs['val_table_name']
     table: Table = get_table(kwargs, val_table_name)
-    column = alc.Column(val_column_name, return_column_type_by_name(val_column_type))
+    column = alc.Column(val_column_name, return_column_type_by_name(val_column_type, kwargs))
     d = table.delete().where(column == val_column_value)
     kwargs['engine'].execute(d)
     log.debug(f"Deleted row by column/value {val_column_name}/{val_column_value} from {val_table_name}")
@@ -292,7 +292,7 @@ def update_rows_from_table_by_column(*args, **kwargs):
 
     val_table_name = kwargs['val_table_name']
     ttable: Table = get_table(kwargs, val_table_name)
-    select_column = alc.Column(val_select_column_name, return_column_type_by_name(val_select_column_type))
+    select_column = alc.Column(val_select_column_name, return_column_type_by_name(val_select_column_type, kwargs))
     # ccolumn = alc.Column(val_select_column_name, return_column_type_by_name(val_select_column_type))
     # tbl.c[column_name_here]
     # d = table.update(getattr(table.columns, val_select_column_name).values().where(select_column == val_select_column_value)
@@ -341,7 +341,7 @@ def delete_task_from_taskmaster_tasks_by_task_name(*args, **kwargs):
     alc = kwargs['alc']
     val_task_name = kwargs['task_name']
     task_name_column = alc.Column('task_name', alc.String)
-    taskmaster_task_types_table: Table = get_table(c.taskmaster_tasks_types_table_name)
+    taskmaster_task_types_table: Table = get_table(kwargs, c.taskmaster_tasks_types_table_name)
     d = taskmaster_task_types_table.delete().where(task_name_column == str(val_task_name))
     kwargs['engine'].execute(d)
     log.debug(f"Deleted task '{val_task_name}' from {c.taskmaster_tasks_types_table_name} table")

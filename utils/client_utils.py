@@ -6,54 +6,27 @@ from utils import constants as c
 from utils import db_utils
 
 
-# functions to send post and get requests
-
-# what to add about this util?
-# it must decide to call local service or other one
-# so if request leads to outside thing, we simply send request and hope that we can process the response
-# note to check: only process if it is json one? put other stuff in json key?
-
-# if request leads to inside thing, then find appropriate service/port. Method that does it while load balancing <- for later, when many
-# service instances will be active
-
-# then, call, collect results.... appropriate things will process them
-
-# TODO: what headers do we want? for now: none probably
+# TODO: what headers do we want/need?
 
 
-# so far service will be localhost/other fure/ other ulr. How to properly name it?
-# let's try this: if it has a DOT, www, http or https it is a foreign webpage
-
-# TODO, add retry mechanism or is it already there?
-# TODO also check properly, and PROCESS properly different response types.
 # TODO add to config ability to lock sending requests to other sites or even fuses
-# TODO finally make DYNAMIC config info
-# TODO probably not just get/post to do. other stuff too
-# TODO probably add conversion from xml/other stuff into json
-# TODO probably conversion here or in separate utils
-# TODO what headers?.. do we need them in steps????????????
-# TODO I need response type headers. maybe even as a wrapper-decorator thingy. I NEED IT
 
-# TODO. Think about authorization. like seriously tho
+# TODO probably add conversion from xml/other stuff into json  (low priority)
+
+# TODO I need response type headers. maybe even as a wrapper-decorator thingy. I NEED IT
+# ::: for this task I saw Flask can return 'Response(xml, mimetype='text/xml')', meaning we just specify response type in
+# ::: header and wrap return of inner function with Response(response, mimetype='decorator_content_type')
+
+# TODO. Think about authorization. like seriously tho (low priority)
 
 # TODO. make decorator that will count times an endpoint was used for statistics and possible anti-DOS functionality
 # in DOS scenario, somehow I want hide-in-shell scenario, when fuse can be re-opened through secured connection only
 
-# TODO auto code checks
-# TODO ability to async task
 
-# TODO in taskmaster. sometimes context might have VARIABLES inside. say if we use parameters. catch them.!!!
-
-# "service": "db_endpoint",   <- we have services tables to check if local exists. we will implement search in other fuses later
-# "route": "/clear/Harvested_Routes", <- context, necessary for request
-# "request_type": "GET", <- request type
-# "requires" : [],       <- what variables we will try to put into json
-# headers???? in task file??? some default for fuse?
 def check_context(context):
     if context:
-        if not isinstance(context, str):
-            return True
-        elif '=' in context or not context.startswith('/') or (len(context) > 1 and context.endswith('/')):
+        if (not isinstance(context, str)) or \
+                ('=' in context or not context.startswith('/') or (len(context) > 1 and context.endswith('/'))):
             return True
     return False
 
@@ -261,7 +234,7 @@ def cleanup_context(context: str):
     if not context or not isinstance(context, str):
         return '/'
     if not context.startswith('/'):  # we can try to just add it
-        context= '/' + context
+        context = '/' + context
     #  it appears that here I actually check length of correct context.
     #  I really want to re-ask myself and my thought process while writing this code
     if len(context.split('?')[0]) > 1 and context.split('?')[0].endswith('/'):

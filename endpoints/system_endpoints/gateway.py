@@ -92,7 +92,7 @@ def redir_request(path):
             return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
         if len(result)>1:
             return {'msg': 'there are multiple matching routes, either try to avoid this during development'
-                           'or try to pick route by service_name or function_name from result list.',
+                           ' or try to pick route by service_name or function_name from result list.',
                             'status':'ambiguous result',
                             'possible resolution':'remove duplicates and re-run harvester OR pick specific result from the list'}
         # pick service port by service name from result from db and go by path

@@ -1,26 +1,56 @@
 import __init__
-from flask import render_template, redirect, url_for, request
-from utils import general_utils as g
+import cv2
+from flask import render_template, redirect, url_for, request, Response
 from utils import constants as c
 from argparse import ArgumentParser
 from utils import logger_utils as log
 from utils.flask_child import FuseNode
 
-
 parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
 
+video_capture = cv2.VideoCapture(0)
 
 
+def gen():
+    while True:
+        ret, image = video_capture.read()
+        cv2.imwrite(c.temporary_files_folder_path +'//'+'t.jpg', image)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + open(c.temporary_files_folder_path +'//'+'t.jpg', 'rb').read() + b'\r\n')
+    video_capture.release()
 
+
+@app.route('/')
+def index():
+    """Video streaming"""
+    return render_template('index.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+# below are just example endpoints, above is the jewel you are looking for, you might want to take a look at pyscript tho
 @app.route('/send_n')
 def send_n():
     return 'sus'
 
-@app.route('/index')
-def index():
-    return 'Did you expect a default page or something? amogus'
 
+@app.route('/pyscript')
+def ijinja():
+    """Landing page."""
+    return render_template(
+        'home.html'
+    )
+
+
+@app.route('/index')
+def indblablablaex():
+    return 'Did you expect a default page or something? amogus'
 
 
 @app.route('/snake')
@@ -44,15 +74,16 @@ def tetris():
     """
     return render_template('tetris.html')
 
-@app.route('/')
-def hello():
-    """Root, please go somewhere else
-    ---
-    responses:
-      200:
-        description: why would you go here, go away
-    """
-    return redirect(url_for('index'), code=200)
+
+# @app.route('/')
+# def hello():
+#     """Root, please go somewhere else
+#     ---
+#     responses:
+#       200:
+#         description: why would you go here, go away
+#     """
+#     return redirect(url_for('index'), code=200)
 
 
 @app.route("/user/<string:str_variable>")
@@ -75,8 +106,6 @@ def endpoint_with_var(str_variable):
             description: A simple business logic unit with swagger
         """
     return 'elo hello fello\', %s' % str_variable
-
-
 
 
 if __name__ == "__main__":

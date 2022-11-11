@@ -70,6 +70,9 @@ class FuseNode(Flask):
         log = logger_utils.get_log(name)
 
         # // test part
+
+        # TODO: I DONT SEE FLASK LOGS RUNNING< DEBUG ASAP
+
         # TODO: this worked to collect request logs, but not perfectly. probably needs refactoring
         w_log = logging.getLogger('werkzeug')
         # TODO: why is level = DEBUG here? investigate. we have level from configs now

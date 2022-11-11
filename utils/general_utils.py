@@ -261,6 +261,10 @@ def clear_log_folder():
     log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
     remove_folder_contents(log_folder_name)
 
+def clear_temporary_files_folder():
+    log_folder_name = c.temporary_files_folder_path
+    remove_folder_contents(log_folder_name)
+
 
 def recreate_log_folder_if_not_exists():
     log_folder_name = c.root_path + 'resources//' + c.logs_folder_name

@@ -38,12 +38,7 @@ services:
       path: "endpoints//py_runnable_endpoint_template.py"
       enabled: True
       local: False
-    ml_model_endpoint:
-      path: "endpoints//ml_model_endpoint.py"
-      enabled: False
-    form_page:
-      path: "endpoints//form_page.py"
-      enabled: False
+
 
 uncommon_modules:
 #  pyyaml:
@@ -77,4 +72,3 @@ sqlite:
         schema_path: "resources//schemas//tasks_table_schema.json"
       Common_Strings:
         schema_path: "resources//schemas//commonly_used_strings_table_schema.json"
-# these table names are just like constant variables here. TODO: make file with constants

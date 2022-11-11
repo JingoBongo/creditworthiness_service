@@ -1,3 +1,5 @@
+import threading
+
 import __init__
 
 import shutil
@@ -175,6 +177,13 @@ def init_start_function_process(function, *args, function_name=None, **kwargs):
 
     db.insert_into_table(c.all_processes_table_name, dic)
     return p
+
+
+def init_start_function_thread(function, *argss, **kwargss):
+    thread = threading.Thread(target=function, args=argss, kwargs=kwargss)
+    thread.start()
+    log.debug(f"Created thread for function {function.__name__} with args {argss} and kwargs {kwargss}")
+    return thread
 
 
 def init_start_service_procedure(service: str, is_sys=False):

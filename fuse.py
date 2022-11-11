@@ -44,7 +44,7 @@ def main():
     g.clear_busy_ports()
     g.generate_on_start_unique_fuse_id()
     g.clear_log_folder()
-    g.clear_temporary_files_folder()
+    # g.clear_temporary_files_folder()
     g.reserve_ports_from_config()
     db_utils.clear_system_services_table()
     db_utils.clear_business_services_table()

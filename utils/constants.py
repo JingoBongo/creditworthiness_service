@@ -30,6 +30,7 @@ route_harvester_schedule_name = 'route_harvester_schedule'
 route_harvester_schedule_pyfile_name = 'route_harvester_schedule.py'
 logs_folder_name = 'logs'
 tasks_status_new = 'new'
+tasks_steps_number_to_make_a_process = 15
 tasks_status_in_progress = 'in_progress'
 tasks_status_errored = 'errored'
 tasks_status_completed = 'completed'

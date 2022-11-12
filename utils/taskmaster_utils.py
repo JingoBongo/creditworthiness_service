@@ -145,6 +145,7 @@ def process_step(task: TaskFromFile, index, is_thread):
 
 def process_new_task(task: TaskFromFile, is_thread):
     # for db: we select by unique name, then upsert by unique name with new status
+    log.debug(f"Inside process_new_task (new thread/process)")
     task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
                                                       'String')[0]
     task_from_db = dict(task_from_db)
@@ -181,7 +182,8 @@ def process_new_task(task: TaskFromFile, is_thread):
         save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name,
                        task.global_provides)
     # we have all pickles we need, now update task status
-    task.status = c.tasks_status_completed
+    if task.status != c.tasks_status_errored and task.status != c.tasks_status_does_not_exist_locally:
+        task.status = c.tasks_status_completed
 
     task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
                                                       'String')[0]
@@ -215,7 +217,7 @@ def process_new_task(task: TaskFromFile, is_thread):
 
 def do_the_task(task_obj: InputTask, data):
     try:
-        log.get_log(f"taskmaster_task_process")
+
         task_type_from_db = db.select_from_table_by_one_column(c.taskmaster_tasks_types_table_name,
                                                                "task_name",
                                                                task_obj.task_name,

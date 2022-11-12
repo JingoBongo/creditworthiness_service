@@ -198,7 +198,8 @@ def provide_url_from_service(service: str):
             port = services_from_db[0]['port']
             return f"http://localhost:{port}"
         # the only case left is the one where local fuse needs to call foreign fuse
-        raise Exception("Implement me")
+        # dummy, or fuse doesn't have it
+        raise Exception(f"Implement me ({provide_url_from_service.__name__})")
 
 
 def get_params_from_context_after_question_mark(raw_string: str):

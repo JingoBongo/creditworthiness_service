@@ -94,37 +94,43 @@ def process_service_statuses(services_and_statuses):
     #         pass
 
 
-def job():
-    log.info("Scheduled life_ping task started..")
-    services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(
-        BUSINESS_SERVICES_TABLE_NAME)
-    services_and_statuses = []
-    # for i in services:
-    #     service_status = ping_one(i.port)
-    #     # print('PID ' + str(i.pid))
-    #     services_and_statuses.append({'name': i.name, 'port': i.port, 'pid': i.pid, 'status': service_status})
-    #     if not i.status == service_status:
-    #         db_utils.change_service_status_by_pid(i.pid, service_status)
-    #     short_name = i.name.split('\\')[-1]
-    #     log.info(f"Endpoint {short_name} (localhost:{i.port}) is {service_status}")
-
+def ping_services(services, services_and_statuses):
     with ThreadPoolExecutor(max_workers=len(services)) as executor:
         for result in executor.map(ping_one_service_and_more, services, repeat(services_and_statuses)):
             pass
 
-    process_service_statuses(services_and_statuses)
+
+def job():
+    log.info("Scheduled life_ping task started..")
+    try:
+        services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(
+            BUSINESS_SERVICES_TABLE_NAME)
+        services_and_statuses = []
+
+        ping_services(services, services_and_statuses)
+        # with ThreadPoolExecutor(max_workers=len(services)) as executor:
+        #     for result in executor.map(ping_one_service_and_more, services, repeat(services_and_statuses)):
+        #         pass
+
+        process_service_statuses(services_and_statuses)
+    except Exception as e:
+        log.exception(f"Main life ping schedule body exceptioned")
+        log.exception(e)
     log.info("Scheduled life_ping task finished")
 
 
 def ping_one_service_and_more(service, services_and_statuses):
-    service_status = ping_one(service.port)
-    # print('PID ' + str(i.pid))
-    services_and_statuses.append(
-        {'name': service.name, 'port': service.port, 'pid': service.pid, 'status': service_status})
-    if not service['status'] == service_status:
-        db_utils.change_service_status_by_pid(service.pid, service_status)
-    short_name = service['name'].split('\\')[-1]
-    log.info(f"Endpoint {short_name} (localhost:{service.port}) is {service_status}")
+    try:
+        service_status = ping_one(service.port)
+        services_and_statuses.append(
+            {'name': service.name, 'port': service.port, 'pid': service.pid, 'status': service_status})
+        if service['status'] != service_status:
+            db_utils.change_service_status_by_pid(service.pid, service_status)
+        short_name = service['name'].split('\\')[-1]
+        log.debug(f"Endpoint {short_name} (localhost:{service.port}) is {service_status}")
+    except Exception as e:
+        log.exception(f"Something went wrong while pinging in lifping scheduler")
+        log.exception(e)
 
     # with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
     #     for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):

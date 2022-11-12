@@ -108,12 +108,12 @@ import requests
 
 
 def main():
-    print(psutil.net_connections())
-    for line in psutil.net_connections():
-        print(str(line).split('port=')[1].split(')')[0])
-
-    used_str_ports = [str(line).split('port=')[1].split(')')[0] for line in psutil.net_connections()]
-    # print(x)
+    dic = {}
+    a = {"A":"1"}
+    b = {"A":"2"}
+    dic.update(a)
+    dic.update(b)
+    print(dic)
 
 if __name__ == '__main__':
     main()

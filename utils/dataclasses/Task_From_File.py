@@ -1,4 +1,4 @@
-import multiprocessing
+import __init__
 
 from utils import constants as c
 from utils import logger_utils as log
@@ -29,15 +29,17 @@ class TaskFromFile:
         for key in temp_init_requires_keys:
             temp_init_requires_dict[key] = data[key]
 
-        self.init_requires = multiprocessing.Manager().dict()
+        # self.init_requires = multiprocessing.Manager().dict()
+        self.init_requires = {}
         self.init_requires.update(temp_init_requires_dict)
-        self.global_provides = multiprocessing.Manager().dict()
+        self.global_provides = {}
+        # self.global_provides = multiprocessing.Manager().dict()
         self.global_provides.update(temp_init_requires_dict)
 
         self.task_folder_path = None
         self.steps = []
-        # self.finished_steps = []
-        self.finished_steps = multiprocessing.Manager().list()
+        self.finished_steps = []
+        # self.finished_steps = multiprocessing.Manager().list()
         for s in task_dict_from_file['steps']:
             new_step = Task_Step_From_File(step_number=s['step_number'],
                                            step_name=s['step_name'],

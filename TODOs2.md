@@ -1,1 +1,0 @@
-add resources yaml variable and use it for schemas for example

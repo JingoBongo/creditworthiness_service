@@ -76,17 +76,6 @@ def tetris():
     return render_template('tetris.html')
 
 
-# @app.route('/')
-# def hello():
-#     """Root, please go somewhere else
-#     ---
-#     responses:
-#       200:
-#         description: why would you go here, go away
-#     """
-#     return redirect(url_for('index'), code=200)
-
-
 @app.route("/user/<string:str_variable>")
 def endpoint_with_var(str_variable):
     """I have no idea why is this a title

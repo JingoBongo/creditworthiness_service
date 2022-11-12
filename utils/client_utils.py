@@ -8,7 +8,6 @@ from utils import db_utils
 
 # TODO: what headers do we want/need?
 
-
 # TODO add to config ability to lock sending requests to other sites or even fuses
 
 # TODO probably add conversion from xml/other stuff into json  (low priority)
@@ -163,7 +162,6 @@ def send_request(url: str, context=None, request_type='GET', headers=None, data=
                                                    params=params, cookies=cookies)
 
     else:
-        kwarg_name, confirmed_data_type, remade_data = None, None, None
         resp: requests.Response = requests.request(request_type, url=url + context,
                                                    params=params, cookies=cookies)
     resp.raise_for_status()

@@ -10,7 +10,7 @@ app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, 
 
 
 
-
+# TODO make a way to generate template endpoints instead of keeping templates
 
 @app.route('/')
 def hello():

@@ -3,7 +3,7 @@ import __init__
 import logging
 from flasgger import Swagger
 
-from flask import Flask, Response
+from flask import Flask, Response, url_for, send_from_directory
 
 import utils.yaml_utils
 from utils import logger_utils
@@ -30,6 +30,9 @@ def remove_key(d, key):
 def life_ping_handler():
     return '{"status":"alive"}'
 
+def favicon_handler():
+    return send_from_directory(c.root_path + c.static_folder_name,'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 def not_found_handler(e):
     return '{"kak_to_throw_like_a_monke": "This is not a thing. But you can see what is available at /apidocs"}'
@@ -40,8 +43,9 @@ class FuseNode(Flask):
         try:
             parser = kwargs.pop("arg_parser")
             super().__init__(*args, **kwargs)
-            # adding 2 default thigs: life_ping route and 404 error handler
+            # adding 3 default things: life_ping route and 404 error handler, and a favicon
             self.add_url_rule(c.life_ping_endpoint_context, methods=['PATCH'], view_func=life_ping_handler)
+            self.add_url_rule('/favicon.ico', view_func=favicon_handler)
             self.register_error_handler(404, not_found_handler)
             parser.add_argument('-port')
             parser.add_argument('-local')
@@ -68,16 +72,10 @@ class FuseNode(Flask):
     def get_log(self):
         name = self.name
         log = logger_utils.get_log(name)
-
-        # // test part
-
-        # TODO: I DONT SEE FLASK LOGS RUNNING< DEBUG ASAP
-
-        # TODO: this worked to collect request logs, but not perfectly. probably needs refactoring
-        w_log = logging.getLogger('werkzeug')
-        # TODO: why is level = DEBUG here? investigate. we have level from configs now
-        w_log.setLevel(logging.DEBUG)
-        w_log.addHandler(c.current_rotating_handler)
-
         self.logger = log
+        level = logging.DEBUG if self.debug else logging.INFO
+        logging.getLogger('werkzeug').setLevel(level)
+        logging.getLogger('werkzeug').addHandler(c.current_rotating_handler)
+        logging.getLogger('werkzeug').addHandler(c.current_console_handler)
+        # code above fixes werkzeug logs, but also floods the logs
         return log

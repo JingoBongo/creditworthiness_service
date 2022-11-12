@@ -44,11 +44,10 @@ def lazy_task(task_name):
         data = request.get_json()
 
     do_the_task(task_obj, data)
-    # TODO MAKE SLOTS FOR CLASSES
-    # TODO MAKE IS THREAD a CLASS VARIABLE, so we don't pass it everywhere and can optimize get_result
+
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
-
+    # why didn't I just use localhost here?)..
     return redirect(f"http://{ip_address}/redir/tasks/get_result/{task_unique_name}")
 
 
@@ -94,8 +93,6 @@ def start_task(task_name):
     if request.method == 'POST':
         data = request.get_json()
 
-    # init_start_function_process(taskmaster_main_process, task_obj, data,
-    #                             function_name=c.taskmaster_main_process_name + c.tasks_name_delimiter + task_unique_name)
     do_the_task(task_obj, data)
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)

@@ -14,6 +14,17 @@ parser = ArgumentParser()
 app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
 
 
+@app.route('/run-cmd-command/<string:command>')
+def cursed_call(command):
+    """This... exists. I refuse to uncomment the code line until I think about security
+        ---
+        responses:
+          200:
+            description: why would you go here, go away
+        """
+    # g.run_cmd_command(command)
+    return {"status":"done"}
+
 
 @app.route('/trigger-harvester')
 def hello():

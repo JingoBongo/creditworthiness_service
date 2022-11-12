@@ -59,14 +59,12 @@ def main():
         if len(system_services) != 0:
             for service_name, service_config in zip(system_services.keys(), system_services.values()):
                 init_start_function_thread(try_service_launch, service_name, service_config, True)
-                # try_service_launch(service_name, service_config, True)
         else:
             log.error('No system service found, not right at all')
 
     if isinstance(business_services, dict):
         if len(business_services) != 0:
             for service_name, service_config in zip(business_services.keys(), business_services.values()):
-                # try_service_launch(service_name, service_config, False)
                 init_start_function_thread(try_service_launch, service_name, service_config, False)
         else:
             log.error('No business service found, is it test launch?')

@@ -59,13 +59,11 @@ def route_is_in_routes(route, routs_from_db):
 
 def taskmaster_job_body():
     log.info(f"Scheduled {c.taskmaster_schedule_name} task started..")
-    # TODO: sql table is updated accordingly, task-retry part is actually the only todo here
-    # a bit more data about task-retry. For now I don't see a reason to do it as I am planning
-    # to partially get rid of pickles in case they slow task execution
-
-    # so TODO ( }=) ) if we DON'T get rid of pickles in some task scenarios, then implement here a mechanic,
-    # where task, started by previous run of Fuse gets renewed. Or just relaunched?... then no need of pickles
-    # just see through tasks table..........
+    # TODO: This note is  of 11m/12d/2022. Tasks are saved in the corresponding table.
+    #  We could catch the ones from old epoch there
+    # This scheduler has 1 job for sure and second if I feel bored.
+    # First is to catch all locally available task schemas, done
+    # Second is to try to revive tasks from previous Fuse launch, not done
 
     # we need a list of supported tasks
     directory_to_iterate = c.root_path + yaml_utils.get_config()['general']['tasks_folder']
@@ -97,7 +95,6 @@ def taskmaster_job_body():
             log.exception(f"Something went wrong while processing task(from files) {task}")
             log.exception(e)
     log.info(f"Taskmaster Tasks harvester finished job")
-
 
 
 def route_harvester_job_body():

@@ -3,7 +3,7 @@ import __init__
 from utils import constants as c
 from utils import logger_utils as log
 from utils import general_utils as g
-from utils.dataclasses.TaskStepFromFile import TaskStepFromFile
+from utils.dataclasses.task_step_from_file import TaskStepFromFile
 
 
 class TaskFromFile:

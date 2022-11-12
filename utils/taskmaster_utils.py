@@ -7,9 +7,9 @@ from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c
 from utils import logger_utils as log
 from utils import db_utils as db
-from utils.dataclasses.Input_Task import InputTask
-from utils.dataclasses.Task_From_File import TaskFromFile
-from utils.dataclasses.TaskStepFromFile import TaskStepFromFile
+from utils.dataclasses.input_task import InputTask
+from utils.dataclasses.task_from_file import TaskFromFile
+from utils.dataclasses.task_step_from_file import TaskStepFromFile
 from utils.general_utils import kill_process, init_start_function_process, init_start_function_thread, get_thread_result
 from utils.pickle_utils import save_to_pickle, read_from_pickle
 from utils import client_utils
@@ -162,32 +162,11 @@ def save_task_results_in_folder(task: TaskFromFile):
 def process_new_task(task: TaskFromFile):
     log.debug(f"Inside process_new_task (new thread/process)")
     is_thread = task.is_threaded
-    # for db: we select by unique name, then upsert by unique name with new status
-    # task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
-    #                                                   'String')[0]
-    # task_from_db = dict(task_from_db)
-    # task_from_db['status'] = c.tasks_status_in_progress
-    # db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
-    # db.insert_into_table(c.tasks_table_name, task_from_db)
+
     init_start_function_thread(change_db_task_status_to_in_progress, task.task_unique_name)
 
     task.status = c.tasks_status_in_progress
     task.task_folder_path = c.temporary_files_folder_path + c.double_forward_slash + str(task.task_unique_name)
-    # another overlook. make folder only if needed. if there are provides or there is an error. moved these lines
-    # to those places
-    # Path(task.task_folder_path).mkdir(parents=True, exist_ok=True)
-    # log.info(f"Created folder '{task.task_folder_path}' for the task")
-
-    # UPD: to code below about saving pickles. Since I pass those with a task file and save task files in case something
-    # goes wrong, there is no need to additionally save those, at least now
-    # # TO-DO now is the time to create init_requires if needed
-    # if task.init_requires and isinstance(task.init_requires, list) and len(task.init_requires) > 0:
-    #     save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_init_requires_file_name,
-    #                    task.init_requires)
-    # # TO-DO And global_provides pickle
-    # save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name, {})
-    # 11d/11m/2022 commented code above assumingly just wastes execution time, we only need to save provides pickles in
-    # case when we have something to provide, not just making empty pickle files
 
     with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
         for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):
@@ -195,10 +174,7 @@ def process_new_task(task: TaskFromFile):
     save_to_folder_thread = None
     if len(task.global_provides) > 0:
         save_to_folder_thread = init_start_function_thread(save_task_results_in_folder, task)
-        # Path(task.task_folder_path).mkdir(parents=True, exist_ok=True)
-        # log.debug(f"Created folder '{task.task_folder_path}' for the task")
-        # save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name,
-        #                task.global_provides)
+
     # we have all pickles we need, now update task status
     if task.status != c.tasks_status_errored and task.status != c.tasks_status_does_not_exist_locally:
         task.status = c.tasks_status_completed
@@ -226,12 +202,7 @@ def process_new_task(task: TaskFromFile):
             return
         process_from_db = process_from_db[0]
         db.delete_process_from_tables_by_pid(process_from_db['pid'])
-    # Do we need to kill the process tho? It's code ended, shouldn't it kill itself automatically?
-    # More over, in case we are launching thread and not process, this would kill taskmaster!
-    # TODO : only kill process in end_process if this is a process. I guess I will add a bool toKillProcess to know what
-    # to do with end process procedure. what about here? I actually now think we shouldn't. Also, bool should be more like
-    # isProcessUsed, and based on it ALSO WORK WITH ALL PROCESSES TABLE SHOULD BE MANAGED
-    # kill_process(process_from_db['pid'])
+#         Here, unlike end_task_procedure process isn't killed because the code to be executed finished anywah
 
 
 def generate_task(task_type_from_db, task_obj, data) -> TaskFromFile:

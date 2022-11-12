@@ -79,8 +79,8 @@ def start_service(service_name):
         """
     return process_start_service(service_name)
 
-
-
+#
+# TODO make a task to relaunch X service
 
 if __name__ == "__main__":
     launch_life_ping_scheduler_if_not_exists()

@@ -1,15 +1,12 @@
 import __init__
 import schedule
 import time
-import utils.general_utils as g
 from utils import constants as c
 import os
-import requests
 from utils import logger_utils as log
 
-from utils import db_utils
 
-# DO NOT IMPORT. (his file) !@!!!!!!
+# DO NOT IMPORT. (this file) !@!!!!!!
 from utils.schedulers_utils import route_harvester_job_body
 
 root_path = c.root_path

@@ -19,6 +19,7 @@ busy_ports_table_name = 'Busy_Ports'
 common_strings_table_name = 'Common_Strings'
 sql_engine_path = f"sqlite:///{root_path}resources\\{db_name}"
 templates_folder_name = 'templates'
+static_folder_name = 'static'
 schedulers_folder_name = 'schedulers'
 system_schedulers_folder_name = 'system_schedulers'
 life_ping_schedule_name = 'life_ping_schedule'

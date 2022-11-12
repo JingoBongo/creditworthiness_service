@@ -9,8 +9,8 @@ from utils import logger_utils as log
 from utils import db_utils as db
 from utils.dataclasses.Input_Task import InputTask
 from utils.dataclasses.Task_From_File import TaskFromFile
-from utils.dataclasses.Task_Step_From_File import Task_Step_From_File
-from utils.general_utils import kill_process, init_start_function_process, init_start_function_thread
+from utils.dataclasses.TaskStepFromFile import TaskStepFromFile
+from utils.general_utils import kill_process, init_start_function_process, init_start_function_thread, get_thread_result
 from utils.pickle_utils import save_to_pickle, read_from_pickle
 from utils import client_utils
 
@@ -24,7 +24,8 @@ def task_is_in_tasks(task, tasks_from_db):
     return False
 
 
-def end_task_procedure(task: TaskFromFile, error_reason, is_thread):
+def end_task_procedure(task: TaskFromFile, error_reason):
+    is_thread = task.is_threaded
     log.error(f"Starting end task procedure for task {task.task_unique_name}")
     log.error(error_reason)
 
@@ -59,7 +60,7 @@ def end_task_procedure(task: TaskFromFile, error_reason, is_thread):
         kill_process(process_from_db['pid'])
 
 
-def prepare_data_for_post_request(task, needed_keys, is_thread):
+def prepare_data_for_post_request(task, needed_keys):
     if needed_keys and len(needed_keys) > 0:
         provided_keys_from_init_requires = task['init_requires']
         for key in needed_keys:
@@ -67,8 +68,7 @@ def prepare_data_for_post_request(task, needed_keys, is_thread):
             # if key not in provided_keys_from_init_requires.keys():
             if key not in provided_keys_from_init_requires.keys() or key not in task.global_provides.keys():
                 end_task_procedure(task,
-                                   f"Task {task['task_unique_name']} ended early as required {key} was not provided",
-                                   is_thread)
+                                   f"Task {task['task_unique_name']} ended early as required {key} was not provided")
         needed_data = {}
         for key in needed_keys:
             # i think here we should update with new dict, not just value
@@ -83,10 +83,10 @@ def required_steps_arent_finished(required_steps, task: TaskFromFile):
     return False
 
 
-def process_step(task: TaskFromFile, index, is_thread):
+def process_step(task: TaskFromFile, index):
     try:
         log.debug(f"I am inside process_step {index}")
-        local_step: Task_Step_From_File = task.steps[index - 1]
+        local_step: TaskStepFromFile = task.steps[index - 1]
 
         # sleep until needed steps are finished
         if local_step.requires_steps and isinstance(local_step.requires_steps, list):
@@ -101,7 +101,7 @@ def process_step(task: TaskFromFile, index, is_thread):
         if local_step.request_type == c.request_type_post:
             # needed_keys = local_step['requires'] try out how it works with below version
             needed_keys = local_step.requires
-            data_for_post = prepare_data_for_post_request(task, needed_keys, is_thread)
+            data_for_post = prepare_data_for_post_request(task, needed_keys)
             data_type = {'Content-Type': 'application/json'}
 
         # we should be able to send request now. if we use post request, add content type json
@@ -129,10 +129,9 @@ def process_step(task: TaskFromFile, index, is_thread):
                     content_to_save = {key: resp.content}
                 else:
                     end_task_procedure(task,
-                                       "If response content type is string, step should only provide one key-value pair set in schema file",
-                                       is_thread)
+                                       "If response content type is string, step should only provide one key-value pair set in schema file")
             else:
-                end_task_procedure(task, "Response body is not JSON, dict or string, what is that?", is_thread)
+                end_task_procedure(task, "Response body is not JSON, dict or string, what is that?")
             task.global_provides.update(content_to_save)
             save_to_pickle(
                 task.task_folder_path + c.double_forward_slash + local_step.step_number + c.tasks_step_provides_delimiter + 'response',
@@ -140,22 +139,39 @@ def process_step(task: TaskFromFile, index, is_thread):
         task.finished_steps.append(local_step.step_number)
     except Exception as e:
         log.exception(f"Something went horribly wrong while trying to finish step {index}, aborting task.")
-        end_task_procedure(task, e, is_thread)
+        end_task_procedure(task, e)
 
 
-def process_new_task(task: TaskFromFile, is_thread):
-    # for db: we select by unique name, then upsert by unique name with new status
-    log.debug(f"Inside process_new_task (new thread/process)")
-    task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
+def change_db_task_status_to_in_progress(task_unique_name):
+    # TODO: Thing is, I wanted to replace delete+ insert with update, but update isnt tested
+    task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task_unique_name,
                                                       'String')[0]
     task_from_db = dict(task_from_db)
     task_from_db['status'] = c.tasks_status_in_progress
-    db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
+    db.delete_task_from_tasks_table_by_unique_task_name(task_unique_name)
     db.insert_into_table(c.tasks_table_name, task_from_db)
-    # TODO: Thing is, I wanted to replace delete+ insert with update, but update isnt tested
+
+
+def save_task_results_in_folder(task: TaskFromFile):
+    Path(task.task_folder_path).mkdir(parents=True, exist_ok=True)
+    log.debug(f"Created folder '{task.task_folder_path}' for the task")
+    save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name,
+                   task.global_provides)
+
+
+def process_new_task(task: TaskFromFile):
+    log.debug(f"Inside process_new_task (new thread/process)")
+    is_thread = task.is_threaded
+    # for db: we select by unique name, then upsert by unique name with new status
+    # task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task.task_unique_name,
+    #                                                   'String')[0]
+    # task_from_db = dict(task_from_db)
+    # task_from_db['status'] = c.tasks_status_in_progress
+    # db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
+    # db.insert_into_table(c.tasks_table_name, task_from_db)
+    init_start_function_thread(change_db_task_status_to_in_progress, task.task_unique_name)
 
     task.status = c.tasks_status_in_progress
-
     task.task_folder_path = c.temporary_files_folder_path + c.double_forward_slash + str(task.task_unique_name)
     # another overlook. make folder only if needed. if there are provides or there is an error. moved these lines
     # to those places
@@ -174,13 +190,15 @@ def process_new_task(task: TaskFromFile, is_thread):
     # case when we have something to provide, not just making empty pickle files
 
     with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
-        for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1), repeat(is_thread)):
+        for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):
             pass
+    save_to_folder_thread = None
     if len(task.global_provides) > 0:
-        Path(task.task_folder_path).mkdir(parents=True, exist_ok=True)
-        log.debug(f"Created folder '{task.task_folder_path}' for the task")
-        save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name,
-                       task.global_provides)
+        save_to_folder_thread = init_start_function_thread(save_task_results_in_folder, task)
+        # Path(task.task_folder_path).mkdir(parents=True, exist_ok=True)
+        # log.debug(f"Created folder '{task.task_folder_path}' for the task")
+        # save_to_pickle(task.task_folder_path + c.double_forward_slash + c.tasks_global_provides_file_name,
+        #                task.global_provides)
     # we have all pickles we need, now update task status
     if task.status != c.tasks_status_errored and task.status != c.tasks_status_does_not_exist_locally:
         task.status = c.tasks_status_completed
@@ -193,7 +211,8 @@ def process_new_task(task: TaskFromFile, is_thread):
     # TODO: third time, instead of dumb select-delete-insert i'd like to have update, but that method is janky and untested
     db.delete_task_from_tasks_table_by_unique_task_name(task.task_unique_name)
     db.insert_into_table(c.tasks_table_name, task_from_db)
-
+    if len(task.global_provides) > 0:
+        get_thread_result(save_to_folder_thread)
     log.info(f"Task {task.task_unique_name} finished execution with status {task.status}")
 
     if not is_thread:
@@ -215,6 +234,24 @@ def process_new_task(task: TaskFromFile, is_thread):
     # kill_process(process_from_db['pid'])
 
 
+def generate_task(task_type_from_db, task_obj, data) -> TaskFromFile:
+    task_type_from_db = task_type_from_db[0]
+    task: TaskFromFile = TaskFromFile(task_type_from_db['task_full_path'], task_obj.task_unique_name, data)
+    return task
+
+
+def generate_and_use_new_dict_task(task_obj) -> dict:
+    c.on_start_unique_fuse_id = db.select_from_table_by_one_column(c.common_strings_table_name, 'key',
+                                                                   c.on_start_unique_fuse_id_name,
+                                                                   'String')[0]['value']
+    new_dict_task: dict = {"task_name": task_obj.task_name, "task_unique_name": task_obj.task_unique_name,
+                           c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
+                           "status": c.tasks_status_new}
+
+    db.insert_into_table(c.tasks_table_name, new_dict_task)
+    return new_dict_task
+
+
 def do_the_task(task_obj: InputTask, data):
     try:
 
@@ -223,24 +260,28 @@ def do_the_task(task_obj: InputTask, data):
                                                                task_obj.task_name,
                                                                "String")
         if len(task_type_from_db) == 1:
-            task_type_from_db = task_type_from_db[0]
-            task = TaskFromFile(task_type_from_db['task_full_path'], task_obj.task_unique_name, data)
+            # task_type_from_db = task_type_from_db[0]
+            # task = TaskFromFile(task_type_from_db['task_full_path'], task_obj.task_unique_name, data)
+            generate_task_thread = init_start_function_thread(generate_task, task_type_from_db, task_obj, data)
 
-            c.on_start_unique_fuse_id = db.select_from_table_by_one_column(c.common_strings_table_name, 'key',
-                                                                           c.on_start_unique_fuse_id_name,
-                                                                           'String')[0]['value']
-            new_dict_task = {"task_name": task_obj.task_name, "task_unique_name": task_obj.task_unique_name,
-                             c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
-                             "status": c.tasks_status_new}
+            # c.on_start_unique_fuse_id = db.select_from_table_by_one_column(c.common_strings_table_name, 'key',
+            #                                                                c.on_start_unique_fuse_id_name,
+            #                                                                'String')[0]['value']
+            # new_dict_task = {"task_name": task_obj.task_name, "task_unique_name": task_obj.task_unique_name,
+            #                  c.on_start_unique_fuse_id_name: c.on_start_unique_fuse_id,
+            #                  "status": c.tasks_status_new}
+            #
+            # db.insert_into_table(c.tasks_table_name, new_dict_task)
+            generate_and_use_new_dict_task_thread = init_start_function_thread(generate_and_use_new_dict_task, task_obj)
 
-            db.insert_into_table(c.tasks_table_name, new_dict_task)
-
-            if len(task.steps) >= c.tasks_steps_number_to_make_a_process:
+            task: TaskFromFile = get_thread_result(generate_task_thread)
+            get_thread_result(generate_and_use_new_dict_task_thread)
+            if not task.is_threaded:
                 func_name = c.taskmaster_main_process_name + c.tasks_name_delimiter + task_obj.task_unique_name
-                init_start_function_process(process_new_task, task, False,
+                init_start_function_process(process_new_task, task,
                                             function_name=func_name)
                 return
-            init_start_function_thread(process_new_task, task, True)
+            init_start_function_thread(process_new_task, task)
 
 
         else:

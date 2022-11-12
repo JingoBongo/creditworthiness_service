@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 
+# TODO: move those in dataclasses?
 class CustomNamedProcess(multiprocessing.Process):
     def __init__(self, *args, name=None, **kwargs):
         self.name = name

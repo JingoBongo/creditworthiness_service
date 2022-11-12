@@ -11,9 +11,9 @@ import utils.subprocess_utils as custom_subprocess
 from utils import db_utils as db
 from utils import constants as c
 from utils import logger_utils as log
+from utils.dataclasses.thread_with_return_value import ThreadWithReturnValue
 from utils.yaml_utils import get_config
 from utils.random_utils import generate_random_uid4
-
 
 
 def run_cmd_command(command):
@@ -162,8 +162,9 @@ def check_file_exists(service_full_path: str):
     return os.path.exists(service_full_path)
 
 
-def init_start_function_process(function, *args, function_name=None, **kwargs):
-    p = custom_subprocess.CustomNamedProcess(target=function, args=args, name=function_name, kwargs=kwargs)
+def init_start_function_process(function, *args, function_name=None, **kwargs) -> custom_subprocess.CustomNamedProcess:
+    p: custom_subprocess.CustomNamedProcess = custom_subprocess.CustomNamedProcess(target=function, args=args,
+                                                                                   name=function_name, kwargs=kwargs)
     # TODO this stores function ref? in db? is this ok?
     dic = {'arguments': str(args).join(str(kwargs))}
     # TODO: this seemed as a template for times when function will not need arguments etc.
@@ -179,11 +180,15 @@ def init_start_function_process(function, *args, function_name=None, **kwargs):
     return p
 
 
-def init_start_function_thread(function, *argss, **kwargss):
-    thread = threading.Thread(target=function, args=argss, kwargs=kwargss)
+def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnValue:
+    thread: ThreadWithReturnValue = ThreadWithReturnValue(target=function, args=argss, kwargs=kwargss)
     thread.start()
     log.debug(f"Created thread for function {function.__name__} with args {argss} and kwargs {kwargss}")
     return thread
+
+
+def get_thread_result(thread: ThreadWithReturnValue):
+    return thread.join()
 
 
 def init_start_service_procedure(service: str, is_sys=False):
@@ -269,6 +274,7 @@ def remove_folder_contents(folder: str):
 def clear_log_folder():
     log_folder_name = c.root_path + 'resources//' + c.logs_folder_name
     remove_folder_contents(log_folder_name)
+
 
 def clear_temporary_files_folder():
     log_folder_name = c.temporary_files_folder_path

@@ -103,17 +103,52 @@
 #
 # def process_result(future):
 #     print(future.result())
+import asyncio
+from threading import Thread
+
+
 import psutil
 import requests
+import time
+
+from utils.decorators.time_measurement import func_timeit
 
 
-def main():
-    dic = {}
-    a = {"A":"1"}
-    b = {"A":"2"}
-    dic.update(a)
-    dic.update(b)
-    print(dic)
+@func_timeit
+def foo():
+    start = time.time()
+    print(f"Foo started executing")
+    requests.get("https://knowyourmeme.com/memes/aboba")
+    print(f"Foo ended executing with time spent inside {time.time() - start}")
+
+
+async def boo():
+    start = time.time()
+    print(f"Foo started executing")
+    await requests.get("https://knowyourmeme.com/memes/aboba")
+    print(f"Foo ended executing with time spent inside {time.time() - start}")
+
+
+def main1():
+    start = time.time()
+    print(f"Execution started")
+    for i in range(10):
+        # t = Thread(target=foo)
+        # t.start()
+        foo()
+    print(f"Total execution was {time.time() - start}")
+async def main():
+    # testing asyncio vs threads
+    start = time.time()
+    print(f"Execution started")
+    tasks = [asyncio.ensure_future(boo()) for i in range(10)]
+    await asyncio.wait(tasks)
+    print(f"Total execution was {time.time() - start}")
+
 
 if __name__ == '__main__':
-    main()
+    # main()
+    # asyncio.run(main())
+    ioloop = asyncio.new_event_loop()
+    ioloop.run_until_complete(main())
+    ioloop.close()

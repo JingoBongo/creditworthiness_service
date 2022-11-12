@@ -1,9 +1,13 @@
-from utils import constants as c
-from utils import logger_utils as log
-from utils import general_utils as g
+import __init__
 
-class Task_Step_From_File:
-    def __init__(self, step_number, step_name, service, route, request_type, requires, requires_steps, needs_to_provide):
+# TODO write proper dataclasses file names, I feel I lack standardization over here
+
+class TaskStepFromFile:
+    __slots__ = ("step_number", "step_name", "service", "route", "request_type", "requires",
+                 "requires_steps", "needs_to_provide", "is_finished")
+
+    def __init__(self, step_number, step_name, service, route, request_type, requires, requires_steps,
+                 needs_to_provide):
         self.step_number = int(step_number)
         self.step_name = step_name
         self.service = service

@@ -15,10 +15,10 @@ video_capture = cv2.VideoCapture(0)
 def gen():
     while True:
         ret, image = video_capture.read()
-        cv2.imwrite(c.temporary_files_folder_path + c.double_forward_slash + 't.jpg', image)
+        cv2.imwrite(c.temporary_files_folder_full_path + c.double_forward_slash + 't.jpg', image)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + open(
-            c.temporary_files_folder_path + c.double_forward_slash + 't.jpg', 'rb').read() + b'\r\n')
+            c.temporary_files_folder_full_path + c.double_forward_slash + 't.jpg', 'rb').read() + b'\r\n')
     video_capture.release()
 
 

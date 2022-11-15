@@ -37,6 +37,7 @@ def try_service_launch(service_name: str, service_config: dict, is_system: bool)
 def main():
     # some preconfiguration & init activities
     g.recreate_log_folder_if_not_exists()
+    g.recreate_temporary_files_folder_if_not_exists()
     setup_cur_logger()
     log.info(f'Firing fuse..')
     print(c.fuse_logo)
@@ -58,14 +59,16 @@ def main():
     if isinstance(system_services, dict):
         if len(system_services) != 0:
             for service_name, service_config in zip(system_services.keys(), system_services.values()):
-                init_start_function_thread(try_service_launch, service_name, service_config, True)
+                # init_start_function_thread(try_service_launch, service_name, service_config, True)
+                try_service_launch(service_name, service_config, True)
         else:
             log.error('No system service found, not right at all')
 
     if isinstance(business_services, dict):
         if len(business_services) != 0:
             for service_name, service_config in zip(business_services.keys(), business_services.values()):
-                init_start_function_thread(try_service_launch, service_name, service_config, False)
+                # init_start_function_thread(try_service_launch, service_name, service_config, False)
+                try_service_launch(service_name, service_config, False)
         else:
             log.error('No business service found, is it test launch?')
     while True:

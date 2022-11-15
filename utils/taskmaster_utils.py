@@ -166,7 +166,7 @@ def process_new_task(task: TaskFromFile):
     init_start_function_thread(change_db_task_status_to_in_progress, task.task_unique_name)
 
     task.status = c.tasks_status_in_progress
-    task.task_folder_path = c.temporary_files_folder_path + c.double_forward_slash + str(task.task_unique_name)
+    task.task_folder_path = c.temporary_files_folder_full_path + c.double_forward_slash + str(task.task_unique_name)
 
     with ThreadPoolExecutor(max_workers=len(task.steps)) as executor:
         for result in executor.map(process_step, repeat(task), range(1, len(task.steps) + 1)):

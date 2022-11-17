@@ -59,6 +59,7 @@ def get_lazy_task_result(task_unique_name):
       200:
         description: 99% caution
     """
+    # TODO I think failure to read pickle leads to longer response time. FIX
     task_from_db = db.select_from_table_by_one_column(c.tasks_table_name, 'task_unique_name', task_unique_name,
                                                       'String')
     if len(task_from_db) == 1:

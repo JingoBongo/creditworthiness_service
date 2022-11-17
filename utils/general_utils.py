@@ -23,42 +23,6 @@ def run_cmd_command(command):
     log.debug(f"{run_cmd_command.__name__} executed '{command}' and returned value: {returned_value}")
 
 
-def read_from_json(path: str):
-    """
-    try read data from json by path, in case of error gives blank JSON
-
-    Args:
-        path (str): path to file
-
-    Returns:
-        JSON dict with received data or blank JSON in case of error
-    """
-    try:
-        with open(path) as json_file:
-            return json.load(json_file)
-    except Exception as e:
-        log.exception(f'Something went horribly wrong when attempted to read from file "{path}"')
-        log.exception(e)
-        return {}
-
-
-def write_to_json(path: str, text):
-    """
-    write data to json file
-
-    Args:
-        path (str): path to file where to save data
-        text (any): data to save into json
-    """
-    try:
-        with open(path, 'w') as outfile:
-            json.dump(text, outfile)
-    except Exception as e:
-        log.exception(
-            f'Something went horribly wrong when attempted to write into file "{path}" this specific text "{text}"')
-        log.exception(e)
-
-
 def clear_busy_ports():
     db.clear_table(c.busy_ports_table_name)
     log.debug(f"{c.busy_ports_table_name} table cleared")
@@ -163,7 +127,7 @@ def check_file_exists(service_full_path: str):
 
 def init_start_function_process(function, *args, function_name=None, **kwargs) -> CustomNamedProcess:
     p: CustomNamedProcess = CustomNamedProcess(target=function, args=args,
-                                                                                   name=function_name, kwargs=kwargs)
+                                               name=function_name, kwargs=kwargs)
     # TODO this stores function ref? in db? is this ok?
     dic = {'arguments': str(args).join(str(kwargs))}
     # TODO: this seemed as a template for times when function will not need arguments etc.

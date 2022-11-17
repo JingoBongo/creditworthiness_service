@@ -2,8 +2,8 @@ import __init__
 
 from utils import constants as c
 from utils import logger_utils as log
-from utils import general_utils as g
 from utils.dataclasses.task_step_from_file import TaskStepFromFile
+from utils.json_utils import read_from_json
 
 
 class TaskFromFile:
@@ -11,7 +11,7 @@ class TaskFromFile:
                  "finished_steps", "status", "error_logs", "is_threaded")
 
     def __init__(self, task_file_path, task_unique_name, data):
-        task_dict_from_file = g.read_from_json(task_file_path)
+        task_dict_from_file = read_from_json(task_file_path)
         self.task_name = task_dict_from_file['task_name']
         self.task_unique_name = task_unique_name
         # So here we do a bit of trolling. data is actually what user sends.

@@ -49,3 +49,4 @@ check 30 steps task
 taskmaster to add way to download pickle
 add a way to upload/download files. <- will be used for fisherman
 The Fisherman
+Fallback mechanism: if package utils fails, at least make a requirements.txt file

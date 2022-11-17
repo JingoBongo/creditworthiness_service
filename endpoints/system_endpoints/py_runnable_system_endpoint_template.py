@@ -22,6 +22,16 @@ def hello():
     """
     return 'system endpoint'
 
+@app.route('/gegeg')
+def gegeg():
+    """Root, please go somewhere else
+    ---
+    responses:
+      200:
+        description: why would you go here, go away
+    """
+    return 'system endpoint'
+
 
 if __name__ == "__main__":
     app.run()

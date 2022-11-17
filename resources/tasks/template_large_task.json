@@ -1,0 +1,397 @@
+{
+  "task_name": "template_large_task",
+  "init_requires": [],
+  "steps": [
+    {
+      "step_number" : 1,
+      "step_name" : "select harvester table",
+      "service" : "db_endpoint",
+      "route" : "/select/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": ["1-val1"]
+    },
+    {
+      "step_number" : 2,
+      "step_name" : "select Sys_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Sys_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": ["2-val1"]
+    },
+    {
+      "step_number" : 3,
+      "step_name" : "select Business_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Business_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": ["3-val1"]
+    },
+    {
+      "step_number" : 4,
+      "step_name" : "select All_Processes table",
+      "service" : "db_endpoint",
+      "route" : "/select/All_Processes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 5,
+      "step_name" : "select harvester table",
+      "service" : "db_endpoint",
+      "route" : "/select/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 6,
+      "step_name" : "select Sys_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Sys_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 7,
+      "step_name" : "select Business_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Business_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 8,
+      "step_name" : "select All_Processes table",
+      "service" : "db_endpoint",
+      "route" : "/select/All_Processes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 9,
+      "step_name" : "select harvester table",
+      "service" : "db_endpoint",
+      "route" : "/select/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 10,
+      "step_name" : "select Sys_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Sys_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 11,
+      "step_name" : "select Business_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Business_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 12,
+      "step_name" : "select All_Processes table",
+      "service" : "db_endpoint",
+      "route" : "/select/All_Processes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 13,
+      "step_name" : "select harvester table",
+      "service" : "db_endpoint",
+      "route" : "/select/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 14,
+      "step_name" : "select Sys_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Sys_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 15,
+      "step_name" : "select Business_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Business_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 16,
+      "step_name" : "select All_Processes table",
+      "service" : "db_endpoint",
+      "route" : "/select/All_Processes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 17,
+      "step_name" : "select harvester table",
+      "service" : "db_endpoint",
+      "route" : "/select/Harvested_Routes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 18,
+      "step_name" : "select Sys_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Sys_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 19,
+      "step_name" : "select Business_Services table",
+      "service" : "db_endpoint",
+      "route" : "/select/Business_Services",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 20,
+      "step_name" : "select All_Processes table",
+      "service" : "db_endpoint",
+      "route" : "/select/All_Processes",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 21,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 22,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 23,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 24,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 25,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 26,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 27,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 28,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 29,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 30,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 31,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 32,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 33,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 34,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 35,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 36,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },{
+      "step_number" : 37,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 38,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 39,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    },
+    {
+      "step_number" : 40,
+      "step_name" : "select     test_sys_endpoint ",
+      "service" : "test_sys_endpoint",
+      "route" : "/gegeg",
+      "request_type": "GET",
+      "requires" : [],
+      "requires_steps": [],
+      "provides": []
+    }
+  ]
+}

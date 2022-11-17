@@ -8,7 +8,7 @@ import os
 all_py_local_files = []
 all_imports = []
 
-
+# TODO FIX  [WinError 5] Access is denied:
 def progress_bar(progress, total, text=''):
     percent = 100 * (progress / float(total))
     bar = '■' * int(percent) + '-' * (100 - int(percent))

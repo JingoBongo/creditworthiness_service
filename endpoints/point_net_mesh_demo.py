@@ -28,8 +28,7 @@ emotions = {
 
 video_capture = cv2.VideoCapture(0)
 shown_image = None
-model_predictions = [8]
-
+model_predictions = None
 first_degree, second_degree, third_degree, fourth_degree = 64, 128, 256, 512
 
 
@@ -109,26 +108,27 @@ def point_net_weights_load(model: keras.Model, path: str):
 
 
 def gen():
+    global model_predictions
+
     face_mesh_collecter = initialize_mediapipe_mesh()
     face_mesh_drawer = initialized_mediapipe_mesh_drawer()
     model = point_net_initialization(64, 128, 256, 512)
     model = point_net_weights_load(model, c.resources_folder_full_path + '\\better_v1_1_point_net\\')
+
     while not False:
         ret, image = video_capture.read()
         landmarked_image = face_mesh_drawer.transform(image)
-        landmarks = face_mesh_collecter.transform(image)
+
         if landmarked_image is not None:
             shown_image = landmarked_image
-            # landmarks = face_mesh_collecter.transform(image)
-            # received_predictions = model.predict(landmarks.reshape(1, 468, 8)) if landmarks else None
-            # model_predictions = received_predictions if received_predictions else [8]
         else:
             shown_image = image
-        print(landmarks)
 
-        # yield (b'--frame\r\n'
-        #        b'Content-Type: image/jpeg\r\n\r\n' + open(
-        #     c.temporary_files_folder_full_path + c.double_forward_slash + 't.jpg', 'rb').read() + b'\r\n')
+        landmarks = face_mesh_collecter.transform(image)
+        if landmarks is not None:
+            model_predictions = model.predict(landmarks.reshape(1, 468, 3))
+            print(model_predictions)
+
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', shown_image)[1].tobytes() + b'\r\n')
     video_capture.release()
@@ -146,7 +146,7 @@ def pred():
         # return Response(emotions.get(predictions.index(max(predictions)), 8), mimetype='text')
 
 
-@app.route('/')
+@app.route('/demo')
 def index():
     """Video streaming"""
     return render_template('index.html')
@@ -160,13 +160,13 @@ def abobaboba():
 @app.route('/ajax')
 def ajax():
     """Video streaminasdasdasdg"""
-    return emotions.get(model_predictions.index(max(model_predictions)), 8)
+    if type(model_predictions) is np.ndarray:
+        llli = list(model_predictions[0])
+        ind = llli.index(max(llli))
+        ans = emotions.get(ind, 'error')
 
-    # if predictions:
-    #     return emotions.get(predictions[0].index(max(list(predictions[0])), 8))
-    # else:
-    #     return "eshkere"
-
+        return f"{ans} : {model_predictions}"
+    return f"error getting result"
 
 @app.route('/video_feed')
 def video_feed():

@@ -45,12 +45,12 @@ services:
 
 uncommon_modules:
 #  pyyaml:
-#    import_name: pyyaml
 #    module_name: pyyaml
+#    import_name: pyyaml
 #    module_version: any
   openCV:
-    import_name: cv2
     module_name: opencv-python
+    import_name: cv2
     module_version: any
   TensorFlow:
     import_name: tensorflow

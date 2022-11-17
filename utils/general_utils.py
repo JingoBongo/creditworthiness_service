@@ -240,7 +240,7 @@ def clear_log_folder():
 
 
 def clear_temporary_files_folder():
-    log_folder_name = c.temporary_files_folder_path
+    log_folder_name = c.temporary_files_folder_full_path
     remove_folder_contents(log_folder_name)
 
 
@@ -250,6 +250,11 @@ def recreate_log_folder_if_not_exists():
     if not os.path.exists(log_folder_name):
         os.makedirs(log_folder_name)
         log.debug(f"Recreated log folder")
+
+def recreate_temporary_files_folder_if_not_exists():
+    if not os.path.exists(c.temporary_files_folder_full_path):
+        os.makedirs(c.temporary_files_folder_full_path)
+        log.debug(f"Recreated temporary_files folder")
 
 
 def generate_on_start_unique_fuse_id():

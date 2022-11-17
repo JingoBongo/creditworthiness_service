@@ -38,6 +38,9 @@ services:
       path: "endpoints//py_runnable_endpoint_template.py"
       enabled: True
       local: False
+    point_net_mesh_demo:
+      path: "endpoints//point_net_mesh_demo.py"
+      port: 5010
 
 
 uncommon_modules:
@@ -49,6 +52,9 @@ uncommon_modules:
     import_name: cv2
     module_name: opencv-python
     module_version: any
+  TensorFlow:
+    import_name: tensorflow
+    module_name: tn
 
 
 sqlite:

@@ -37,6 +37,7 @@ def try_service_launch(service_name: str, service_config: dict, is_system: bool)
 def main():
     # some preconfiguration & init activities
     g.recreate_log_folder_if_not_exists()
+    g.recreate_temporary_files_folder_if_not_exists()
     setup_cur_logger()
     log.info(f'Firing fuse..')
     print(c.fuse_logo)

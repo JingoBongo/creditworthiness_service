@@ -141,7 +141,8 @@ def pred():
     while not False:
         ret, image = video_capture.read()
         # landmarks = face_mesh_collecter.transform(image)
-        yield emotions.get(model_predictions.index(max(model_predictions)), 8)
+        # yield emotions.get(model_predictions.index(max(model_predictions)), 8)
+        yield 'I am showing endpoints text'
         # return Response(emotions.get(predictions.index(max(predictions)), 8), mimetype='text')
 
 

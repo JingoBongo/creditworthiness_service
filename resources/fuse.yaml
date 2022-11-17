@@ -36,7 +36,7 @@ services:
   business:
     endpoint_template:
       path: "endpoints//py_runnable_endpoint_template.py"
-      enabled: True
+      enabled: False
       local: False
     point_net_mesh_demo:
       path: "endpoints//point_net_mesh_demo.py"
@@ -55,6 +55,11 @@ uncommon_modules:
   TensorFlow:
     import_name: tensorflow
     module_name: tn
+    module_version: any
+  Scikit-learn:
+    import_name: sklearn
+    module_name: scikit-learn
+    module_version: any
 
 
 sqlite:

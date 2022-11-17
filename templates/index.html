@@ -6,6 +6,31 @@
     <div>
         <h1>Live Video Streaming </h1>
         <img id="img" src = "{{ url_for('video_feed') }}">
+        <div id = 'elele'></div>
+            <script>
+        (function () {
+
+            function get_value() {
+                // create an ajax request
+                var q = new XMLHttpRequest();
+
+                q.open("get", "{{ url_for('ajax') }}", true);
+                q.send();
+
+                q.onload = function () {
+                    // update page with new value
+                    document.getElementById('elele').innerHTML = "rms: " + q.responseText;
+
+                    // timeout to run again after 2 seconds
+                    setTimeout(get_value, 2000);
+                }
+            }
+
+            // call the function to get it started
+            get_value();
+
+        })();
+    </script>
     </div>
 </body>
 </html>

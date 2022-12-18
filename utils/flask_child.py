@@ -39,10 +39,10 @@ def not_found_handler(e):
 
 
 class FuseNode(Flask):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, template_folder=c.root_path + c.templates_folder_name, static_folder=c.root_path + c.static_folder_name, **kwargs):
         try:
             parser = kwargs.pop("arg_parser")
-            super().__init__(*args, **kwargs)
+            super().__init__(*args, template_folder=template_folder, static_folder=static_folder, **kwargs)
             # adding 3 default things: life_ping route and 404 error handler, and a favicon
             self.add_url_rule(c.life_ping_endpoint_context, methods=['PATCH'], view_func=life_ping_handler)
             self.add_url_rule('/favicon.ico', view_func=favicon_handler)
@@ -52,7 +52,9 @@ class FuseNode(Flask):
             args = parser.parse_args()
             endpoint_port = args.port
             host = "127.0.0.1" if args.local == 'True' else utils.yaml_utils.get_host_from_config()
-            self.debug = utils.yaml_utils.get_debug_flag_from_config()
+            # self.debug = utils.yaml_utils.get_debug_flag_from_config()
+            self.debug = True
+            # TODO: this is temporary made so, please restore later
             self.host = host
             self.port = endpoint_port
             self.swagger = Swagger(self)

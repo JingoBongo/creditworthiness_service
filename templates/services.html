@@ -1,0 +1,122 @@
+<html>
+<head>
+    <title>Services </title>
+</head>
+<body>
+<div>
+    <h1>Services </h1>
+    <div id='elele'></div>
+    <h3>System Services</h3>
+    <div id="sys_tab"></div>
+    <h3>Business Services</h3>
+    <div id="bus_tab"></div>
+    <h3>Disabled Services</h3>
+    <script>
+
+        function shutdown_by_pid(pid){
+            console.log("Shutdown "+pid);
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "{{ url_for('redir_request', path = '/services/remove/"+pid+"') }}", true); // false for synchronous request
+            xmlHttp.send();
+        }
+        function bounce_by_pid(pid){
+            console.log("Bounce "+pid);
+        }
+
+        function get_sys_services() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "{{ url_for('redir_request', path = 'select_dict/Sys_Services') }}", false); // false for synchronous request
+            xmlHttp.send();
+            return xmlHttp.responseText;
+        }
+
+        function get_bus_services() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "{{ url_for('redir_request', path = 'select_dict/Business_Services') }}", false); // false for synchronous request
+            xmlHttp.send();
+            return xmlHttp.responseText;
+        }
+
+        function update_services_table_under_id_div(id, ddata) {
+            data = JSON.parse(ddata);
+            // console.table(data);
+
+            // (C) GENERATE TABLE
+            // (C1) CREATE EMPTY TABLE
+            document.getElementById(id).innerHTML = ""
+            var table = document.createElement("table"), row, cellKey, cellId, cellName, cellPath, cellPort, cellPid, cellStatus, cellShutDownBtn, cellBounceBtn;
+            document.getElementById(id).appendChild(table);
+            for (let key in data) {
+                // (C2) ROWS & CELLS
+                row = table.insertRow();
+                cellKey = row.insertCell();
+                cellId = row.insertCell();
+                cellName = row.insertCell();
+                cellPath = row.insertCell();
+                cellPort = row.insertCell();
+                cellPid = row.insertCell();
+                cellStatus = row.insertCell();
+                cellShutDownBtn = row.insertCell();
+                cellBounceBtn = row.insertCell();
+
+                // (C3) KEY & VALUE
+                cellKey.innerHTML = key;
+
+                cellId.innerHTML = data[key]["id"];
+                cellName.innerHTML = data[key]["name"];
+                cellPath.innerHTML = data[key]["path"];
+                cellPort.innerHTML = data[key]["port"];
+                cellPid.innerHTML = data[key]["pid"];
+                cellStatus.innerHTML = data[key]["status"];
+            //     shutdown shutdownBtn
+                var shutdownBtn = document.createElement('input');
+                shutdownBtn.type = "button";
+                shutdownBtn.className = "btn";
+                shutdownBtn.value = "Shutdown";
+                // shutdownBtn.onclick = function(){shutdown_by_pid(data[key]["pid"])};
+                shutdownBtn.addEventListener("click", shutdown_by_pid, data[key]["pid"]);
+                cellShutDownBtn.appendChild(shutdownBtn);
+            //     bounce btn
+                var bounceBtn = document.createElement('input');
+                bounceBtn.type = "button";
+                bounceBtn.className = "btn";
+                bounceBtn.value = "Bounce";
+                bounceBtn.onclick = function(){bounce_by_pid(data[key]["pid"])};
+                bounceBtn.addEventListener("click", bounce_by_pid, data[key]["pid"]);
+                cellBounceBtn.appendChild(bounceBtn);
+            }
+        }
+
+        (function () {
+
+                function get_value() {
+                    var sys_services = get_sys_services();
+                    var bus_services = get_bus_services();
+                    // var services = $.extend(true, {}, sys_services, bus_services);
+
+                    // update page with new value
+                    <!--                    document.getElementById('tab1').innerHTML = q.responseText;-->
+
+                    // console.log(sys_services);
+                    update_services_table_under_id_div("sys_tab", sys_services);
+                    update_services_table_under_id_div("bus_tab", bus_services);
+
+
+                    // timeout to run again after 2 seconds
+                    setTimeout(get_value, 7000);
+                }
+
+
+                // call the function to get it started
+                get_value();
+
+            }
+
+        )
+        ();
+
+
+    </script>
+</div>
+</body>
+</html>

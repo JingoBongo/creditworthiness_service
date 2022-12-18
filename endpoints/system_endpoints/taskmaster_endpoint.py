@@ -14,7 +14,7 @@ from utils import db_utils as db
 from utils.taskmaster_utils import InputTask, do_the_task
 
 parser = ArgumentParser()
-app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+app = FuseNode(__name__, arg_parser=parser)
 
 
 @app.route('/')
@@ -102,6 +102,5 @@ def start_task(task_name):
 
 
 if __name__ == "__main__":
-    print(f'Taskmaster endpoint main')
     launch_taskmaster_scheduler_if_not_exists()
     app.run()

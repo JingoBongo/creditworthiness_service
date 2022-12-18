@@ -2,15 +2,23 @@ import __init__
 
 from argparse import ArgumentParser
 
+from utils.decorators.cors import crossdomain
 from utils.flask_child import FuseNode
 from utils.general_utils import get_rid_of_service_by_pid, process_start_service
 from utils.general_utils import get_rid_of_service_by_pid_and_port_dirty, db
 from utils.schedulers_utils import launch_life_ping_scheduler_if_not_exists
 from utils import constants as c
 
-
 parser = ArgumentParser()
-app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+app = FuseNode(__name__, arg_parser=parser)
+
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 
 @app.route('/schedulers/statuses')
@@ -35,6 +43,7 @@ def get_services_list():
     return str(db.select_from_table('Business_services') + db.select_from_table('Sys_services'))
 
 
+@crossdomain(origin='*')
 @app.route('/services/remove/<int:pid>')
 def get_rid_of_service(pid):
     """Removes a service. provide with pid
@@ -44,7 +53,7 @@ def get_rid_of_service(pid):
       200:
         description: 99% caution
     """
-    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid',  pid, 'Integer')) == 1:
+    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) == 1:
         return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid(pid)
@@ -69,6 +78,7 @@ def remove_service_wrong(pid):
         return "Input valid pid, please be aware that you can kill actual windows process"
 
 
+@crossdomain(origin='*')
 @app.route('/services/start/<service_name>')
 def start_service(service_name):
     """Starts a service. provide with service name from config..
@@ -78,6 +88,7 @@ def start_service(service_name):
             description: 99% caution
         """
     return process_start_service(service_name)
+
 
 #
 # TODO make a task to relaunch X service

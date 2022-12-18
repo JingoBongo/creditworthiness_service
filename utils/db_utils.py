@@ -57,6 +57,7 @@ def process_one_column(column, kwargs):
     return alc.Column(column_name, generic_type)
 
 
+# TODO: add table columns check for table recreation ;;; meaning to check if  table has only needed columns etc
 @sql_alchemy_db_func()
 def initial_table_creation(*args, **kwargs):
     try:
@@ -78,6 +79,13 @@ def initial_table_creation(*args, **kwargs):
 
 def get_table(kwargs, table_name: str):
     return kwargs['alc'].Table(table_name, kwargs['metadata'],
+                               autoload=True,
+                               autoload_with=kwargs['engine'])
+
+
+@sql_alchemy_db_func('table_name')
+def get_table_object(*args, **kwargs):
+    return kwargs['alc'].Table(kwargs['table_name'], kwargs['metadata'],
                                autoload=True,
                                autoload_with=kwargs['engine'])
 
@@ -124,6 +132,20 @@ def select_from_table(*args, **kwargs):
         proxy = kwargs['connection'].execute(query)
         result_set = proxy.fetchall()
         return result_set
+    except Exception as e:
+        log.exception('Something went horribly wrong while executing "insert_into_business_services_v2"')
+        log.exception(e)
+
+
+@sql_alchemy_db_func(required_args=['table_name'])
+def select_from_table_ret_dict(*args, **kwargs):
+    try:
+        alc = kwargs['alc']
+        table = get_table(kwargs, str(kwargs['table_name']))
+        query = alc.select([table])
+        proxy = kwargs['connection'].execute(query)
+        result_set = proxy.fetchall()
+        return [r._asdict() for r in result_set]
     except Exception as e:
         log.exception('Something went horribly wrong while executing "insert_into_business_services_v2"')
         log.exception(e)

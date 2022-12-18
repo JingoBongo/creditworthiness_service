@@ -7,7 +7,7 @@ from utils import logger_utils as log
 from utils.flask_child import FuseNode
 
 parser = ArgumentParser()
-app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+app = FuseNode(__name__, arg_parser=parser)
 
 video_capture = cv2.VideoCapture(0)
 

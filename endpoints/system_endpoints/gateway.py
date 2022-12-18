@@ -1,6 +1,6 @@
 import __init__
 import requests
-from flask import redirect, request
+from flask import redirect, request, abort, render_template
 
 from utils import general_utils as g
 from argparse import ArgumentParser
@@ -11,9 +11,34 @@ from utils.schedulers_utils import launch_route_harvester_scheduler_if_not_exist
 from utils import logger_utils as log
 
 parser = ArgumentParser()
-app = FuseNode(__name__, template_folder=c.root_path + c.templates_folder_name, arg_parser=parser)
+app = FuseNode(__name__, arg_parser=parser)
+# TODO. after some time move all templates to where they belong. fow now just duplicate
 
+@app.route('/')
+@app.route('/<current>')
+def manage(current = None):
+    if current == 'services':
+        template = 'services.html'
+        title = 'Services'
+    elif current == 'internet_market':
+        template = 'internet_market.html'
+        title = 'Internet market'
+    elif current is None:
+        template = 'gate_index.html'
+        title = 'Fuse Management Hub'
+    else:
+        abort(404)
 
+    return render_template(template, title=title, current=current)
+
+@app.route('/todo_page')
+def todo_page():
+
+    return render_template('TODO_page.html')
+
+# @admin.route('/manage') check out these later
+# @admin.route('/manage/<current>')
+# @login_required
 @app.route('/run-cmd-command/<string:command>')
 def cursed_call(command):
     """This... exists. I refuse to uncomment the code line until I think about security
@@ -23,7 +48,7 @@ def cursed_call(command):
             description: why would you go here, go away
         """
     # g.run_cmd_command(command)
-    return {"status":"done"}
+    return {"status":"done;;; I refuse to uncomment the code line until I think about security"}
 
 
 @app.route('/trigger-harvester')

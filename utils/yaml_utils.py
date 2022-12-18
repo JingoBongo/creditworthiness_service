@@ -18,9 +18,31 @@ def get_config():
     return read_from_yaml(c.root_path + c.conf_path)
 
 
+def save_config(contents):
+    with open(c.root_path + c.conf_path, 'w') as outfile:
+        yaml.dump(contents, outfile, default_flow_style=False)
+
+
 def get_host_from_config():
     return get_config()['general']['host']
 
 
 def get_debug_flag_from_config():
     return get_config()['general']['debug']
+
+
+def set_service_enabled(service_name, boolean):
+    config = get_config()
+    for service in config['services']["system"]:
+        if service == service_name:
+            # if 'enabled' in service.keys():
+            # if service.get('enabled', None):
+            config['services']["system"][service]['enabled'] = boolean
+            break
+    for service in config['services']["business"]:
+        if service == service_name:
+        # if service.get('enabled', None):
+        # if 'enabled' in service.keys():
+            config['services']["business"][service]['enabled'] = boolean
+        break
+    save_config(config)

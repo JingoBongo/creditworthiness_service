@@ -52,9 +52,7 @@ class FuseNode(Flask):
             args = parser.parse_args()
             endpoint_port = args.port
             host = "127.0.0.1" if args.local == 'True' else utils.yaml_utils.get_host_from_config()
-            # self.debug = utils.yaml_utils.get_debug_flag_from_config()
-            self.debug = True
-            # TODO: this is temporary made so, please restore later
+            self.debug = utils.yaml_utils.get_debug_flag_from_config()
             self.host = host
             self.port = endpoint_port
             self.swagger = Swagger(self)

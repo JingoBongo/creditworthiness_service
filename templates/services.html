@@ -11,22 +11,41 @@
     <h3>Business Services</h3>
     <div id="bus_tab"></div>
     <h3>Disabled Services</h3>
+    <div id="dis_tab"></div>
     <script>
 
-        function shutdown_by_pid(pid) {
-            console.log("Shutdown " + pid);
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("POST ", "{{ url_for('redir_request', path = 'services/remove/') }}", false); // false for synchronous request
-            let data = `{"pid" : ` + pid + `}`;
-            xmlHttp.setRequestHeader("Accept", "application/json");
-            xmlHttp.setRequestHeader("Content-Type", "application/json");
-
-            }
-            xmlHttp.send(data);
+        function bounce_by_pid() {
+            // actually implement this
+            console.log("Bounce " + pid);
         }
 
-        function bounce_by_pid(pid) {
-            console.log("Bounce " + pid);
+        function shutdown_by_pid() {
+            this.disabled = true;
+            let pid = this.custom_pid_value;
+            console.log("Shutdown " + pid);
+            fetch("{{ url_for('redir_request', path = 'services/remove_post') }}", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"pid": pid})
+            })
+        }
+
+
+        function start_by_name() {
+            this.disabled = true;
+            let name = this.custom_name_value;
+            console.log("Start " + name);
+            fetch("{{ url_for('redir_request', path = 'services/start_post') }}", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"name": name})
+            })
         }
 
         function get_sys_services() {
@@ -43,21 +62,66 @@
             return xmlHttp.responseText;
         }
 
+        function get_config_disabled_Services() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "{{ url_for('redir_request', path = 'config/get_disabled_services_dict') }}", false); // false for synchronous request
+            xmlHttp.send();
+            return xmlHttp.responseText;
+        }
+
+        function update_disabled_services_table_under_id_div(id, ddata) {
+            data = JSON.parse(ddata);
+            document.getElementById(id).innerHTML = ""
+            var table = document.createElement("table"), row, cellName, cellPath, cellStartBtn;
+            document.getElementById(id).appendChild(table);
+            titleRow = table.insertRow();
+            titleRow.insertCell().innerHTML = "name";
+            titleRow.insertCell().innerHTML = "path";
+
+            for (let key in data) {
+                row = table.insertRow();
+                cellName = row.insertCell();
+                cellPath = row.insertCell();
+                cellStartBtn = row.insertCell();
+
+                // (C3) KEY & VALUE
+                // cellKey.innerHTML = key;
+                // cellId.innerHTML = data[key]["id"];
+                cellName.innerHTML = data[key]["name"];
+                cellPath.innerHTML = data[key]["path"];
+                //     shutdown shutdownBtn
+                var startBtn = document.createElement('input');
+                startBtn.type = "button";
+                startBtn.className = "btn";
+                startBtn.value = "Start";
+                startBtn.custom_name_value = data[key]["name"];
+                startBtn.addEventListener("click", start_by_name, false);
+                cellStartBtn.appendChild(startBtn);
+            }
+
+        }
+
         function update_services_table_under_id_div(id, ddata) {
             data = JSON.parse(ddata);
-            // console.table(data);
-
-            // (C) GENERATE TABLE
-            // (C1) CREATE EMPTY TABLE
             document.getElementById(id).innerHTML = ""
-            var table = document.createElement("table"), row, cellKey, cellId, cellName, cellPath, cellPort, cellPid,
+            var table = document.createElement("table"), row, cellName, cellPath, cellPort, cellPid,
                 cellStatus, cellShutDownBtn, cellBounceBtn;
             document.getElementById(id).appendChild(table);
+            titleRow = table.insertRow();
+            // cellKey = titleRow.insertCell().innerHTML = "key";
+            // cellId = titleRow.insertCell().innerHTML = "id";
+            titleRow.insertCell().innerHTML = "name";
+            titleRow.insertCell().innerHTML = "path";
+            titleRow.insertCell().innerHTML = "port";
+            titleRow.insertCell().innerHTML = "PID";
+            titleRow.insertCell().innerHTML = "status";
+            // cellShutDownBtn = titleRow.insertCell().innerHTML = "";
+            // cellBounceBtn = titleRow.insertCell().innerHTML = "";
             for (let key in data) {
                 // (C2) ROWS & CELLS
                 row = table.insertRow();
-                cellKey = row.insertCell();
-                cellId = row.insertCell();
+                // cellKey = row.insertCell();
+                // cellId = row.insertCell();
                 cellName = row.insertCell();
                 cellPath = row.insertCell();
                 cellPort = row.insertCell();
@@ -67,9 +131,8 @@
                 cellBounceBtn = row.insertCell();
 
                 // (C3) KEY & VALUE
-                cellKey.innerHTML = key;
-
-                cellId.innerHTML = data[key]["id"];
+                // cellKey.innerHTML = key;
+                // cellId.innerHTML = data[key]["id"];
                 cellName.innerHTML = data[key]["name"];
                 cellPath.innerHTML = data[key]["path"];
                 cellPort.innerHTML = data[key]["port"];
@@ -81,17 +144,16 @@
                 shutdownBtn.className = "btn";
                 shutdownBtn.value = "Shutdown";
                 // shutdownBtn.onclick = function(){shutdown_by_pid(data[key]["pid"])};
-                shutdownBtn.addEventListener("click", shutdown_by_pid, data[key]["pid"]);
+                shutdownBtn.custom_pid_value = data[key]["pid"];
+                shutdownBtn.addEventListener("click", shutdown_by_pid, false);
                 cellShutDownBtn.appendChild(shutdownBtn);
                 //     bounce btn
                 var bounceBtn = document.createElement('input');
                 bounceBtn.type = "button";
                 bounceBtn.className = "btn";
                 bounceBtn.value = "Bounce";
-                bounceBtn.onclick = function () {
-                    bounce_by_pid(data[key]["pid"])
-                };
-                bounceBtn.addEventListener("click", bounce_by_pid, data[key]["pid"]);
+                bounceBtn.custom_pid_value = data[key]["pid"];
+                bounceBtn.addEventListener("click", bounce_by_pid, false);
                 cellBounceBtn.appendChild(bounceBtn);
             }
         }
@@ -101,18 +163,14 @@
                 function get_value() {
                     var sys_services = get_sys_services();
                     var bus_services = get_bus_services();
-                    // var services = $.extend(true, {}, sys_services, bus_services);
+                    var disabled_services_from_config = get_config_disabled_Services();
 
-                    // update page with new value
-                    <!--                    document.getElementById('tab1').innerHTML = q.responseText;-->
-
-                    // console.log(sys_services);
                     update_services_table_under_id_div("sys_tab", sys_services);
                     update_services_table_under_id_div("bus_tab", bus_services);
-
-
+                    // update the list of disabled services from config
+                    update_disabled_services_table_under_id_div("dis_tab", disabled_services_from_config);
                     // timeout to run again after 2 seconds
-                    setTimeout(get_value, 7000);
+                    setTimeout(get_value, 5000);
                 }
 
 

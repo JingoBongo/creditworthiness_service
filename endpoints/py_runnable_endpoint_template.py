@@ -9,17 +9,6 @@ from utils.flask_child import FuseNode
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 
-video_capture = cv2.VideoCapture(0)
-
-
-def gen():
-    while True:
-        ret, image = video_capture.read()
-        cv2.imwrite(c.temporary_files_folder_full_path + c.double_forward_slash + 't.jpg', image)
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + open(
-            c.temporary_files_folder_full_path + c.double_forward_slash + 't.jpg', 'rb').read() + b'\r\n')
-    video_capture.release()
 
 
 @app.route('/')
@@ -28,11 +17,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/video_feed')
-def video_feed():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 # below are just example endpoints, above is the jewel you are looking for, you might want to take a look at pyscript tho

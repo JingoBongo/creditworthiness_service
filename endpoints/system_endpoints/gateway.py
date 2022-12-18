@@ -118,7 +118,7 @@ def find_possible_routes(path):
     return str(find_valid_route(path))
 
 
-@app.route('/redir/<path:path>')
+@app.route('/redir/<path:path>', methods=['GET', 'POST'])
 def redir_request(path):
     """Redirect to service/route; is a bit slower and leads to directly accessing internal services
         ---
@@ -146,7 +146,6 @@ def redir_request(path):
             #     TODO this includes selects from db as well
             port = row['port']
             new_url = f"http://localhost:{port}/{path}"
-
             if request.method == 'POST':
                 return redirect(new_url, code=307)
 

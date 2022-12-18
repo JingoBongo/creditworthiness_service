@@ -13,14 +13,20 @@
     <h3>Disabled Services</h3>
     <script>
 
-        function shutdown_by_pid(pid){
-            console.log("Shutdown "+pid);
+        function shutdown_by_pid(pid) {
+            console.log("Shutdown " + pid);
             var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("GET", "{{ url_for('redir_request', path = '/services/remove/"+pid+"') }}", true); // false for synchronous request
-            xmlHttp.send();
+            xmlHttp.open("POST ", "{{ url_for('redir_request', path = 'services/remove/') }}", false); // false for synchronous request
+            let data = `{"pid" : ` + pid + `}`;
+            xmlHttp.setRequestHeader("Accept", "application/json");
+            xmlHttp.setRequestHeader("Content-Type", "application/json");
+
+            }
+            xmlHttp.send(data);
         }
-        function bounce_by_pid(pid){
-            console.log("Bounce "+pid);
+
+        function bounce_by_pid(pid) {
+            console.log("Bounce " + pid);
         }
 
         function get_sys_services() {
@@ -44,7 +50,8 @@
             // (C) GENERATE TABLE
             // (C1) CREATE EMPTY TABLE
             document.getElementById(id).innerHTML = ""
-            var table = document.createElement("table"), row, cellKey, cellId, cellName, cellPath, cellPort, cellPid, cellStatus, cellShutDownBtn, cellBounceBtn;
+            var table = document.createElement("table"), row, cellKey, cellId, cellName, cellPath, cellPort, cellPid,
+                cellStatus, cellShutDownBtn, cellBounceBtn;
             document.getElementById(id).appendChild(table);
             for (let key in data) {
                 // (C2) ROWS & CELLS
@@ -68,7 +75,7 @@
                 cellPort.innerHTML = data[key]["port"];
                 cellPid.innerHTML = data[key]["pid"];
                 cellStatus.innerHTML = data[key]["status"];
-            //     shutdown shutdownBtn
+                //     shutdown shutdownBtn
                 var shutdownBtn = document.createElement('input');
                 shutdownBtn.type = "button";
                 shutdownBtn.className = "btn";
@@ -76,12 +83,14 @@
                 // shutdownBtn.onclick = function(){shutdown_by_pid(data[key]["pid"])};
                 shutdownBtn.addEventListener("click", shutdown_by_pid, data[key]["pid"]);
                 cellShutDownBtn.appendChild(shutdownBtn);
-            //     bounce btn
+                //     bounce btn
                 var bounceBtn = document.createElement('input');
                 bounceBtn.type = "button";
                 bounceBtn.className = "btn";
                 bounceBtn.value = "Bounce";
-                bounceBtn.onclick = function(){bounce_by_pid(data[key]["pid"])};
+                bounceBtn.onclick = function () {
+                    bounce_by_pid(data[key]["pid"])
+                };
                 bounceBtn.addEventListener("click", bounce_by_pid, data[key]["pid"]);
                 cellBounceBtn.appendChild(bounceBtn);
             }

@@ -1,3 +1,5 @@
+from flask import request
+
 import __init__
 
 from argparse import ArgumentParser
@@ -44,7 +46,7 @@ def get_services_list():
 
 
 @crossdomain(origin='*')
-@app.route('/services/remove/<int:pid>')
+@app.route('/services/remove/<int:pid>', methods=["GET"])
 def get_rid_of_service(pid):
     """Removes a service. provide with pid
     Be aware that this kills ANY process by PID, not only fuse's one
@@ -53,7 +55,24 @@ def get_rid_of_service(pid):
       200:
         description: 99% caution
     """
-    if not len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) == 1:
+    if len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) != 1:
+        return "Provided pid is not owned by the Fuse, therefore aborting"
+    if isinstance(pid, int) and pid > 0:
+        return get_rid_of_service_by_pid(pid)
+    else:
+        return "Input valid pid, please be aware that you can kill actual windows process"
+@crossdomain(origin='*')
+@app.route('/services/remove/', methods=["POST"])
+def get_rid_of_service_post():
+    """Removes a service. provide with pid
+    Be aware that this kills ANY process by PID, not only fuse's one
+        ---
+    responses:
+      200:
+        description: 99% caution
+    """
+    pid = int(request.args.get("pid"))
+    if len(db.select_from_table_by_one_column(c.all_processes_table_name, 'pid', pid, 'Integer')) != 1:
         return "Provided pid is not owned by the Fuse, therefore aborting"
     if isinstance(pid, int) and pid > 0:
         return get_rid_of_service_by_pid(pid)

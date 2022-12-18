@@ -12,11 +12,11 @@ from utils import logger_utils as log
 
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
-# TODO. after some time move all templates to where they belong. fow now just duplicate
+
 
 @app.route('/')
 @app.route('/<current>')
-def manage(current = None):
+def manage(current=None):
     if current == 'services':
         template = 'services.html'
         title = 'Services'
@@ -31,10 +31,11 @@ def manage(current = None):
 
     return render_template(template, title=title, current=current)
 
+
 @app.route('/todo_page')
 def todo_page():
-
     return render_template('TODO_page.html')
+
 
 # @admin.route('/manage') check out these later
 # @admin.route('/manage/<current>')
@@ -48,7 +49,7 @@ def cursed_call(command):
             description: why would you go here, go away
         """
     # g.run_cmd_command(command)
-    return {"status":"done;;; I refuse to uncomment the code line until I think about security"}
+    return {"status": "done;;; I refuse to uncomment the code line until I think about security"}
 
 
 @app.route('/trigger-harvester')
@@ -61,9 +62,9 @@ def hello():
     """
     try:
         route_harvester_job_body()
-        return {'msg':'success', 'status':'ok'}
+        return {'msg': 'success', 'status': 'ok'}
     except Exception as e:
-        return {'msg':'exception', 'status':'error', 'exception':e}
+        return {'msg': 'exception', 'status': 'error', 'exception': e}
 
 
 @app.route('/provide/<path:path>')
@@ -84,8 +85,10 @@ def test_provider(path):
                     'status': 'ambiguous result',
                     'possible resolution': 'remove duplicates and re-run harvester OR pick specific result from the list'}
         # pick service port by service name from result from db and go by path
-        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
-        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'],
+                                                     'String')
+        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'],
+                                                     'String')
         rows = rows2 + rows1
         for row in rows:
             #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
@@ -114,6 +117,7 @@ def find_possible_routes(path):
         """
     return str(find_valid_route(path))
 
+
 @app.route('/redir/<path:path>')
 def redir_request(path):
     """Redirect to service/route; is a bit slower and leads to directly accessing internal services
@@ -124,30 +128,34 @@ def redir_request(path):
         """
     try:
         result = find_valid_route(path)
-        if len(result)<=0:
+        if len(result) <= 0:
             return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
-        if len(result)>1:
+        if len(result) > 1:
             return {'msg': 'there are multiple matching routes, either try to avoid this during development'
                            ' or try to pick route by service_name or function_name from result list.',
-                            'status':'ambiguous result',
-                            'possible resolution':'remove duplicates and re-run harvester OR pick specific result from the list'}
+                    'status': 'ambiguous result',
+                    'possible resolution': 'remove duplicates and re-run harvester OR pick specific result from the list'}
         # pick service port by service name from result from db and go by path
-        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'], 'String')
-        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'], 'String')
+        rows1 = g.db.select_from_table_by_one_column(c.sys_services_table_name, 'name', result[0]['service_name'],
+                                                     'String')
+        rows2 = g.db.select_from_table_by_one_column(c.business_services_table_name, 'name', result[0]['service_name'],
+                                                     'String')
         rows = rows2 + rows1
         for row in rows:
-        #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
-        #     TODO this includes selects from db as well
+            #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
+            #     TODO this includes selects from db as well
             port = row['port']
             new_url = f"http://localhost:{port}/{path}"
-            something = redirect(new_url)
-            return something
+
+            if request.method == 'POST':
+                return redirect(new_url, code=307)
+
+            return redirect(new_url)
         # return below should be unreachable in theory, but... still
         return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
     except Exception as e:
         log.exception(e)
-        return {'msg':'error', 'exception':e}
-
+        return {'msg': 'error', 'exception': e}
 
 
 if __name__ == "__main__":

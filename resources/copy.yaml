@@ -1,0 +1,70 @@
+general:
+  tasks_folder: "resources//tasks"
+  debug: False
+  host: "0.0.0.0"
+
+fuse:
+#  venv_activate_path: "orchestra_env//Scripts//activate"
+  first_port: 5000
+  last_port: 5100
+
+services:
+  system:
+    test_sys_endpoint:
+      path: "endpoints//system_endpoints//py_runnable_system_endpoint_template.py"
+      local: False
+      mono: True
+      enabled: False
+    life_ping_endpoint:
+      path: "endpoints//system_endpoints//life_ping_endpoint.py"
+      port: 5001
+    gateway:
+      path: "endpoints//system_endpoints//gateway.py"
+      port: 80
+    db_endpoint:
+      path: "endpoints//system_endpoints//db_endpoint.py"
+      port: 5002
+    taskmaster:
+      path: "endpoints//system_endpoints//taskmaster_endpoint.py"
+      port: 5003
+      enabled: True
+
+  business:
+    endpoint_template:
+      path: "endpoints//py_runnable_endpoint_template.py"
+      enabled: False
+    point_net_mesh_demo:
+      path: "endpoints//point_net_mesh_demo.py"
+      port: 5010
+      enabled: False
+
+
+uncommon_modules:
+  pyyaml:
+    module_name: pyyaml
+    import_name: pyyaml
+    module_version: any
+
+
+
+sqlite:
+  init:
+    tables:
+      Sys_Services:
+        schema_path: "resources//schemas//sys_services_table_schema.json"
+      Business_Services:
+        schema_path: "resources//schemas//business_services_table_schema.json"
+      Schedulers:
+        schema_path: "resources//schemas//schedulers_table_schema.json"
+      Harvested_Routes:
+        schema_path: "resources//schemas//harvested_routes_table_schema.json"
+      Taskmaster_Tasks:
+        schema_path: "resources//schemas//taskmaster_available_tasks_table_schema.json"
+      All_Processes:
+        schema_path: "resources//schemas//all_processes_table_schema.json"
+      Busy_Ports:
+        schema_path: "resources//schemas//busy_ports_table_schema.json"
+      Tasks:
+        schema_path: "resources//schemas//tasks_table_schema.json"
+      Common_Strings:
+        schema_path: "resources//schemas//commonly_used_strings_table_schema.json"

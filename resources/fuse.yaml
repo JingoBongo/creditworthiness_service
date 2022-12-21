@@ -8,7 +8,7 @@ general:
 services:
   business:
     endpoint_template:
-      enabled: true
+      enabled: false
       path: endpoints//py_runnable_endpoint_template.py
     point_net_mesh_demo:
       enabled: false

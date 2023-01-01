@@ -14,6 +14,12 @@ services:
       enabled: false
       path: endpoints//point_net_mesh_demo.py
       port: 5010
+    terminal:
+      enabled: true
+      local: false
+      mono: true
+      path: endpoints//test_terminal.py
+      port: 5099
   system:
     db_endpoint:
       path: endpoints//system_endpoints//db_endpoint.py
@@ -33,6 +39,7 @@ services:
       local: false
       mono: true
       path: endpoints//system_endpoints//py_runnable_system_endpoint_template.py
+
 sqlite:
   init:
     tables:
@@ -54,4 +61,13 @@ sqlite:
         schema_path: resources//schemas//taskmaster_available_tasks_table_schema.json
       Tasks:
         schema_path: resources//schemas//tasks_table_schema.json
-uncommon_modules: null
+uncommon_modules:
+  ssl:
+    module_name: pyopenssl
+    import_name: pyopenssl
+    module_version: any
+  socketio:
+    module_name: Flask-SocketIO
+    import_name: flask-socketio
+    module_version: 5.1.1
+

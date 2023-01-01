@@ -1,5 +1,4 @@
 import __init__
-from utils.general_utils import init_start_function_thread
 
 from utils.package_utils import run_importing_process
 

@@ -109,6 +109,7 @@ def main():
         default="",
         help="arguments to pass to command (i.e. --cmd-args='arg1 arg2 --flag')",
     )
+    parser.add_argument("--version", action="store_true", help="print version and exit")
     args = parser.parse_args()
     if args.version:
         print(__version__)

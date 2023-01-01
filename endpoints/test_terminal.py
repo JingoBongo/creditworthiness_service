@@ -105,12 +105,7 @@ def connect():
 
 
 def main():
-    parser.add_argument('-port')
-    parser.add_argument('-local')
-    args = parser.parse_args()
-    host = "127.0.0.1" if args.local == 'True' else yaml_utils.get_host_from_config()
-    debug = yaml_utils.get_debug_flag_from_config()
-    socketio.run(app, debug=debug, port=args.port, host=host)
+    socketio.run(app, debug=app.debug, port=app.port, host=app.host)
 
 
 if __name__ == "__main__":

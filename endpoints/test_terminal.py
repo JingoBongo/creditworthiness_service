@@ -79,7 +79,7 @@ def connect():
         return
 
     # create child process attached to a pty we can read from and write to
-    child_pid, fd = pty.fork()
+    (child_pid, fd) = pty.fork()
     if child_pid == 0:
         # this is the child process fork.
         # anything printed here will show up in the pty, including the output

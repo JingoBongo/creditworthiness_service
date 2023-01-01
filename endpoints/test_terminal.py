@@ -50,7 +50,7 @@ def read_and_forward_pty_output():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("terminal.html")
 
 
 @socketio.on("pty-input", namespace="/pty")

@@ -67,7 +67,7 @@ class FuseNode(Flask):
     def run(self, *args, **kwargs):
         if 'port' in kwargs.keys():
             self.port = kwargs['port']
-        super().run(*args, debug=self.debug, host=self.host, port=self.port, **kwargs)
+        super().run(debug=self.debug, host=self.host, port=self.port)
 
     def get_log(self):
         name = self.name

@@ -30,6 +30,7 @@ services:
     life_ping_endpoint:
       path: endpoints//system_endpoints//life_ping_endpoint.py
       port: 5001
+      enabled: false
     taskmaster:
       enabled: false
       path: endpoints//system_endpoints//taskmaster_endpoint.py

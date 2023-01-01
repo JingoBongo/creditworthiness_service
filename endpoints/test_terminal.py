@@ -96,15 +96,23 @@ def connect():
         # but if they come before the background task never starts
         socketio.start_background_task(target=read_and_forward_pty_output)
 
-        logging.info("child pid is " + child_pid)
-        logging.info(
-            f"starting background task with command `{cmd}` to continously read "
-            "and forward pty output to client"
-        )
-        logging.info("task started")
+
+
 
 
 def main():
+    parser.add_argument(
+        "--command", default="bash", help="Command to run in the terminal"
+    )
+    parser.add_argument(
+        "--cmd-args",
+        default="",
+        help="arguments to pass to command (i.e. --cmd-args='arg1 arg2 --flag')",
+    )
+    args = parser.parse_args()
+    if args.version:
+        print(__version__)
+        exit(0)
     socketio.run(app, debug=app.debug, port=app.port, host=app.host)
 
 

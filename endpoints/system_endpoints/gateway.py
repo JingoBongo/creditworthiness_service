@@ -14,8 +14,8 @@ parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 
 
-@app.route('/')
-@app.route('/<current>')
+@app.route('/home')
+@app.route('/home/<current>')
 def manage(current=None):
     if current == 'services':
         template = 'services.html'

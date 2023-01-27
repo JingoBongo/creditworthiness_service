@@ -30,16 +30,18 @@ def remove_key(d, key):
 def life_ping_handler():
     return '{"status":"alive"}'
 
+
 def favicon_handler():
-    return send_from_directory(c.root_path + c.static_folder_name,'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(c.root_path + c.static_folder_name, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 def not_found_handler(e):
-    return '{"kak_to_throw_like_a_monke": "This is not a thing. But you can see what is available at /apidocs"}'
+    return '{"issue": "You clearly tried some unexpected context. How about you start with /apidocs? It is unique for every service/port"}'
 
 
 class FuseNode(Flask):
-    def __init__(self, *args, template_folder=c.root_path + c.templates_folder_name, static_folder=c.root_path + c.static_folder_name, **kwargs):
+    def __init__(self, *args, template_folder=c.root_path + c.templates_folder_name,
+                 static_folder=c.root_path + c.static_folder_name, **kwargs):
         try:
             parser = kwargs.pop("arg_parser")
             super().__init__(*args, template_folder=template_folder, static_folder=static_folder, **kwargs)

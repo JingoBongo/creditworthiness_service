@@ -14,7 +14,7 @@ def read_from_json(path: str):
         return {}
 
 
-def write_to_json(path: str):
+def write_to_json(path: str, text):
     try:
         with open(path, 'w') as outfile:
             json.dump(text, outfile)

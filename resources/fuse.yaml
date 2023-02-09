@@ -1,6 +1,9 @@
 fuse:
   first_port: 5000
   last_port: 5100
+  cloud_repo: JingoBongo/fuse_cloud_repo
+  cloud_repo_username: FuseFrameworkRobot
+  secret: resources//secret.txt
 general:
   debug: false
   host: 0.0.0.0

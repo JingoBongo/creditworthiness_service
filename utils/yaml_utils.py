@@ -30,6 +30,13 @@ def get_host_from_config():
 def get_debug_flag_from_config():
     return get_config()['general']['debug']
 
+def get_cloud_repo_from_config():
+    return get_config()['fuse']['cloud_repo']
+def get_cloud_repo_username_from_config():
+    return get_config()['fuse']['cloud_repo_username']
+def get_secret_path_from_config():
+    return get_config()['fuse']['secret']
+
 
 def set_service_enabled(service_name, boolean):
     config = get_config()

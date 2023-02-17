@@ -19,56 +19,49 @@ import yaml
 # password = enc.decrypt_string(enc.load_key(), enc.load_encrypted_string(c.secret_path))
 # repo_url = yaml_utils.get_cloud_repo_from_config()
 
+def try_get_file_list(repository):
+    g = Github()
+    repo = g.get_repo(repository)
+    files = [f.filename for f in repo.get_contents("")]
+    return files
 
-def read_data_from_yaml(file_path):
+def try_modify_file(repository, file):
     username = yaml_utils.get_cloud_repo_username_from_config()
     password = enc.decrypt_string(enc.load_key(), enc.load_encrypted_string(c.secret_path))
-    repository = yaml_utils.get_cloud_repo_from_config()
-    file_url = f"https://raw.githubusercontent.com/{repository}/master/{file_path}"
-    response = requests.get(file_url, auth=(username, password))
-    if response.status_code == 200:
-        data = yaml.safe_load(response.text)
-        return data
-    else:
-        raise Exception(f"Failed to read file from repository. Response code: {response.status_code}")
+    access_token = "oauthtoken"
+    repo_name = repository
+    file_path = 'youtube_used_vids_list.yaml'
 
-def modify_yaml_in_github(file_path, data):
-    username = yaml_utils.get_cloud_repo_username_from_config()
-    password = enc.decrypt_string(enc.load_key(), enc.load_encrypted_string(c.secret_path))
-    access_token = "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"
-    repository = yaml_utils.get_cloud_repo_from_config()
-    commit_message = "list modification"
-    encoded_content = yaml.safe_dump(data).encode('utf-8')
-    file_url = f"https://api.github.com/repos/{repository}/contents/{file_path}"
-    headers = {
-        "Authorization": f"Token {access_token}",
-        "Content-Type": "application/json"
-    }
-    get_response = requests.get(file_url, auth=(username, access_token))
-    sha = get_response.json()["sha"]
-    payload = {
-        "message": commit_message,
-        "content": encoded_content.decode('utf-8'),
-        "sha": sha
-    }
-    response = requests.put(file_url, auth=(username, access_token), headers=headers, data=json.dumps(payload))
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Failed to modify file. Response code: {response.status_code}")
+    # Create a PyGithub instance using your username and password or personal access token
+    # g = Github(username, password)
+    g = Github(login_or_token = "oauthtoken")
 
-def this_at_least_works(repository, file):
-    ppassword = enc.decrypt_string(enc.load_key(), enc.load_encrypted_string(c.secret_path))
-    github = Github(login_or_token = "FuseFrameworkRobot", password=ppassword)
-    # repo = Repository(full_name_or_id="JingoBongo/fuse_framework")
-    repo = github.get_repo(full_name_or_id = "JingoBongo/fuse_cloud_repo")
-    print(repo.name)
+    # Get the repository object
+    # repo = g.get_user().get_repo(repo_name)
+    repo = g.get_repo(repository)
 
-# print(this_at_least_works("FuseFrameworkRobot/fuse_cloud_repo", "youtube_used_vids_list.yaml"))
+    # Get the contents of the YAML file
+    file_contents = repo.get_contents(file_path).decoded_content.decode()
 
-data = read_data_from_yaml("youtube_used_vids_list.yaml")
+    # Parse the YAML file into a Python dictionary
+    file_dict = yaml.safe_load(file_contents)
+
+    # Modify the dictionary as desired
+    file_dict['new_key'] = 'new_value'
+
+    # Convert the dictionary back to YAML
+    new_file_contents = yaml.dump(file_dict)
+
+    # Create a new commit with the modified file contents
+    repo.update_file(file_path, "Updated youtube_used_vids_list.yaml", new_file_contents,
+                     repo.get_contents(file_path).sha)
+
+
+# data = read_data_from_yaml("youtube_used_vids_list.yaml")
+try_modify_file("JingoBongo/fuse_cloud_repo", 'file')
+data = try_get_file_list("JingoBongo/fuse_cloud_repo")
 print(data)
-data['list'].append('kekekw')
-modify_yaml_in_github("youtube_used_vids_list.yaml", data)
-data = read_data_from_yaml("youtube_used_vids_list.yaml")
-print(data)
+# data['list'].append('kekekw')
+# modify_yaml_in_github("youtube_used_vids_list.yaml", data)
+# data = read_data_from_yaml("youtube_used_vids_list.yaml")
+# print(data)

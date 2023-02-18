@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 
 from utils import yaml_utils
-from utils import constants as c
+
 
 def encrypt_string(key, string):
     f = Fernet(key)
@@ -32,9 +32,9 @@ def load_encrypted_string(file_name):
     return encrypted_string
 
 
-
-def save_key(key_file):
-    password = b"password"
+def save_key(key_file, key_phrase):
+    # password = b"password"
+    password = key_phrase.encode('utf-8')
     salt = os.urandom(16)
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256,
@@ -48,38 +48,47 @@ def save_key(key_file):
         f.write(key)
     return key
 
+
 def load_key():
-    key_file = c.root_path + yaml_utils.get_secret_path_from_config()
+    key_file = yaml_utils.get_secret_txt_path_from_config()
     with open(key_file, "rb") as f:
         key = f.read()
     return key
 
 
-
+def get_secured_token():
+    key = load_key()
+    eencrypted_string = load_encrypted_string(yaml_utils.get_secret_bin_path_from_config())
+    return decrypt_string(key, eencrypted_string)
 
 # Below is a basic sequence of what you need to do in order to allow Fuse use your git.
-# There is a secret.bin file with encrypted GITHUB account that has access to the repo that you listed in the config
-# If you want (and I believe you do) to use your own, you need to create your own encrypted password (secret_message) in a file
-# to get it one will need to know the key to it. In my case I will just manually add a txt with such password
-# Also don't forget to update git username in the config
+# There is a secret.bin file with encrypted GITHUB OAuth account token that has access to the repo that you listed in the config
+# You should add Fuse's git account as a collaborator, also be aware that in case you are creating new account for this (as I would suggest)
+# Then you need to allow new account to do modifications (apparently by default it is off)
 
-# WHY such approach? Welp, to allow Fuse to use some dummy created account to use a private repository that that dummy
-# account has access to. Why? To have data and configs that are global to all Fuses. The key in txt file is never added
-# to git, therefore unless 3rd party gets access to your PC it is ok, right?.. Right?..
+# If you want (and I believe you do) to use your own, you need to create your own pair of .bin and .txt files.
+# Create new github account. Add it as a collaborator for the repo(s) you are interested in. Allow new accounts to make
+# modifications in that repo or globally (yes, this is a thing). Then generate OAuth token and temporarily save have it ready
+
+# WHY such approach? Welp, to allow Fuse to use some dummy created account to use a repository that that dummy
+# account has access to. Why? To have packages, data and configs that are global to all Fuses.
+# The key in txt file is never added to git, therefore unless 3rd party gets access to your PC it is ok, right?.. Right?..
 # At least I hope I will not mess up and allow Fuse's user to access system file directly..
 
 # When YOU need to generate encrypted password file... use uncommented code below
 
 # So, the sequence
-# I suggest you uncomment and do it step by step.
+# I suggest you uncomment and do it step by step or so when it makes sense.
 # 1. generate key
-# key = save_key("secret.txt")
+# key = save_key("secret.txt", "password")
+# Notes here: although password can be the same, derived key is always different
 # 2. Then copy file anywhere in Fuse you want your secret to be (I consider resources is the place)
+# Notes: location of both secrets (.bin and .txt) can be inside Fuse or defined by absolute path in config
 # 2.5 So once you created and moved secret and updated config, you can
-# #     just load it
+# ===> just load it from config-defined place
 # key = load_key()
-# # 3. prepare actual git pass
-# string = "git_pass"
+# # 3. prepare actual git pass (or auth token)
+# string = "password/token"
 # # 4. encrypt it
 # encrypted_string = encrypt_string(key, string)
 # # 5. Save the encrypted string file
@@ -89,3 +98,10 @@ def load_key():
 # eencrypted_string = load_encrypted_string("secret.bin")
 # ddecrypted_string = decrypt_string(key, eencrypted_string)
 # print(ddecrypted_string)
+
+# Once again, I repeat. .bin file is kinda under 2 layers of encryption, it is relatively safe to upload it to repo
+# .txt key must be local. Once again it is different every time no matter what password you used. Therefore if you lost
+# it once, you can't just remake the key. One time generated thing, by design
+
+# Note: if you think you fucked up and the token is not that secure, just revoke it and try with new one.
+# Git's token can be revoked from settings of account that owns the token

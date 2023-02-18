@@ -1,4 +1,4 @@
-import os
+import __init__
 
 import utils.constants as c
 from utils import logger_utils as log

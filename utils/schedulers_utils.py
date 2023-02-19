@@ -97,6 +97,14 @@ def taskmaster_job_body():
     log.info(f"Taskmaster Tasks harvester finished job")
 
 
+def module_metadata_harvester():
+    log.info("Scheduled module_metadata_harvester task started..")
+#     this task aims to update two tables, of local modules and of modules from repositories
+# scan local modules and update table
+
+# get repositories modules (with 1 new method for each repo preferably)
+# and update local table
+
 def route_harvester_job_body():
     log.info("Scheduled route_harvester task started..")
     services = db_utils.select_from_table(SYS_SERVICES_TABLE_NAME) + db_utils.select_from_table(

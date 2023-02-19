@@ -1,0 +1,64 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "Integer",
+      "primary_key": "True"
+    },
+    {
+      "name": "py_file_name",
+      "type": "String",
+      "nullable": "False"
+    },
+    {
+      "name": "standalone",
+      "type": "Boolean",
+      "nullable": "True"
+    },
+    {
+      "name": "module_name",
+      "type": "String",
+      "nullable": "True"
+    },
+    {
+      "name": "mono",
+      "type": "Boolean",
+      "nullable": "True"
+    },
+    {
+      "name": "local",
+      "type": "Boolean",
+      "nullable": "True"
+    },
+    {
+      "name": "role",
+      "type": "String",
+      "nullable": "True"
+    },
+    {
+      "name": "author",
+      "type": "String",
+      "nullable": "True"
+    },
+    {
+      "name": "repository",
+      "type": "String",
+      "nullable": "True"
+    },
+    {
+      "name": "version",
+      "type": "Integer",
+      "nullable": "True"
+    },
+    {
+      "name": "last_version_update",
+      "type": "DateTime",
+      "nullable": "True"
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "nullable": "True"
+    }
+  ]
+}

@@ -10,10 +10,10 @@ def get_module_name(metadata_dict, filepath):
     elif filepath:
         return os.path.basename(filepath)
     else:
-        return 'unnamed_module_'+random_utils.generate_random_uid4()
+        return 'unnamed_module_' + random_utils.generate_random_uid4()
 
 
-class ModuleMetadata():
+class ModuleMetadata:
     def __init__(self, metadata_dict: dict, filepath=None):
         self.standalone = bool(metadata_dict.get('MDL_STANDALONE', True))
         self.module_name = get_module_name(metadata_dict, filepath)
@@ -23,6 +23,6 @@ class ModuleMetadata():
         self.author = metadata_dict.get('MDL_AUTHOR', None)
         self.repository = metadata_dict.get('MDL_REPOSITORY', None)
         self.version = int(metadata_dict.get('MDL_VERSION', 1))
-        date= metadata_dict.get('MDL_LAST_VERSION_DATE', '1/1/1998')
+        date = metadata_dict.get('MDL_LAST_VERSION_DATE', '1/1/1998')
         self.last_version_date = datetime.strptime(date, '%m/%d/%Y').date()
-        self.description = metadata_dict.get('MDL_DESCRIPTION')
+        self.description = metadata_dict.get('MDL_DESCRIPTION', None)

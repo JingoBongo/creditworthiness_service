@@ -3,7 +3,9 @@ fuse:
   last_port: 5100
   cloud_repo: JingoBongo/fuse_cloud_repo
   cloud_repo_username: FuseFrameworkRobot
-  secret: resources//secret.txt
+  secret:
+    txt: fuse_root + resources//secret.txt
+    bin: fuse_root + resources//secret.bin
 general:
   debug: false
   host: 0.0.0.0
@@ -13,16 +15,6 @@ services:
     endpoint_template:
       enabled: false
       path: endpoints//py_runnable_endpoint_template.py
-    point_net_mesh_demo:
-      enabled: false
-      path: endpoints//point_net_mesh_demo.py
-      port: 5010
-    terminal:
-      enabled: true
-      local: false
-      mono: true
-      path: endpoints//test_terminal.py
-      port: 5099
   system:
     db_endpoint:
       path: endpoints//system_endpoints//db_endpoint.py
@@ -33,9 +25,7 @@ services:
     life_ping_endpoint:
       path: endpoints//system_endpoints//life_ping_endpoint.py
       port: 5001
-      enabled: false
     taskmaster:
-      enabled: false
       path: endpoints//system_endpoints//taskmaster_endpoint.py
       port: 5003
     test_sys_endpoint:
@@ -70,8 +60,12 @@ uncommon_modules:
     module_name: pyopenssl
     import_name: pyopenssl
     module_version: any
-  socketio:
-    module_name: Flask-SocketIO
-    import_name: flask-socketio
-    module_version: 5.1.1
+  github:
+    module_name: PyGithub
+    import_name: github
+    module_version: any
+  temp_sql_alc_has_broken_last_version:
+    module_name: sqlalchemy
+    import_name: sqlalchemy
+    module_version: 1.4.46
 

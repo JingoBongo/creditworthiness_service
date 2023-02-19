@@ -3,6 +3,7 @@ import os
 
 fuse_instance_name = 'Fuse'
 db_name = 'main_db.db'
+default_branch = 'master'
 life_ping_endpoint_context = '/life_ping'
 root_path = os.path.dirname(os.path.abspath(__file__)).replace('utils', '')
 conf_path = os.path.normpath('.//resources//fuse.yaml')

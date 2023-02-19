@@ -1,5 +1,5 @@
 import __init__
-import cv2
+
 from flask import render_template, redirect, url_for, request, Response
 from utils import constants as c
 from argparse import ArgumentParser

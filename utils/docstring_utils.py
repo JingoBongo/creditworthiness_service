@@ -1,6 +1,6 @@
+import __init__
 import os
 
-import __init__
 
 
 def get_docstring_from_readlines(lines):
@@ -32,37 +32,20 @@ def get_docstring_from_file(filename):
 
 
 
-
-import re
-
 def get_metadata_from_docstring(docstring):
-    metadata_regex = r'^\s*([A-Za-z0-9_-]+)\s*:\s*(.*)$'
     metadata = {}
-    current_key = None
-    current_value_lines = []
+    if docstring:
+        lines = docstring.strip().split('\n')
+        for line in lines:
+            line = line.strip()
+            if ':' in line:
+                key, value = line.split(':', 1)
+                metadata[key.strip()] = value.strip()
 
-    for line in docstring.split('\n'):
-        match = re.match(metadata_regex, line)
-        if match:
-            if current_key is not None:
-                current_value = '\n'.join(current_value_lines)
-                metadata[current_key] = current_value
-
-            current_key, current_value_lines = match.groups()
-            current_value_lines = [current_value_lines.strip()]
-        elif current_key is not None and line.strip().startswith(' '):
-            current_value_lines.append(line.strip())
-        else:
-            if current_key is not None:
-                current_value = '\n'.join(current_value_lines)
-                metadata[current_key] = current_value
-
-            current_key = None
-            current_value_lines = []
-
-    if current_key is not None:
-        current_value = '\n'.join(current_value_lines)
-        metadata[current_key] = current_value
+                # If the value is continued on the next line, keep reading until the end of the value
+                while not value.strip().endswith('"') and lines:
+                    value += '\n' + lines.pop(0).strip()
+                    metadata[key.strip()] = value.strip()
 
     return metadata
 
@@ -72,5 +55,6 @@ def get_metadata_from_docstring(docstring):
 
 
 docstring =get_docstring_from_file("C:/Users/mpaka/PycharmProjects/fuse_framework/endpoints/py_runnable_endpoint_template.py")
+print(docstring)
 metadata = get_metadata_from_docstring(docstring)
-print()
+print(metadata)

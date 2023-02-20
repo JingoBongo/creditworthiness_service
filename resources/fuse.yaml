@@ -55,6 +55,10 @@ sqlite:
         schema_path: resources//schemas//taskmaster_available_tasks_table_schema.json
       Tasks:
         schema_path: resources//schemas//tasks_table_schema.json
+      Local_Modules:
+        schema_path: resources//schemas//local_modules.json
+      Remote_Modules:
+        schema_path: resources//schemas//remote_modules.json
 uncommon_modules:
   ssl:
     module_name: pyopenssl

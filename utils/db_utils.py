@@ -426,6 +426,18 @@ def change_service_status_by_pid(*args, **kwargs):
     log.debug(f"Updated service by pid {val_pid} with status {val_status}")
 
 
+
+
+def get_module_metadata_objects_list(source):
+#     there are 2 possible sources, remote and local
+    if 'remote' in source:
+        raw_res = select_from_table(c.remote_modules_table_name)
+    else:
+        raw_res = select_from_table(c.local_modules_table_name)
+    print()
+
+
+
 def initial_db_creation():
     conn = sqlite3.connect(f"{c.root_path}resources\\{c.db_name}")
     conn.close()

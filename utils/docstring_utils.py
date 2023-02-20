@@ -91,9 +91,9 @@ def parse_key_value_string(input_string):
 
 
 
-docstring =get_docstring_from_file("C:/Users/mpaka/PycharmProjects/fuse_framework/endpoints/py_runnable_endpoint_template.py")
-# docstring =get_docstrings("C:/Users/mpaka/PycharmProjects/fuse_framework/endpoints/py_runnable_endpoint_template.py")
-print(docstring)
-# metadata = get_metadata_from_docstring(docstring)
-metadata = parse_key_value_string(docstring)
-print(metadata)
+# docstring =get_docstring_from_file("C:/Users/mpaka/PycharmProjects/fuse_framework/endpoints/py_runnable_endpoint_template.py")
+# # docstring =get_docstrings("C:/Users/mpaka/PycharmProjects/fuse_framework/endpoints/py_runnable_endpoint_template.py")
+# print(docstring)
+# # metadata = get_metadata_from_docstring(docstring)
+# metadata = parse_key_value_string(docstring)
+# print(metadata)

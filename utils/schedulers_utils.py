@@ -3,10 +3,13 @@ import os
 import re
 
 from utils import db_utils, yaml_utils
+from utils.dataclasses.module_metadata import ModuleMetadata
+from utils.docstring_utils import get_docstring_from_readlines, parse_key_value_string
 from utils.subprocess_utils import start_generic_subprocess
 from utils import constants as c
 from utils import logger_utils as log
 from utils.taskmaster_utils import task_is_in_tasks
+
 
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
@@ -98,9 +101,26 @@ def taskmaster_job_body():
 
 
 def module_metadata_harvester():
-    log.info("Scheduled module_metadata_harvester task started..")
+    # log.info("Scheduled module_metadata_harvester task started..")
+
 #     this task aims to update two tables, of local modules and of modules from repositories
 # scan local modules and update table
+    endpoints_path = c.endpoints_path
+    local_modules = []
+    for root, dirs, files in os.walk(endpoints_path):
+        for file in files:
+            file_full_path = os.path.join(root, file)
+            if file.endswith(".py"):
+                with open(file_full_path, encoding='utf-8') as f:
+                    docstring = get_docstring_from_readlines(f.readlines())
+                    if not docstring or 'MDL_' not in docstring:
+                        continue
+                    metadata_dict = parse_key_value_string(docstring)
+                    local_module = ModuleMetadata(metadata_dict, file_full_path)
+                    local_modules.append(local_module)
+    print()
+
+module_metadata_harvester()
 
 # get repositories modules (with 1 new method for each repo preferably)
 # and update local table

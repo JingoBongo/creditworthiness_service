@@ -118,6 +118,7 @@ def module_metadata_harvester():
                     metadata_dict = parse_key_value_string(docstring)
                     local_module = ModuleMetadata(metadata_dict, file_full_path)
                     local_modules.append(local_module)
+    db_utils.insert_into_table()
     print()
 
 module_metadata_harvester()

@@ -436,7 +436,7 @@ def get_module_metadata_objects_list(source):
         raw_res = select_from_table(c.local_modules_table_name)
     print()
 
-
+# get_module_metadata_objects_list('local')
 
 def initial_db_creation():
     conn = sqlite3.connect(f"{c.root_path}resources\\{c.db_name}")

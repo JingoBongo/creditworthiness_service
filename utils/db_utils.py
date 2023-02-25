@@ -1,4 +1,5 @@
 import __init__
+from utils.dataclasses.module_metadata import ModuleMetadata
 
 from utils.yaml_utils import get_config
 from utils.decorators.db_decorators import sql_alchemy_db_func
@@ -44,12 +45,18 @@ def process_one_column(column, kwargs):
 
     # TODO. sqlalchemy doesnt accept dict as kwargs, therefore for now it is a dumb if-chain
     if 'nullable' in column.keys() and 'primary_key' in column.keys():
+        # this should never be true though. primary and nullable are excluding each other
+        # TODO: remove this if?
         return alc.Column(column_name, generic_type, primary_key=bool(column['primary_key']),
                           nullable=bool(column['nullable']))
 
     # check primary
     if 'primary_key' in column.keys():
         return alc.Column(column_name, generic_type, primary_key=bool(column['primary_key']))
+
+    # check if unique
+    if 'unique' in column.keys():
+        return alc.Column(column_name, generic_type, unique=bool(column['unique']))
 
     # check nullable
     if 'nullable' in column.keys():
@@ -78,6 +85,7 @@ def initial_table_creation(*args, **kwargs):
 
 
 def get_table(kwargs, table_name: str):
+    # TODO RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0.
     return kwargs['alc'].Table(table_name, kwargs['metadata'],
                                autoload=True,
                                autoload_with=kwargs['engine'])
@@ -426,17 +434,47 @@ def change_service_status_by_pid(*args, **kwargs):
     log.debug(f"Updated service by pid {val_pid} with status {val_status}")
 
 
-
-
-def get_module_metadata_objects_list(source):
-#     there are 2 possible sources, remote and local
-    if 'remote' in source:
+def get_module_metadata_modules_objects_list(source):
+    #     there are 2 possible sources, remote and local
+    if c.remote_modules_table_name in source:
         raw_res = select_from_table(c.remote_modules_table_name)
     else:
         raw_res = select_from_table(c.local_modules_table_name)
-    print()
+    classed_res = []
+    for res in raw_res:
+        temp_dict = {}
+        file_path = res['py_file_name']
+        temp_dict['MDL_STANDALONE'] = res['standalone']
+        temp_dict['MDL_MONO'] = res['mono']
+        temp_dict['MDL_LOCAL'] = res['local']
+        temp_dict['MDL_ROLE'] = res['role']
+        temp_dict['MDL_AUTHOR'] = res['author']
+        temp_dict['MDL_REPOSITORY'] = res['repository']
+        temp_dict['MDL_VERSION'] = res['version']
+        temp_dict['MDL_LAST_VERSION_DATE'] = res['last_version_update']
+        temp_dict['MDL_DESCRIPTION'] = res['description']
+        temp_dict['MDL_MODULE_NAME'] = res['module_name']
+        temp_module_metadata = ModuleMetadata(temp_dict, file_path)
+        classed_res.append(temp_module_metadata)
+    return classed_res
 
-# get_module_metadata_objects_list('local')
+
+def insert_metadata_module_object(source, module: ModuleMetadata):
+    temp_dict = {}
+    temp_dict['standalone'] = module.standalone
+    temp_dict['mono'] = module.mono
+    temp_dict['local'] = module.local
+    temp_dict['role'] = module.role
+    temp_dict['author'] = module.author
+    temp_dict['repository'] = module.repository
+    temp_dict['version'] = module.version
+    temp_dict['last_version_update'] = module.last_version_update
+    temp_dict['description'] = module.description
+    temp_dict['py_file_name'] = module.module_file_name
+    temp_dict['module_name'] = module.module_name
+    table_name = c.remote_modules_table_name if c.remote_modules_table_name in source else c.local_modules_table_name
+    insert_into_table(table_name, temp_dict)
+
 
 def initial_db_creation():
     conn = sqlite3.connect(f"{c.root_path}resources\\{c.db_name}")

@@ -8,7 +8,7 @@
     {
       "name": "py_file_name",
       "type": "String",
-      "nullable": "False"
+      "unique": "True"
     },
     {
       "name": "standalone",
@@ -52,7 +52,7 @@
     },
     {
       "name": "last_version_update",
-      "type": "DateTime",
+      "type": "Date",
       "nullable": "True"
     },
     {

@@ -10,7 +10,6 @@ from utils import constants as c
 from utils import logger_utils as log
 from utils.taskmaster_utils import task_is_in_tasks
 
-
 SYS_SERVICES_TABLE_NAME = c.sys_services_table_name
 BUSINESS_SERVICES_TABLE_NAME = c.business_services_table_name
 
@@ -103,8 +102,8 @@ def taskmaster_job_body():
 def module_metadata_harvester():
     # log.info("Scheduled module_metadata_harvester task started..")
 
-#     this task aims to update two tables, of local modules and of modules from repositories
-# scan local modules and update table
+    #     this task aims to update two tables, of local modules and of modules from repositories
+    # scan local modules and update table
     endpoints_path = c.endpoints_path
     local_modules = []
     for root, dirs, files in os.walk(endpoints_path):
@@ -118,10 +117,25 @@ def module_metadata_harvester():
                     metadata_dict = parse_key_value_string(docstring)
                     local_module = ModuleMetadata(metadata_dict, file_full_path)
                     local_modules.append(local_module)
-    db_utils.insert_into_table()
+    local_db_modules = db_utils.get_module_metadata_modules_objects_list(c.local_modules_table_name)
+    for newly_found_module in local_modules:
+        if not check_module_metadata_is_in_list(newly_found_module, local_db_modules):
+            db_utils.insert_metadata_module_object(c.local_modules_table_name, newly_found_module)
+    for existing_module in local_db_modules:
+        if not check_module_metadata_is_in_list(existing_module, local_modules):
+            db_utils.delete_rows_from_table_by_column(c.local_modules_table_name, 'py_file_name', 'String',
+                                                      existing_module.module_file_name)
     print()
 
-module_metadata_harvester()
+
+def check_module_metadata_is_in_list(module: ModuleMetadata, llist: list):
+    for mod in llist:
+        if module.module_file_name == mod.module_file_name:
+            return True
+    return False
+
+
+# module_metadata_harvester()
 
 # get repositories modules (with 1 new method for each repo preferably)
 # and update local table

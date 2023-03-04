@@ -6,6 +6,7 @@ from sanic_openapi import swagger_blueprint
 import __init__
 from utils import yaml_utils
 from utils import constants as c
+from utils.decorators.exceptions_catcher_decorator import catch_exceptions
 
 
 # from sanic import Sanic, json, file
@@ -104,7 +105,9 @@ async def handle_404(request, exception):
         'issue': 'You clearly tried some unexpected context. How about you start with /apidocs? It is unique for every service/port'},
         status=404)
 
+
 from sanic.handlers import ErrorHandler
+
 
 class CustomErrorHandler(ErrorHandler):
     def default(self, request, exception):
@@ -113,14 +116,58 @@ class CustomErrorHandler(ErrorHandler):
         return super().default(request, exception)
 
 
+
+
+
+@catch_exceptions()
+def attempt_to_set_arg_parser_variable_to_object(parser, arg_name, dest_obj):
+    arg_val = getattr(parser.parse_args(), arg_name)
+    setattr(dest_obj, arg_name, arg_val)
+
+@catch_exceptions()
+def check_attribute_exists(dest_obj, attr_name):
+    my_var_value = getattr(dest_obj, attr_name, None)
+    return my_var_value
+
+
 class FuseNode2(Sanic):
     def __init__(self, **kwargs):
         super().__init__(kwargs.get('name') or 'fallbackname')
-        self.ctx.port = kwargs.get('port') or 5000
-        self.ctx.host = "127.0.0.1" if kwargs.get('local') == 'True' else yaml_utils.get_host_from_config()
-        self.ctx.debug = yaml_utils.get_debug_flag_from_config()
+        if parser:= kwargs.pop("arg_parser", None):
+            parser.add_argument(f"-local")
+            parser.add_argument(f"-port")
+            parser.add_argument(f"-debug")
+            parser.add_argument(f"-fast")
+            attempt_to_set_arg_parser_variable_to_object(parser, 'local', self.ctx)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'port', self.ctx)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'debug', self.ctx)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'fast', self.ctx)
+
+            self.ctx.host = "127.0.0.1" if self.ctx.local == 'True' else yaml_utils.get_host_from_config()
+
+            if check_attribute_exists(self.ctx, 'local'):
+                self.ctx.host = "127.0.0.1" if self.ctx.local == 'True' else yaml_utils.get_host_from_config()
+            else:
+                self.ctx.host = yaml_utils.get_host_from_config()
+
+            if check_attribute_exists(self.ctx, 'debug'):
+                self.ctx.debug = bool(self.ctx.debug)
+            if check_attribute_exists(self.ctx, 'fast'):
+                self.ctx.fast == bool(self.ctx.fast)
+
+
+        if not check_attribute_exists(self.ctx, 'port'):
+            self.ctx.port = kwargs.get('port') or 5000
+        if not check_attribute_exists(self.ctx, 'fast'):
+            self.ctx.fast = False
+        if not check_attribute_exists(self.ctx, 'host'):
+            self.ctx.host = "127.0.0.1" if kwargs.get('local') == 'True' else yaml_utils.get_host_from_config()
+        if not check_attribute_exists(self.ctx, 'debug'):
+            self.ctx.debug = yaml_utils.get_debug_flag_from_config()
         if kwargs.get('swagger', False):
             self.blueprint(swagger_blueprint)
+        self.ctx.port = int(self.ctx.port)
+
         # adding 3 default things: life_ping route and 404 error handler, and a favicon
         self.add_route(methods=['PATCH'], uri=c.life_ping_endpoint_context, handler=life_ping_handler)
         self.add_route(methods=c.all_request_method_types, uri='/favicon.ico', handler=favicon)
@@ -133,4 +180,21 @@ class FuseNode2(Sanic):
         self.error_handler = CustomErrorHandler()
 
     def run(self, *args, **kwargs):
-        super().run(debug=self.ctx.debug, host=self.ctx.host, port=self.ctx.port)
+        if prt := kwargs.get('port', None):
+            self.ctx.port = int(prt)
+        if hst := kwargs.get('host', None):
+            self.ctx.host = str(hst)
+        if dbg := kwargs.get('debug', None):
+            self.ctx.port = bool(dbg)
+        if fst := kwargs.get('fast', None):
+            self.ctx.fast = bool(fst)
+        # Note to why i dont use it: i also need to cast variable type, but for later, maybe I will find a way
+        # attempt_to_assign_variable_from_kwargs_if_exists('port', kwargs, self.ctx)
+        # attempt_to_assign_variable_from_kwargs_if_exists('host', kwargs, self.ctx)
+        # attempt_to_assign_variable_from_kwargs_if_exists('debug', kwargs, self.ctx)
+        super().run(debug=self.ctx.debug, host=self.ctx.host, port=self.ctx.port, fast=self.ctx.fast)
+
+def attempt_to_assign_variable_from_kwargs_if_exists(var_name, kwargs, dest_obj):
+    arg_val = getattr(kwargs, var_name, None)
+    if arg_val:
+        setattr(dest_obj, var_name, arg_val)

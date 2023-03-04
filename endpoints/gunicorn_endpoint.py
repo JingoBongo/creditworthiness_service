@@ -22,8 +22,8 @@ from sanic.response import text
 
 from utils.flask_child2 import FuseNode2
 
-# parser = Argument
-app = FuseNode2()
+parser = ArgumentParser()
+app = FuseNode2(arg_parser=parser)
 
 
 @doc.summary("Get a greeting")

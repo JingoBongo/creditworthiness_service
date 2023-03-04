@@ -20,10 +20,13 @@ import __init__
 from sanic import Sanic, json
 from sanic.response import text
 
+from utils import constants
 from utils.flask_child2 import FuseNode2
+from sanic_jinja2 import SanicJinja2
 
 parser = ArgumentParser()
 app = FuseNode2(arg_parser=parser)
+jinja = SanicJinja2(app, pkg_name="main")
 
 
 @doc.summary("Get a greeting")
@@ -32,6 +35,12 @@ app = FuseNode2(arg_parser=parser)
 @app.route('/hello/<name>')
 async def hello(request, name):
     return json({'message': f'Hello, {name}!'})
+
+
+
+@app.route('/html')
+async def htmlhtml(request):
+    return jinja.render("TODO_page.html", request)
 
 
 

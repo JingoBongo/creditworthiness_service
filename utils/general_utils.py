@@ -92,7 +92,8 @@ def get_rid_of_service_by_pid_and_port_dirty(pid):
 def start_service(service_short_name: str, service_full_path: str, port, local=False):
     local_part = ['-local', str(local)]
     port_part = ['-port', str(port)]
-    local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part,
+    name_part = ['-name', str(service_short_name)]
+    local_process = custom_subprocess.start_service_subprocess(service_full_path, local_part, port_part, name_part,
                                                                service_short_name)
     log.info(f"fuse added service to pool: {service_short_name}")
     log.info(f"added path: {service_full_path}")

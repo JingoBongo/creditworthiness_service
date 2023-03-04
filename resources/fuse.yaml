@@ -15,6 +15,9 @@ services:
     endpoint_template:
       enabled: false
       path: endpoints//py_runnable_endpoint_template.py
+    sanic:
+      enabled: True
+      path: endpoints//gunicorn_endpoint.py
   system:
     db_endpoint:
       path: endpoints//system_endpoints//db_endpoint.py

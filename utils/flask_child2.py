@@ -1,107 +1,25 @@
-# from sanic_openapi import swagger_blueprint
-from sanic import Sanic, json, file
-from sanic.handlers import ErrorHandler
-from sanic_openapi import swagger_blueprint
+import logging
 
 import __init__
-from utils import yaml_utils
+from sanic import Sanic, json, file
+from sanic_openapi import swagger_blueprint
+
+from utils import yaml_utils, logger_utils
 from utils import constants as c
 from utils.decorators.exceptions_catcher_decorator import catch_exceptions
+from utils import logger_utils as log
 
 
-# from sanic import Sanic, json, file
-# import logging
-# from flasgger import Swagger
-#
-# from flask import Flask, Response, url_for, send_from_directory
-#
-# import utils.yaml_utils
-# from utils import logger_utils
-#
-#
-#
-#
-# async def life_ping_handler(request):
-#     return await json({"status": "alive"})
-#
-#
-# # def favicon_handler():
-# #     return send_from_directory(c.root_path + c.static_folder_name, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
-#
-# async def favicon(request):
-#     return await file(c.root_path + c.static_folder_name + '//favicon.ico')
-#
-#
-#
-#
-# async def handle_404(request, exception):
-#     return await json({
-#                     'issue': 'You clearly tried some unexpected context. How about you start with /apidocs? It is unique for every service/port'},
-#                 status=404)
-#
-#
-# class FuseNode2:
-#
-#
-#     def __init__(self, *args, template_folder=c.root_path + c.templates_folder_name,
-#                  static_folder=c.root_path + c.static_folder_name, **kwargs):
-#         try:
-#             parser = kwargs.pop("arg_parser")
-#             self.app = Sanic(args[0])
-#             self.name = args[0]
-#             self.app.config.update(static_dir=static_folder, template_dir=template_folder,
-#                                debug=utils.yaml_utils.get_debug_flag_from_config())
-#
-#             # adding 3 default things: life_ping route and 404 error handler, and a favicon
-#             self.app.router.add(methods=['PATCH'], uri=c.life_ping_endpoint_context, handler=life_ping_handler)
-#             self.app.router.add(methods=c.all_request_method_types, uri='/favicon.ico', handler=favicon)
-#             self.app.error_handler.add(404, handle_404)
-#
-#             parser.add_argument('-port')
-#             parser.add_argument('-local')
-#             args = parser.parse_args()
-#             endpoint_port =args.port if args.port else 5000
-#             host = "127.0.0.1" if args.local == 'True' else utils.yaml_utils.get_host_from_config()
-#             self.debug = utils.yaml_utils.get_debug_flag_from_config()
-#             self.host = host
-#             self.port = endpoint_port
-#             # self.swagger = Swagger(self)
-#             self.app.blueprint(swagger_blueprint)
-#             self.get_log()
-#             self.logger.info(f"Started FuseNode {self.name} at {host}:{endpoint_port}")
-#         except Exception as e:
-#             print(f"Something went wrong while launching fuse node")
-#             print(e)
-#             self.logger.info(f"Something went wrong while launching fuse node")
-#             self.logger.info(e)
-#
-#     def run(self, *args, **kwargs):
-#         if 'port' in kwargs.keys():
-#             self.port = kwargs['port']
-#         # super().run(debug=self.debug, host=self.ctx.host, port=self.ctx.port)
-#         self.app.run()
-#         # self.app.run(debug=self.debug, host=self.host, port=self.port)
-#
-#     def get_log(self):
-#         name = self.name
-#         log = logger_utils.get_log(name)
-#         self.logger = log
-#         level = logging.DEBUG if self.debug else logging.INFO
-#         logging.getLogger('sanic.error').setLevel(level)
-#         logging.getLogger('sanic.error').addHandler(c.current_rotating_handler)
-#         logging.getLogger('sanic.error').addHandler(c.current_console_handler)
-#         # code above fixes werkzeug logs, but also floods the logs
-#         return log
 async def life_ping_handler(request):
-    return await json({"status": "alive"})
+    return json({"status": "alive"})
 
 
 async def favicon(request):
-    return await file(c.root_path + c.static_folder_name + '//favicon.ico')
+    return file(c.root_path + c.static_folder_name + '//favicon.ico')
 
 
 async def handle_404(request, exception):
-    return await json({
+    return json({
         'issue': 'You clearly tried some unexpected context. How about you start with /apidocs? It is unique for every service/port'},
         status=404)
 
@@ -116,13 +34,12 @@ class CustomErrorHandler(ErrorHandler):
         return super().default(request, exception)
 
 
-
-
-
 @catch_exceptions()
 def attempt_to_set_arg_parser_variable_to_object(parser, arg_name, dest_obj):
     arg_val = getattr(parser.parse_args(), arg_name)
-    setattr(dest_obj, arg_name, arg_val)
+    # setattr(dest_obj, arg_name, arg_val)
+    dest_obj[arg_name] = arg_val
+
 
 @catch_exceptions()
 def check_attribute_exists(dest_obj, attr_name):
@@ -132,29 +49,51 @@ def check_attribute_exists(dest_obj, attr_name):
 
 class FuseNode2(Sanic):
     def __init__(self, **kwargs):
-        super().__init__(kwargs.get('name') or 'fallbackname')
-        if parser:= kwargs.pop("arg_parser", None):
+        nme = None
+        dict_basket = {}
+        # if temp_arg_prs:= kwargs.get("arg_parser", None):
+        #     temp_arg_prs.add_argument("-name")
+        #     argggs = temp_arg_prs.parse_args()
+        #     nme = argggs.get("-name", None)
+
+        if parser := kwargs.pop("arg_parser", None):
             parser.add_argument(f"-local")
             parser.add_argument(f"-port")
             parser.add_argument(f"-debug")
             parser.add_argument(f"-fast")
-            attempt_to_set_arg_parser_variable_to_object(parser, 'local', self.ctx)
-            attempt_to_set_arg_parser_variable_to_object(parser, 'port', self.ctx)
-            attempt_to_set_arg_parser_variable_to_object(parser, 'debug', self.ctx)
-            attempt_to_set_arg_parser_variable_to_object(parser, 'fast', self.ctx)
+            parser.add_argument(f"-name")
 
-            self.ctx.host = "127.0.0.1" if self.ctx.local == 'True' else yaml_utils.get_host_from_config()
+            attempt_to_set_arg_parser_variable_to_object(parser, 'local', dict_basket)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'port', dict_basket)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'debug', dict_basket)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'fast', dict_basket)
+            attempt_to_set_arg_parser_variable_to_object(parser, 'name', dict_basket)
 
-            if check_attribute_exists(self.ctx, 'local'):
-                self.ctx.host = "127.0.0.1" if self.ctx.local == 'True' else yaml_utils.get_host_from_config()
+
+            # if check_attribute_exists(dict_basket, 'local'):
+            if dict_basket.get('local', None):
+                dict_basket['host'] = "127.0.0.1" if dict_basket['local'] == 'True' else yaml_utils.get_host_from_config()
             else:
-                self.ctx.host = yaml_utils.get_host_from_config()
+                dict_basket['host'] = yaml_utils.get_host_from_config()
+            dict_basket['host'] = "127.0.0.1" if dict_basket['local'] == 'True' else yaml_utils.get_host_from_config()
 
-            if check_attribute_exists(self.ctx, 'debug'):
-                self.ctx.debug = bool(self.ctx.debug)
-            if check_attribute_exists(self.ctx, 'fast'):
-                self.ctx.fast == bool(self.ctx.fast)
+            # if check_attribute_exists(dict_basket, 'debug'):
+            if dict_basket.get('debug', None):
+                dict_basket['debug'] = bool(dict_basket['debug'])
+            # if check_attribute_exists(dict_basket, 'fast'):
+            if dict_basket.get('fast', None):
+                dict_basket['fast'] == bool(dict_basket['fast'])
+            if nmme:= dict_basket.get('name', None):
+                nme = nmme
 
+        super().__init__(nme or kwargs.get('name') or 'fallbackname')
+        # self.static()
+        for key,value in dict_basket.items():
+            setattr(self.ctx, key, value)
+        logging.config.dictConfig({
+            'version': 1,
+            'disable_existing_loggers': True
+        })
 
         if not check_attribute_exists(self.ctx, 'port'):
             self.ctx.port = kwargs.get('port') or 5000
@@ -168,16 +107,34 @@ class FuseNode2(Sanic):
             self.blueprint(swagger_blueprint)
         self.ctx.port = int(self.ctx.port)
 
+        # i want logger
+        self.get_log()
+        log.info(f"Started FuseNode {self.name} at {self.ctx.host}:{self.ctx.port}")
+        # and default static and template folders
+
         # adding 3 default things: life_ping route and 404 error handler, and a favicon
         self.add_route(methods=['PATCH'], uri=c.life_ping_endpoint_context, handler=life_ping_handler)
         self.add_route(methods=c.all_request_method_types, uri='/favicon.ico', handler=favicon)
 
-        # self.router.add(methods=['PATCH'], uri=c.life_ping_endpoint_context, handler=life_ping_handler)
-        # self.error_handler.add(404, handle_404)
-        # self.error_handler(ErrorHandler(handle_404))
-
         # what does it even do? TODO: my own error handler
         self.error_handler = CustomErrorHandler()
+
+    def get_log(self):
+        name = self.name
+        log = logger_utils.get_log(name)
+        self.ctx.logger = log
+        level = logging.DEBUG if self.ctx.debug else logging.INFO
+        logging.getLogger('sanic.root').setLevel(level)
+        logging.getLogger('sanic.root').addHandler(c.current_rotating_handler)
+        logging.getLogger('sanic.root').addHandler(c.current_console_handler)
+        logging.getLogger('sanic.error').setLevel(level)
+        logging.getLogger('sanic.error').addHandler(c.current_rotating_handler)
+        logging.getLogger('sanic.error').addHandler(c.current_console_handler)
+        logging.getLogger('sanic.access').setLevel(level)
+        logging.getLogger('sanic.access').addHandler(c.current_rotating_handler)
+        logging.getLogger('sanic.access').addHandler(c.current_console_handler)
+        return log
+
 
     def run(self, *args, **kwargs):
         if prt := kwargs.get('port', None):
@@ -192,7 +149,15 @@ class FuseNode2(Sanic):
         # attempt_to_assign_variable_from_kwargs_if_exists('port', kwargs, self.ctx)
         # attempt_to_assign_variable_from_kwargs_if_exists('host', kwargs, self.ctx)
         # attempt_to_assign_variable_from_kwargs_if_exists('debug', kwargs, self.ctx)
-        super().run(debug=self.ctx.debug, host=self.ctx.host, port=self.ctx.port, fast=self.ctx.fast)
+
+        # TODO further (and upper 3 lines) needs further clarification.
+        # for upper: there is probably a good way to do it without many ifs
+        # for lower: access_log in async (high load) together with debug false (check) remove connection logs
+        # but greatly improve performance. I suggest keeping the logs at least in mono workers, but for now it
+        # only exists while debug
+        super().run(debug=self.ctx.debug, host=self.ctx.host, port=self.ctx.port, fast=self.ctx.fast,
+                    access_log=self.ctx.debug)
+
 
 def attempt_to_assign_variable_from_kwargs_if_exists(var_name, kwargs, dest_obj):
     arg_val = getattr(kwargs, var_name, None)

@@ -10,7 +10,8 @@ def catch_exceptions(*exc_types):
                 return result
             except Exception as e:
                 if isinstance(e, exc_types) or not exc_types:
-                    log.exception(f"Exception caught: {type(e).__name__}: {str(e)}")
+                    # log.exception(f"Exception caught: {type(e).__name__}: {str(e)}")
+                    print(f"Exception caught: {type(e).__name__}: {str(e)}")
                 else:
                     raise
 

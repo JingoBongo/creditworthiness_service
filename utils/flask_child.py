@@ -51,6 +51,7 @@ class FuseNode(Flask):
             self.register_error_handler(404, not_found_handler)
             parser.add_argument('-port')
             parser.add_argument('-local')
+            parser.add_argument('-name')
             args = parser.parse_args()
             endpoint_port = args.port
             host = "127.0.0.1" if args.local == 'True' else utils.yaml_utils.get_host_from_config()

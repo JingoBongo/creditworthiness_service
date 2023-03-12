@@ -48,7 +48,7 @@ def check_attribute_exists(dest_obj, attr_name):
 
 
 class FuseNode2(Sanic):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         nme = None
         dict_basket = {}
         # if temp_arg_prs:= kwargs.get("arg_parser", None):
@@ -68,7 +68,6 @@ class FuseNode2(Sanic):
             attempt_to_set_arg_parser_variable_to_object(parser, 'debug', dict_basket)
             attempt_to_set_arg_parser_variable_to_object(parser, 'fast', dict_basket)
             attempt_to_set_arg_parser_variable_to_object(parser, 'name', dict_basket)
-
 
             # if check_attribute_exists(dict_basket, 'local'):
             if dict_basket.get('local', None):

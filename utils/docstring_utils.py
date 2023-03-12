@@ -4,6 +4,8 @@ import ast
 
 
 def get_docstring_from_readlines(lines):
+    """get all docstrings obtained from the given lines
+    """
     docstring_lines = []
     for i, line in enumerate(lines):
         if line.strip().startswith('"""'):
@@ -38,6 +40,8 @@ def get_docstring_from_readlines(lines):
 
 
 def get_docstring_from_file(filename):
+    """get docstrings right from file
+    """
     filename = os.path.normpath(filename)
     with open(filename) as f:
         lines = f.readlines()

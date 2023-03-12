@@ -55,6 +55,8 @@ def main():
     system_services = config['services']['system']
     business_services = config['services']['business']
 
+    #   in both of the cases below, check given services list to be a dict and launch
+    # them depending on their role
     if isinstance(system_services, dict):
         if len(system_services) != 0:
             for service_name, service_config in zip(system_services.keys(), system_services.values()):
@@ -69,6 +71,8 @@ def main():
         else:
             log.error('No business service found, is it test launch?')
     log.info(f'Kaboom. Welcome.')
+
+    #   the while that survived
     while True:
         pass
 

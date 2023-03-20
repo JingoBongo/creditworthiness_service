@@ -16,7 +16,7 @@ services:
       enabled: false
       path: endpoints//py_runnable_endpoint_template.py
     sanic:
-      enabled: True
+      enabled: False
       path: endpoints//gunicorn_endpoint.py
     screenshot_maker:
       enabled: True

@@ -23,7 +23,13 @@ def run_cmd_command_and_wait_response(command):
     # since here we do it rough and have no info about args, let it be outdated (new = subprocess.run())
     # command that doesn't care about passing everything separately
     # returned_value = os.system(command)
-    output = subprocess.check_output(command, shell=True)
+    # output = subprocess.check_output(command, shell=True)
+    # splitted = command.split(' ')
+    # output = subprocess.run(command)
+
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE)
+    output = proc.stdout.read()
+
     log.debug(f"{run_cmd_command_and_wait_response.__name__} executed '{command}' and returned value: {output}")
     return output
 

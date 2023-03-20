@@ -125,7 +125,7 @@ def module_metadata_harvester():
         if not check_module_metadata_is_in_list(existing_module, local_modules):
             db_utils.delete_rows_from_table_by_column(c.local_modules_table_name, 'py_file_name', 'String',
                                                       existing_module.module_file_name)
-    print()
+
 
 
 def check_module_metadata_is_in_list(module: ModuleMetadata, llist: list):

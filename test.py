@@ -65,4 +65,3 @@ for playlist in list_of_playlists:
         if total_seconds_available+temp_seconds > number_of_screenshots:
             break
         total_seconds_available += temp_seconds
-print()

@@ -1,19 +1,16 @@
-from zipfile import ZipFile
+import re
+import zipfile
+
+from flask import request, send_from_directory, render_template
 
 import __init__
-import functools
+from zipfile import ZipFile
 import os
-import queue
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-
-from flask import render_template, redirect, url_for, request, Response, jsonify
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils import logger_utils as log
 from utils.flask_child import FuseNode
-import concurrent.futures
-import time
-import threading
 import cv2
 from enum import Enum
 
@@ -64,11 +61,6 @@ def make_sure_there_is_enough_space_for_videos(dict_of_all_playlists, list_of_ch
 
 def downloader_thread_is_currently_working():
     return worker_statuses[WorkerName.DOWNLOADER] == WorkerStatus.BUSY
-    # for worker in threadpool.workers:
-    #     status = threadpool.get_worker_status(worker.name)
-    #     if WorkerStatus.BUSY == status:
-    #         return True
-    # return False
 
 
 def recreate_image_harvester_files_and_folders():
@@ -114,11 +106,17 @@ def generate_bytesize_of_playlist(playlist_url):
     # 41788 bytes per second for 480p video, roughly
     # therefore length = ALL_BYTES / 156
     # dict_of_playlists_with_data[playlist] = {}
-    if '\\n' in str(size_byte_res):  # then this is a list
-        size_byte_res = sum([int(el.decode('utf-8')) for el in size_byte_res.split()])
-    else:  # then this is a single video
-        size_byte_res = int(size_byte_res.decode('utf-8'))
-    return size_byte_res
+    if type(size_byte_res) == bytes:
+        if '\\n' in str(size_byte_res):  # then this is a list
+            size_byte_res = sum(
+                [int(el.decode('utf-8')) for el in size_byte_res.split() if re.match('^[0-9]+$', el.decode('utf-8'))])
+        else:  # then this is a single video
+            # TODO: I am not sure I didn't fuck this up, test on singular video
+            size_byte_res = int(
+                s := size_byte_res.decode('utf-8') if re.match('^[0-9]+$', size_byte_res.decode('utf-8')) else None)
+        return size_byte_res
+    else:
+        return None
 
 
 def temp_do_two_things():
@@ -128,8 +126,77 @@ def temp_do_two_things():
 
 @app.route("/yt_downloader/cut_and_archive")
 def cut_and_archive_videos():
-    init_start_function_thread(temp_do_two_things())
+    init_start_function_thread(temp_do_two_things)
     return {'status': 'ok'}
+
+
+@app.route("/yt_downloader/get_approximation_of_available_screenshots")
+def get_available_screenshot_approx():
+    list_of_playlists = git_utils.get_yaml_file_from_repository(yaml_utils.get_cloud_repo_from_config(),
+                                                                'youtube_playlists.yaml')['list']
+    dict_of_playlists_with_data = {}
+    total_seconds_available = 0
+    playlists_to_download_list = []
+    for playlist in list_of_playlists:
+        if playlist in read_used_playlists_from_file():
+            continue
+        #   well, first we need length and size of each element of each playlist.. or just for playlists
+
+        # this function is pretty slow. it is slower the more videos are there in the playlist, no way to speed up
+        size_byte_res = generate_bytesize_of_playlist(playlist)
+
+        local_dict = {'size_b': size_byte_res,
+                      'size_gb': size_byte_res / c.one_thousand_to_the_power_3,
+                      'url': playlist,
+                      'duration_seconds': int(size_byte_res / 41788)}
+        dict_of_playlists_with_data[playlist] = local_dict
+        # here we should theoretically have all data about playlists
+        total_seconds_available += local_dict['duration_seconds']
+        playlists_to_download_list.append(local_dict['url'])
+    return {'num_of_playlists': len(playlists_to_download_list),
+            'approximate_screenshot_amount': total_seconds_available}
+
+
+@app.route('/yt_downloader/show_archives')
+def show_files():
+    directory = archives_folder_name  # replace with your directory path
+    files = os.listdir(directory)
+    return render_template('file_list_explorer.html', files=files)
+
+
+@app.route("/yt_downloader/clear_errored_videos")
+def clear_errored_videos():
+    for root, dirs, files in os.walk(videos_folder_name):
+        for file in files:
+            file_full_path = os.path.join(root, file)
+            if not file.endswith(".webm"):
+                os.remove(file_full_path)
+    return {'status': 'ok'}
+@app.route("/yt_downloader/clear_webm_videos")
+def clear_webm_videos():
+    for root, dirs, files in os.walk(videos_folder_name):
+        for file in files:
+            file_full_path = os.path.join(root, file)
+            if file.endswith(".webm"):
+                os.remove(file_full_path)
+    return {'status': 'ok'}
+
+
+@app.route("/yt_downloader/how_many_screenshots_ready")
+def show_ready_screenshot_count():
+    for root, dirs, files in os.walk(archives_folder_name):
+        return {'status': 'ok', 'amount': int(100 * len(files))}
+
+
+@app.route('/yt_downloader/download', methods=['POST'])
+def download_files():
+    directory = archives_folder_name  # replace with your directory path
+    selected_files = request.form.getlist('files')
+
+    # send each selected file as an attachment
+    for filename in selected_files:
+        file_path = os.path.join(directory, filename)
+        return send_from_directory(directory, filename, as_attachment=True)
 
 
 @app.route("/yt_downloader/download/<int:number_of_screenshots>")
@@ -149,12 +216,8 @@ def download_videos(number_of_screenshots):
     total_seconds_available = 0
     playlists_to_download_list = []
     for playlist in list_of_playlists:
-        # TODO: add internal list of all already used playlists, they are added in that list in the moment download
         if playlist in read_used_playlists_from_file():
             continue
-        # by their link is started. they are ignored here
-        # if already used => break
-
         #   well, first we need length and size of each element of each playlist.. or just for playlists
 
         # this function is pretty slow. it is slower the more videos are there in the playlist, no way to speed up
@@ -176,14 +239,6 @@ def download_videos(number_of_screenshots):
                 'reason': f"There are only {total_seconds_available} screenshots to download, when "
                           f"{number_of_screenshots} were asked. You might want to add new items to the list of "
                           f"playlists here: {yaml_utils.get_cloud_repo_from_config()}/youtube_playlists.yaml"}
-
-    # for playlist_dict in dict_of_playlists_with_data.values():
-    #     temp_seconds = playlist_dict['duration_seconds']
-    #     playlists_to_download_list.append(playlist_dict['url'])
-    #     if total_seconds_available + temp_seconds > number_of_screenshots:
-    #         break
-    #     total_seconds_available += temp_seconds
-    # print()
 
     if make_sure_there_is_enough_space_for_videos(dict_of_playlists_with_data, playlists_to_download_list):
         init_start_function_thread(download_function_body, playlists_to_download_list)
@@ -268,3 +323,5 @@ def cut_videos_into_raw_screenshots():
 if __name__ == "__main__":
     recreate_image_harvester_files_and_folders()
     app.run()
+
+# TODO: add checks before making screenshots and archives to check if there is at least.. 20 gigs of space

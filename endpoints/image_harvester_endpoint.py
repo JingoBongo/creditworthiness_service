@@ -235,7 +235,7 @@ def download_videos(number_of_screenshots):
         if total_seconds_available + temp_seconds > number_of_screenshots:
             break
         total_seconds_available += temp_seconds
-    print()
+
 
     if make_sure_there_is_enough_space_for_videos(dict_of_playlists_with_data, playlists_to_download_list):
         # TODO add playlists from playlists_to_download_list somewhere as already used

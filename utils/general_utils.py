@@ -13,6 +13,7 @@ from utils import constants as c
 from utils import logger_utils as log
 from utils.dataclasses.custom_named_process import CustomNamedProcess
 from utils.dataclasses.thread_with_return_value import ThreadWithReturnValue
+from utils.decorators.exceptions_catcher_decorator import catch_exceptions
 from utils.yaml_utils import get_config
 from utils.random_utils import generate_random_uid4
 
@@ -151,6 +152,7 @@ def init_start_function_process(function, *args, function_name=None, **kwargs) -
     return p
 
 
+# @catch_exceptions()
 def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnValue:
     thread: ThreadWithReturnValue = ThreadWithReturnValue(target=function, args=argss, kwargs=kwargss)
     thread.start()

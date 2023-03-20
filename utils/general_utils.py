@@ -1,3 +1,5 @@
+import subprocess
+
 import __init__
 
 import shutil
@@ -15,13 +17,18 @@ from utils.yaml_utils import get_config
 from utils.random_utils import generate_random_uid4
 
 
-def run_cmd_command(command):
+def run_cmd_command_and_wait_response(command):
     log.info(f'triggering command :{command}')
     # since here we do it rough and have no info about args, let it be outdated (new = subprocess.run())
     # command that doesn't care about passing everything separately
-    returned_value = os.system(command)
-    log.debug(f"{run_cmd_command.__name__} executed '{command}' and returned value: {returned_value}")
+    # returned_value = os.system(command)
+    output = subprocess.check_output(command, shell=True)
+    log.debug(f"{run_cmd_command_and_wait_response.__name__} executed '{command}' and returned value: {output}")
+    return output
 
+
+def run_cmd_command(command):
+    subprocess.run(command, shell=True)
 
 def clear_busy_ports():
     db.clear_table(c.busy_ports_table_name)

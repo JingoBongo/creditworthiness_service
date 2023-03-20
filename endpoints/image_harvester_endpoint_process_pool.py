@@ -1,9 +1,11 @@
+import functools
 import os
 import queue
+from concurrent.futures import ProcessPoolExecutor
 
 import __init__
 
-from flask import render_template, redirect, url_for, request, Response
+from flask import render_template, redirect, url_for, request, Response, jsonify
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils import logger_utils as log
@@ -13,23 +15,8 @@ import time
 import threading
 from enum import Enum
 
+from utils.general_utils import init_start_function_thread
 
-# parser = ArgumentParser()
-# app = FuseNode(__name__, arg_parser=parser)
-
-
-# Idea behind this service. It is planned to be used like a worker; with the ability to start/stop/etc it from the web
-# It is not going to have cron job, it is going to be launched as 1 file
-
-# It will have 2-3 workers, 1st to collect screenshots in folders. 2nd to modify them to save space
-# oooor mare those distinct services, because modularity, bitch!
-
-# it will save images in temp folder, 500 in one folder?
-
-# Folder will have generic name. RawImageFolder-{index}-{state}
-# Where state can be {Empty}, {Ongoing}, {Complete}
-
-# Somehow archive those folders? Transmitting 500 over the internet might be tricky
 
 class WorkerName(Enum):
     DOWNLOADER = 'DOWNLOADER'
@@ -96,41 +83,29 @@ class CustomThreadPool:
         self.task_queue.join()
 
 
-yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + 'yt_dlp_used_playlists.txt'
-videos_folder_name = c.temporary_files_folder_full_path + 'ytdlp_videos'
-raw_screenshots_folder_name = c.temporary_files_folder_full_path + 'ytlpd_raw_screenshots'
-filtered_screenshots_folder_name = c.temporary_files_folder_full_path + 'ytlpd_filtered_screenshots'
+yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp_used_playlists.txt'
+videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
+raw_screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_raw_screenshots'
+filtered_screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_filtered_screenshots'
 
 print('on top, before argparser')
 parser = ArgumentParser()
 
-print('on top, before threadpool')
-threadpool = CustomThreadPool(num_threads=10)
+# print('on top, before threadpool')
+# threadpool = CustomThreadPool(num_threads=10)
 
 print('on top, before fusenode')
 app = FuseNode(__name__, arg_parser=parser)
 
+# Create a dictionary to keep track of worker statuses
+worker_status = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
 
-
-# parser = ArgumentParser()
-# app = FuseNode2(__name__, arg_parser=parser)
-
-
-# Idea behind this service. It is planned to be used like a worker; with the ability to start/stop/etc it from the web
-# It is not going to have cron job, it is going to be launched as 1 file
-
-# It will have 2-3 workers, 1st to collect screenshots in folders. 2nd to modify them to save space
-# oooor mare those distinct services, because modularity, bitch!
-
-# it will save images in temp folder, 500 in one folder?
-
-# Folder will have generic name. RawImageFolder-{index}-{state}
-# Where state can be {Empty}, {Ongoing}, {Complete}
-
-# Somehow archive those folders? Transmitting 500 over the internet might be tricky
+# Create a process pool executor with 4 workers
+executor = ProcessPoolExecutor(max_workers=4)
 
 
 def download_playlist(playlist):
+    log.info(f"Starting downloading {playlist}")
     command = f"yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""
     return general_utils.run_cmd_command(command)
 
@@ -140,15 +115,16 @@ def make_sure_there_is_enough_space_for_videos(dict_of_all_playlists, list_of_ch
     for el in dict_of_all_playlists.values():
         if el['url'] in list_of_chosen_playlists:
             total_memory_to_be_used += el['size_gb']
-    return os_utils.get_hard_drive_free_space_gbyte() < total_memory_to_be_used
+    return os_utils.get_hard_drive_free_space_gbyte() > total_memory_to_be_used
 
 
 def downloader_thread_is_currently_working():
-    for worker in threadpool.workers:
-        status = threadpool.get_worker_status(worker.name)
-        if WorkerStatus.BUSY == status:
-            return True
-    return False
+    return worker_status[WorkerName.DOWNLOADER] == WorkerStatus.BUSY
+    # for worker in threadpool.workers:
+    #     status = threadpool.get_worker_status(worker.name)
+    #     if WorkerStatus.BUSY == status:
+    #         return True
+    # return False
 
 
 def recreate_image_harvester_files_and_folders():
@@ -172,7 +148,7 @@ def read_used_playlists_from_file():
 # def write_new_used_play
 def append_new_used_playlists_to_file(*strings):
     filename = yt_dlp_used_playlists_file_path
-    with open(filename, 'w') as f:
+    with open(filename, 'a') as f:
         if isinstance(strings[0], str):
             f.write(strings[0])
         else:
@@ -182,10 +158,10 @@ def append_new_used_playlists_to_file(*strings):
 
 @app.route("/yt_downloader/worker_statuses")
 def return_worker_statuses():
-    workers_and_statuses = {}
-    for worker in threadpool.workers:
-        workers_and_statuses[worker.name] = worker.status
-    return workers_and_statuses
+    li = []
+    for key, value in worker_status.items():
+        li.append({key.value: value.value})
+    return str(li)
 
 
 @app.route("/yt_downloader/download/<int:number_of_screenshots>")
@@ -238,15 +214,28 @@ def download_videos(number_of_screenshots):
     print()
 
     if make_sure_there_is_enough_space_for_videos(dict_of_playlists_with_data, playlists_to_download_list):
-        # TODO add playlists from playlists_to_download_list somewhere as already used
-        # Do I do it here properly or do i entirely rely on making this module standalone?
-        # for now: standalone. therefore create needed file in resources
-        # TODO: at the start of module create needed files, folders
-        append_new_used_playlists_to_file(playlists_to_download_list)
-        for playlist in playlists_to_download_list:
-            threadpool.submit_task(download_playlist, WorkerName.DOWNLOADER, playlist)
+        init_start_function_thread(download_function_body, playlists_to_download_list)
         return {'status': 'ok'}
     return {'status': 'error', 'reason': 'not enough space for such number of videos'}
+
+def download_function_body(playlists_to_download_list):
+    # TODO add playlists from playlists_to_download_list somewhere as already used
+    # Do I do it here properly or do i entirely rely on making this module standalone?
+    # for now: standalone. therefore create needed file in resources
+    # TODO: at the start of module create needed files, folders
+    append_new_used_playlists_to_file(playlists_to_download_list)
+
+    for playlist in playlists_to_download_list:
+        # executor(download_playlist, WorkerName.DOWNLOADER, playlist)
+        worker_name = WorkerName.DOWNLOADER
+        worker_status[worker_name] = WorkerStatus.BUSY
+
+        def on_finish(_fut, wworker_name):
+            worker_status[wworker_name] = WorkerStatus.IDLE
+
+        future = executor.submit(download_playlist, playlist)
+        future.add_done_callback(functools.partial(on_finish, worker_name))
+        result = future.result()
 
 
 @app.route("/endpoint_with_varuser/<string:str_variable>")

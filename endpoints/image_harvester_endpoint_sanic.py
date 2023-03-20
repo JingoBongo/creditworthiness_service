@@ -1,35 +1,20 @@
+import __init__
 import os
 import queue
 
-import __init__
+from sanic import json
+
 
 from flask import render_template, redirect, url_for, request, Response
-from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
+from utils import constants as c, git_utils, yaml_utils, general_utils, os_utils
 from argparse import ArgumentParser
 from utils import logger_utils as log
-from utils.flask_child import FuseNode
+from utils.flask_child2 import FuseNode2
 import concurrent.futures
 import time
 import threading
 from enum import Enum
 
-
-# parser = ArgumentParser()
-# app = FuseNode(__name__, arg_parser=parser)
-
-
-# Idea behind this service. It is planned to be used like a worker; with the ability to start/stop/etc it from the web
-# It is not going to have cron job, it is going to be launched as 1 file
-
-# It will have 2-3 workers, 1st to collect screenshots in folders. 2nd to modify them to save space
-# oooor mare those distinct services, because modularity, bitch!
-
-# it will save images in temp folder, 500 in one folder?
-
-# Folder will have generic name. RawImageFolder-{index}-{state}
-# Where state can be {Empty}, {Ongoing}, {Complete}
-
-# Somehow archive those folders? Transmitting 500 over the internet might be tricky
 
 class WorkerName(Enum):
     DOWNLOADER = 'DOWNLOADER'
@@ -103,17 +88,10 @@ filtered_screenshots_folder_name = c.temporary_files_folder_full_path + 'ytlpd_f
 
 print('on top, before argparser')
 parser = ArgumentParser()
-
+print('on top, before fusenode')
+app = FuseNode2(__name__, arg_parser=parser)
 print('on top, before threadpool')
 threadpool = CustomThreadPool(num_threads=10)
-
-print('on top, before fusenode')
-app = FuseNode(__name__, arg_parser=parser)
-
-
-
-# parser = ArgumentParser()
-# app = FuseNode2(__name__, arg_parser=parser)
 
 
 # Idea behind this service. It is planned to be used like a worker; with the ability to start/stop/etc it from the web
@@ -128,6 +106,11 @@ app = FuseNode(__name__, arg_parser=parser)
 # Where state can be {Empty}, {Ongoing}, {Complete}
 
 # Somehow archive those folders? Transmitting 500 over the internet might be tricky
+
+
+@app.route("/user/<string:str_variable>")
+def endpoint_with_var(request, str_variable):
+    return 'elo hello fello\', %s' % str_variable
 
 
 def download_playlist(playlist):
@@ -179,19 +162,18 @@ def append_new_used_playlists_to_file(*strings):
             for string in strings[0]:
                 f.write(string + '\n')
 
-
 @app.route("/yt_downloader/worker_statuses")
-def return_worker_statuses():
+def return_worker_statuses(request):
     workers_and_statuses = {}
     for worker in threadpool.workers:
         workers_and_statuses[worker.name] = worker.status
-    return workers_and_statuses
+    return json(workers_and_statuses)
 
 
 @app.route("/yt_downloader/download/<int:number_of_screenshots>")
-def download_videos(number_of_screenshots):
+def download_videos(request, number_of_screenshots):
     if downloader_thread_is_currently_working():
-        return {'status': 'error', 'reason': 'download worker currently busy'}
+        return json({'status': 'error', 'reason': 'download worker currently busy'})
 
     # the idea is that the list of videos can be taken from source X, say, a repo.
     # So, let's leave a list of playlists in a repo...
@@ -199,7 +181,7 @@ def download_videos(number_of_screenshots):
     list_of_playlists = git_utils.get_yaml_file_from_repository(yaml_utils.get_cloud_repo_from_config(),
                                                                 'youtube_playlists.yaml')['list']
     if read_used_playlists_from_file() == list_of_playlists:
-        return {'status': 'error', 'reason': 'all playlists from the file were already downloaded'}
+        return json({'status': 'error', 'reason': 'all playlists from the file were already downloaded'})
 
     dict_of_playlists_with_data = {}
     for playlist in list_of_playlists:
@@ -245,37 +227,46 @@ def download_videos(number_of_screenshots):
         append_new_used_playlists_to_file(playlists_to_download_list)
         for playlist in playlists_to_download_list:
             threadpool.submit_task(download_playlist, WorkerName.DOWNLOADER, playlist)
-        return {'status': 'ok'}
-    return {'status': 'error', 'reason': 'not enough space for such number of videos'}
+        return json({'status': 'ok'})
+    return json({'status': 'error', 'reason': 'not enough space for such number of videos'})
 
-
-@app.route("/endpoint_with_varuser/<string:str_variable>")
-def endpoint_with_var(str_variable):
-    """I have no idea why is this a title
-        These are just notes as an example. We don't need most of this
-        functionality, plus we aren't paid for this. So let's keep it
-        simple as in hello_world endpoit, ey?
-        ---
-        parameters:
-          - arg1: whatever, dude, this goes into business logic for now
-            type: string
-            required: true
-            default: none, actually
-        definitions:
-          Job_id:
-            type: String
-        responses:
-          200:
-            description: A simple business logic unit with swagger
-        """
-    return 'elo hello fello\', %s' % str_variable
-
-
-# @app.route("/yt_downloader/download/<intLnumber_of>")
 
 if __name__ == "__main__":
+    print('in main, before app run')
+    app.run()
     print('in main, before recreate folders')
     recreate_image_harvester_files_and_folders()
 
-    print('in main, before app run')
-    app.run()
+
+# Define some tasks
+# def task_a(worker_name, x, y):
+#     print(f"{worker_name}: Starting task A with args {x}, {y}...")
+#     time.sleep(1)
+#     print(f"{worker_name}: Task A completed")
+#
+#
+# def task_b(worker_name, x):
+#     print(f"{worker_name}: Starting task B with arg {x}...")
+#     time.sleep(1.5)
+#     print(f"{worker_name}: Task B completed")
+
+# TODO part below is just for demonstration purposes, learn it and remove it
+# Create a thread pool with 3 workers
+# pool = CustomThreadPool(num_threads=3)
+#
+# # Submit tasks to workers with arguments
+# pool.submit_task(task_a, WorkerName.DOWNLOADER.value, 1, 2)
+# pool.submit_task(task_b, WorkerName.WORKER_2.value, 'hello')
+#
+# # Check worker statuses
+# for worker_name in WorkerName:
+#     status = pool.get_worker_status(worker_name.value)
+#     print(f"{worker_name.value}: {status.value}")
+#
+# # Wait for all tasks to complete
+# pool.wait_completion()
+#
+# # Check worker statuses again
+# for worker_name in WorkerName:
+#     status = pool.get_worker_status(worker_name.value)
+#     print(f"{worker_name.value}: {status.value}")

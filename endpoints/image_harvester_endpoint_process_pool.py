@@ -90,12 +90,14 @@ def read_used_playlists_from_file():
 # def write_new_used_play
 def append_new_used_playlists_to_file(*strings):
     filename = yt_dlp_used_playlists_file_path
-    with open(filename, 'a') as f:
-        if isinstance(strings[0], str):
-            f.write(strings[0] + '\n')
+    with open(filename, 'w') as f:
+        if isinstance(strings, str):
+            f.write(strings + '\n')
+        elif isinstance(strings, list):
+            for item in strings:
+                f.write(item + '\n')
         else:
-            for string in strings[0]:
-                f.write(string + '\n')
+            raise TypeError("Data type not supported")
 
 
 @app.route("/yt_downloader/worker_statuses")

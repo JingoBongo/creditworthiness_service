@@ -316,6 +316,7 @@ def download_playlists_function_body(playlists_to_download_list):
     #     all necessary downloads are made, start a function to cut screenshots
     worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.IDLE
     cut_videos_into_raw_screenshots()
+    clear_webm_videos()
     archive_filtered_screenshots()
 
 
@@ -380,8 +381,9 @@ def cut_one_video_into_screenshots(video_path):
         i += 1
 
     cap.release()
-    os.remove(video_path)
-    return
+    if os.path.exists(video_path):
+        os.remove(video_path)
+
 
 
 def cut_videos_into_raw_screenshots():

@@ -14,10 +14,6 @@ from utils.flask_child import FuseNode
 import cv2
 from enum import Enum
 
-#   for face collection it is better to use FaceDetection module from MediaPipe
-import mediapipe as mp
-face_detection_builder = mp.solutions.face_detection
-
 from utils.general_utils import init_start_function_thread
 
 
@@ -38,19 +34,14 @@ yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp
 videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
 screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screenshots'
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
-
-#   face detectors, classic Haar cascade with poor performance, but easy to set
-# and MediaPipe with better efficiency
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-#   we want model to be 75% sure that there is any face
-face_detection = face_detection_builder.FaceDetection(model_selection=1, min_detection_confidence=0.75)
 
 parser = ArgumentParser()
 
 app = FuseNode(__name__, arg_parser=parser)
 
 worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
-executor = ProcessPoolExecutor(max_workers=4)
+executor = ProcessPoolExecutor(max_workers=2)
 
 
 def download_playlist(playlist):
@@ -66,6 +57,11 @@ def make_sure_there_is_enough_space_for_videos(dict_of_all_playlists, list_of_ch
             total_memory_to_be_used += el['size_gb']
     buffer_space = 20
     return os_utils.get_hard_drive_free_space_gbyte() + buffer_space > total_memory_to_be_used
+
+
+def make_sure_there_is_enough_space_for_video(dict_of_all_playlist):
+    buffer_space = 20
+    return os_utils.get_hard_drive_free_space_gbyte() + buffer_space > dict_of_all_playlist['size_gb']
 
 
 def downloader_thread_is_currently_working():
@@ -128,14 +124,14 @@ def generate_bytesize_of_playlist(playlist_url):
         return None
 
 
-def temp_do_two_things():
+def cut_and_archive():
     cut_videos_into_raw_screenshots()
     archive_filtered_screenshots()
 
 
 @app.route("/yt_downloader/cut_and_archive")
 def cut_and_archive_videos():
-    init_start_function_thread(temp_do_two_things)
+    init_start_function_thread(cut_and_archive)
     return {'status': 'ok'}
 
 
@@ -162,6 +158,8 @@ def get_available_screenshot_approx():
         # here we should theoretically have all data about playlists
         total_seconds_available += local_dict['duration_seconds']
         playlists_to_download_list.append(local_dict['url'])
+    print(str({'num_of_playlists': len(playlists_to_download_list),
+               'approximate_screenshot_amount': total_seconds_available}))
     return {'num_of_playlists': len(playlists_to_download_list),
             'approximate_screenshot_amount': total_seconds_available}
 
@@ -181,6 +179,8 @@ def clear_errored_videos():
             if not file.endswith(".webm"):
                 os.remove(file_full_path)
     return {'status': 'ok'}
+
+
 @app.route("/yt_downloader/clear_webm_videos")
 def clear_webm_videos():
     for root, dirs, files in os.walk(videos_folder_name):
@@ -206,6 +206,50 @@ def download_files():
     for filename in selected_files:
         file_path = os.path.join(directory, filename)
         return send_from_directory(directory, filename, as_attachment=True)
+
+
+# this todo is a big one: on linux machine it is needed to sudo chmod 755 ./fuse.py  ;
+#  or permission denied will be a common thing
+
+
+def download_two_endpoint_body(number_of_screenshots, list_of_playlists):
+    total_seconds_available = 0
+    for playlist in list_of_playlists:
+        if playlist in read_used_playlists_from_file():
+            continue
+
+        size_byte_res = generate_bytesize_of_playlist(playlist)
+        local_dict = {'size_b': size_byte_res,
+                      'size_gb': size_byte_res / c.one_thousand_to_the_power_3,
+                      'url': playlist,
+                      'duration_seconds': int(size_byte_res / 41788)}
+
+        total_seconds_available += local_dict['duration_seconds']
+        if make_sure_there_is_enough_space_for_video(local_dict):
+            download_one_playlist_function_body(playlist)
+        else:
+            return
+        if total_seconds_available >= number_of_screenshots:
+            break
+    cut_videos_into_raw_screenshots()
+    archive_filtered_screenshots()
+
+
+@app.route("/yt_downloader/download2/<int:number_of_screenshots>")
+def download_videos2(number_of_screenshots):
+    if downloader_thread_is_currently_working():
+        return {'status': 'error', 'reason': 'download worker currently busy'}
+
+    # the idea is that the list of videos can be taken from source X, say, a repo.
+    # So, let's leave a list of playlists in a repo...
+    # number of screenshots roughly matches number of second that the videos have
+    list_of_playlists = git_utils.get_yaml_file_from_repository(yaml_utils.get_cloud_repo_from_config(),
+                                                                'youtube_playlists.yaml')['list']
+    if read_used_playlists_from_file() == list_of_playlists:
+        return {'status': 'error', 'reason': 'all playlists from the file were already downloaded'}
+    init_start_function_thread(download_two_endpoint_body, number_of_screenshots, list_of_playlists)
+
+    return {'status': 'ok'}
 
 
 @app.route("/yt_downloader/download/<int:number_of_screenshots>")
@@ -250,26 +294,49 @@ def download_videos(number_of_screenshots):
                           f"playlists here: {yaml_utils.get_cloud_repo_from_config()}/youtube_playlists.yaml"}
 
     if make_sure_there_is_enough_space_for_videos(dict_of_playlists_with_data, playlists_to_download_list):
-        init_start_function_thread(download_function_body, playlists_to_download_list)
+        init_start_function_thread(download_playlists_function_body, playlists_to_download_list)
         return {'status': 'ok'}
     return {'status': 'error', 'reason': 'not enough space for such number of videos'}
 
 
-def download_function_body(playlists_to_download_list):
+def download_playlists_function_body(playlists_to_download_list):
     worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.BUSY
     # TODO add playlists from playlists_to_download_list somewhere as already used
     # Do I do it here properly or do i entirely rely on making this module standalone?
     # for now: standalone. therefore create needed file in resources
     # TODO: at the start of module create needed files, folders
-    append_new_used_playlists_to_file(playlists_to_download_list)
+
+    # doing below line one by one is safer, even though a bit slower and splitted into multiple operations
+    # append_new_used_playlists_to_file(playlists_to_download_list)
 
     for playlist in playlists_to_download_list:
         future = executor.submit(download_playlist, playlist)
         result = future.result()
+        append_new_used_playlists_to_file(playlist)
     #     all necessary downloads are made, start a function to cut screenshots
     worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.IDLE
     cut_videos_into_raw_screenshots()
     archive_filtered_screenshots()
+
+
+def download_one_playlist_function_body(playlist_to_download):
+    worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.BUSY
+    # TODO add playlists from playlists_to_download_list somewhere as already used
+    # Do I do it here properly or do i entirely rely on making this module standalone?
+    # for now: standalone. therefore create needed file in resources
+    # TODO: at the start of module create needed files, folders
+
+    # doing below line one by one is safer, even though a bit slower and splitted into multiple operations
+    # append_new_used_playlists_to_file(playlists_to_download_list)
+
+    future = executor.submit(download_playlist, playlist_to_download)
+    result = future.result()
+    append_new_used_playlists_to_file(playlist_to_download)
+    #     all necessary downloads are made, start a function to cut screenshots
+    worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.IDLE
+    # init_start_function_thread(cut_and_archive)
+    # cut_videos_into_raw_screenshots()
+    # archive_filtered_screenshots()
 
 
 def archive_filtered_screenshots():
@@ -295,34 +362,25 @@ def archive_filtered_screenshots():
 def cut_one_video_into_screenshots(video_path):
     video_base = os.path.basename(video_path)
     print(f" Working on {video_base} cutting to screenshots")
-    cap = cv2.VideoCapture(video_path)
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    index = 0
-    i = 1
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        if i % fps == 0:
-            #   this section is responsible for work of the Haar cascade, may uncomment if
-            # we'll want to deal with different face detection techniques
-            # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    with cv2.VideoCapture(video_path) as cap:
+        # cap = cv2.VideoCapture(video_path)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        index = 0
+        i = 1
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            if i % fps == 0:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-            # if len(faces) > 0:
-            #     cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-            #     index += 1
-            
-            #   MediaPipe FaceDetection part, uses alternative pipeline
-            results = face_detection.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            if not results.detections:
-                continue
-            cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-            index += 1
-            
-        i += 1
+                if len(faces) > 0:
+                    cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
+                    index += 1
+            i += 1
 
-    cap.release()
+        cap.release()
     os.remove(video_path)
     return
 

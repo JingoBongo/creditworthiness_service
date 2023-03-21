@@ -10,10 +10,11 @@ general:
   debug: false
   host: 0.0.0.0
   tasks_folder: resources//tasks
+
 services:
   business:
     endpoint_template:
-      enabled: false
+      enabled: False
       path: endpoints//py_runnable_endpoint_template.py
     sanic:
       enabled: False
@@ -23,6 +24,7 @@ services:
       mono: True
       port: 5015
       path: endpoints//image_harvester_endpoint_process_pool.py
+
   system:
     db_endpoint:
       path: endpoints//system_endpoints//db_endpoint.py

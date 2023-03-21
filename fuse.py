@@ -52,6 +52,7 @@ def main():
     db_utils.clear_schedulers_table()
     db_utils.clear_table(c.all_processes_table_name)
     config = yaml_utils.get_config()
+    print(f">>>>>> Going with config : {c.root_path + c.conf_path}")
     system_services = config['services']['system']
     business_services = config['services']['business']
 

@@ -1,4 +1,6 @@
 import __init__
+import time
+import os
 import requests
 from flask import redirect, request, abort, render_template
 
@@ -23,6 +25,9 @@ def manage(current=None):
     elif current == 'internet_market':
         template = 'internet_market.html'
         title = 'Internet market'
+    elif current == 'logs':
+        log_files = os.listdir(c.logs_folder_full_path)
+        return render_template('logs_main.html', log_files=log_files)
     elif current is None:
         template = 'gate_index.html'
         title = 'Fuse Management Hub'
@@ -30,6 +35,29 @@ def manage(current=None):
         abort(404)
 
     return render_template(template, title=title, current=current)
+
+
+@app.route('/logs')
+def view_log_file():
+    filename = request.args['filename']
+    return render_template('log.html', filename=filename)
+
+
+@app.route('/logs/<filename>/stream')
+def stream_log_file(filename):
+    def generate():
+        last_pos = 0
+        while True:
+            with open(os.path.join(c.logs_folder_full_path, filename), 'r') as f:
+                # Seek to the last position in the file that was read
+                f.seek(last_pos)
+                # Yield any new lines that have been added to the log file
+                for line in f:
+                    yield line
+                last_pos = f.tell()
+            time.sleep(2)
+
+    return app.response_class(generate(), mimetype='text/plain')
 
 
 @app.route('/todo_page')

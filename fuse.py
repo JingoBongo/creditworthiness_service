@@ -4,7 +4,7 @@ from utils.package_utils import run_importing_process
 
 run_importing_process()
 
-from utils import logger_utils as log
+from utils import logger_utils as log, os_utils
 from utils import yaml_utils
 from utils import general_utils as g
 from utils import db_utils
@@ -52,7 +52,9 @@ def main():
     db_utils.clear_schedulers_table()
     db_utils.clear_table(c.all_processes_table_name)
     config = yaml_utils.get_config()
-    print(f">>>>>> Going with config : {c.root_path + c.conf_path}")
+    log.warn(f"[!!!] Going with config : {c.root_path + c.conf_path}")
+    if os_utils.is_linux_running():
+        log.warn(f"[!!!] On linux machine it is needed to sudo chmod 755 ./fuse.py (once)")
     system_services = config['services']['system']
     business_services = config['services']['business']
 

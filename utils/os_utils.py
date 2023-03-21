@@ -38,6 +38,9 @@ def get_folder_free_space_gbyte(folder):
     return disk_usage.free / one_thousand_to_the_power_3
 
 
+
+
+
 def get_folder_used_space_gbyte(folder):
     return get_folder_total_space_gbyte(folder) - get_folder_free_space_gbyte(folder)
 
@@ -48,6 +51,10 @@ def get_hard_drive_total_space_gbyte():
 
 def get_hard_drive_free_space_gbyte():
     return get_folder_free_space_gbyte(slash)
+
+
+def check_there_is_enough_free_space():
+    return get_folder_free_space_gbyte(slash) > 20
 
 
 def get_hard_drive_used_space_gbyte():

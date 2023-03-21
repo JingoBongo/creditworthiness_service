@@ -15,6 +15,7 @@ import cv2
 from enum import Enum
 
 from utils.general_utils import init_start_function_thread
+from utils.os_utils import check_there_is_enough_free_space
 
 
 class WorkerName(Enum):
@@ -59,9 +60,9 @@ def make_sure_there_is_enough_space_for_videos(dict_of_all_playlists, list_of_ch
     return os_utils.get_hard_drive_free_space_gbyte() + buffer_space > total_memory_to_be_used
 
 
-def make_sure_there_is_enough_space_for_video(dict_of_all_playlist):
+def make_sure_there_is_enough_space_for_playlist(dict_of_all_playlist):
     buffer_space = 20
-    return os_utils.get_hard_drive_free_space_gbyte() + buffer_space > dict_of_all_playlist['size_gb']
+    return os_utils.get_hard_drive_free_space_gbyte() > dict_of_all_playlist['size_gb'] + buffer_space
 
 
 def downloader_thread_is_currently_working():
@@ -225,7 +226,7 @@ def download_two_endpoint_body(number_of_screenshots, list_of_playlists):
                       'duration_seconds': int(size_byte_res / 41788)}
 
         total_seconds_available += local_dict['duration_seconds']
-        if make_sure_there_is_enough_space_for_video(local_dict):
+        if make_sure_there_is_enough_space_for_playlist(local_dict):
             download_one_playlist_function_body(playlist)
         else:
             return
@@ -247,6 +248,7 @@ def download_videos2(number_of_screenshots):
                                                                 'youtube_playlists.yaml')['list']
     if read_used_playlists_from_file() == list_of_playlists:
         return {'status': 'error', 'reason': 'all playlists from the file were already downloaded'}
+    clear_errored_videos()
     init_start_function_thread(download_two_endpoint_body, number_of_screenshots, list_of_playlists)
 
     return {'status': 'ok'}
@@ -294,6 +296,7 @@ def download_videos(number_of_screenshots):
                           f"playlists here: {yaml_utils.get_cloud_repo_from_config()}/youtube_playlists.yaml"}
 
     if make_sure_there_is_enough_space_for_videos(dict_of_playlists_with_data, playlists_to_download_list):
+        clear_errored_videos()
         init_start_function_thread(download_playlists_function_body, playlists_to_download_list)
         return {'status': 'ok'}
     return {'status': 'error', 'reason': 'not enough space for such number of videos'}
@@ -358,6 +361,7 @@ def archive_filtered_screenshots():
                         ind = 0
                         files_to_zip.clear()
                 ind += 1
+    log.info(f"Finished working on archiving screenshots")
 
 
 def cut_one_video_into_screenshots(video_path):
@@ -391,10 +395,10 @@ def cut_videos_into_raw_screenshots():
     for root, dirs, files in os.walk(videos_folder_name):
         for file in files:
             file_full_path = os.path.join(root, file)
-            if file.endswith(".webm"):
+            if file.endswith(".webm") and check_there_is_enough_free_space():
                 threadpool.submit(cut_one_video_into_screenshots, file_full_path)
     threadpool.shutdown(wait=True)
-
+    log.info(f"Finished working on cutting screenshots")
 
 # @app.route("/yt_downloader/download/<intLnumber_of>")
 

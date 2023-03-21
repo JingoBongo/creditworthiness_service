@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Log Viewer</title>
+  </head>
+  <body>
+    <h1>Log Viewer</h1>
+    <form action="/logs{{ filename }}" method="get">
+      <label for="filename">Select a log file:</label>
+      <select id="filename" name="filename">
+        {% for file in log_files %}
+        <option value="{{ file }}">{{ file }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">View</button>
+    </form>
+  </body>
+</html>

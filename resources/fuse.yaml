@@ -31,7 +31,7 @@ services:
       port: 5002
     gateway:
       path: endpoints//system_endpoints//gateway.py
-      port: 80
+      port: 5000
     life_ping_endpoint:
       path: endpoints//system_endpoints//life_ping_endpoint.py
       port: 5001

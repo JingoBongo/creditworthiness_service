@@ -12,6 +12,7 @@ secret_path = root_path + os.path.normpath('.//resources//secret.bin')
 endpoints_path = root_path + os.path.normpath('.//endpoints')
 resources_path = root_path + os.path.normpath('.//resources')
 temporary_files_folder_full_path = root_path + os.path.normpath('.//resources//temporary_files//')
+logs_folder_full_path = root_path + os.path.normpath('.//resources//logs//')
 resources_folder_full_path = root_path + os.path.normpath('.//resources//')
 sys_services_table_name = 'Sys_Services'
 business_services_table_name = 'Business_Services'

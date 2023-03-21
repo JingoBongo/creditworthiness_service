@@ -362,25 +362,24 @@ def archive_filtered_screenshots():
 def cut_one_video_into_screenshots(video_path):
     video_base = os.path.basename(video_path)
     print(f" Working on {video_base} cutting to screenshots")
-    with cv2.VideoCapture(video_path) as cap:
-        # cap = cv2.VideoCapture(video_path)
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        index = 0
-        i = 1
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-            if i % fps == 0:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    cap = cv2.VideoCapture(video_path)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    index = 0
+    i = 1
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if i % fps == 0:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-                if len(faces) > 0:
-                    cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-                    index += 1
-            i += 1
+            if len(faces) > 0:
+                cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
+                index += 1
+        i += 1
 
-        cap.release()
+    cap.release()
     os.remove(video_path)
     return
 

@@ -92,7 +92,7 @@ def append_new_used_playlists_to_file(*strings):
     filename = yt_dlp_used_playlists_file_path
     with open(filename, 'a') as f:
         if isinstance(strings[0], str):
-            f.write(strings[0])
+            f.write(strings[0] + '\n')
         else:
             for string in strings[0]:
                 f.write(string + '\n')

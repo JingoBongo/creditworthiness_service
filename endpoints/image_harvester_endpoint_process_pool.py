@@ -14,6 +14,10 @@ from utils.flask_child import FuseNode
 import cv2
 from enum import Enum
 
+#   for face collection it is better to use FaceDetection module from MediaPipe
+import mediapipe as mp
+face_detection_builder = mp.solutions.face_detection
+
 from utils.general_utils import init_start_function_thread
 
 
@@ -34,7 +38,12 @@ yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp
 videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
 screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screenshots'
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
+
+#   face detectors, classic Haar cascade with poor performance, but easy to set
+# and MediaPipe with better efficiency
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+#   we want model to be 75% sure that there is any face
+face_detection = face_detection_builder.FaceDetection(model_selection=1, min_detection_confidence=0.75)
 
 parser = ArgumentParser()
 
@@ -295,12 +304,22 @@ def cut_one_video_into_screenshots(video_path):
         if not ret:
             break
         if i % fps == 0:
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            #   this section is responsible for work of the Haar cascade, may uncomment if
+            # we'll want to deal with different face detection techniques
+            # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-            if len(faces) > 0:
-                cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-                index += 1
+            # if len(faces) > 0:
+            #     cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
+            #     index += 1
+            
+            #   MediaPipe FaceDetection part, uses alternative pipeline
+            results = face_detection.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            if not results.detections:
+                continue
+            cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
+            index += 1
+            
         i += 1
 
     cap.release()

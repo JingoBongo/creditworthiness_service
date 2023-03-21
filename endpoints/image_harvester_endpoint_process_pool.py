@@ -229,11 +229,15 @@ def download_two_endpoint_body(number_of_screenshots, list_of_playlists):
 
         total_seconds_available += local_dict['duration_seconds']
         if make_sure_there_is_enough_space_for_playlist(local_dict):
+            log.info(
+                f"{total_seconds_available=} is being added with {local_dict['duration_seconds']} seconds; "
+                f"Downloading playlist {playlist}")
             download_one_playlist_function_body(playlist)
         else:
             return
         if total_seconds_available >= number_of_screenshots:
             break
+    log.info(f"Stopped downloading")
     cut_videos_into_raw_screenshots()
     archive_filtered_screenshots()
 
@@ -315,11 +319,13 @@ def download_playlists_function_body(playlists_to_download_list):
     # append_new_used_playlists_to_file(playlists_to_download_list)
 
     for playlist in playlists_to_download_list:
+        log.info(f"Downloading playlist {playlist}")
         future = executor.submit(download_playlist, playlist)
         result = future.result()
         append_new_used_playlists_to_file(playlist)
     #     all necessary downloads are made, start a function to cut screenshots
     worker_statuses[WorkerName.DOWNLOADER] = WorkerStatus.IDLE
+    log.info(f"Stopped downloading")
     cut_videos_into_raw_screenshots()
     clear_webm_videos()
     archive_filtered_screenshots()
@@ -357,7 +363,7 @@ def archive_filtered_screenshots():
                 files_to_zip.append(file_full_path)
                 if ind == 100:
                     with ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w') as zipObj:
-                        print(f" Archiving {screenshot_base}")
+                        print(f"Archiving {ind}/{len(files)}  {screenshot_base}")
                         [zipObj.write(f) for f in files_to_zip]
                         [os.remove(f) for f in files_to_zip]
                         ind = 0
@@ -366,9 +372,9 @@ def archive_filtered_screenshots():
     log.info(f"Finished working on archiving screenshots")
 
 
-def cut_one_video_into_screenshots(video_path):
+def cut_one_video_into_screenshots(video_path, files_len, ind):
     video_base = os.path.basename(video_path)
-    print(f" Working on {video_base} cutting to screenshots")
+    print(f" Working on {ind}/{files_len} {video_base} cutting to screenshots")
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     index = 0
@@ -391,16 +397,18 @@ def cut_one_video_into_screenshots(video_path):
         os.remove(video_path)
 
 
-
 def cut_videos_into_raw_screenshots():
     threadpool = ThreadPoolExecutor(max_workers=3)
+    i = 0
     for root, dirs, files in os.walk(videos_folder_name):
         for file in files:
             file_full_path = os.path.join(root, file)
             if file.endswith(".webm") and check_there_is_enough_free_space():
-                threadpool.submit(cut_one_video_into_screenshots, file_full_path)
+                threadpool.submit(cut_one_video_into_screenshots, file_full_path, len(files), i)
+            i += 1
     threadpool.shutdown(wait=True)
     log.info(f"Finished working on cutting screenshots")
+
 
 # @app.route("/yt_downloader/download/<intLnumber_of>")
 

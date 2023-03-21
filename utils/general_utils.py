@@ -30,7 +30,7 @@ def run_cmd_command_and_wait_response(command):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     output = proc.stdout.read()
 
-    log.debug(f"{run_cmd_command_and_wait_response.__name__} executed '{command}' and returned value: {output}")
+    log.info(f"{run_cmd_command_and_wait_response.__name__} executed '{command}' and returned value: {output}")
     return output
 
 

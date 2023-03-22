@@ -23,7 +23,7 @@ services:
       enabled: True
       mono: True
       port: 5015
-      path: endpoints//image_harvester_endpoint_process_pool.py
+      path: endpoints//image_harvester_endpoint_whatchdog.py
 
   system:
     db_endpoint:
@@ -38,8 +38,9 @@ services:
     taskmaster:
       path: endpoints//system_endpoints//taskmaster_endpoint.py
       port: 5003
+      enabled: False
     test_sys_endpoint:
-      enabled: false
+      enabled: False
       local: false
       mono: true
       path: endpoints//system_endpoints//py_runnable_system_endpoint_template.py

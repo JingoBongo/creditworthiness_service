@@ -36,7 +36,7 @@ def lazy_task(task_name):
       200:
         description: 99% caution
     """
-    log.info(f"Started working on task {task_name}")
+    app.logger.info(f"Started working on task {task_name}")
     task_unique_name = str(task_name) + c.tasks_name_delimiter + random_utils.generate_random_uid4()
     task_obj = InputTask(task_name, task_unique_name)
     data = None
@@ -70,8 +70,8 @@ def get_lazy_task_result(task_unique_name):
                     task_from_db['task_folder_path'] + c.double_forward_slash + c.tasks_global_provides_file_name)
                 return {'status': task_from_db['status'], "result": result}
             except Exception as e:
-                log.exception(f"Something went horribly wrong while getting result of {task_unique_name}")
-                log.exception(e)
+                app.logger.exception(f"Something went horribly wrong while getting result of {task_unique_name}")
+                app.logger.exception(e)
         else:
             # TODO this is temporary, I want to return error logs later
             return {"msg": f"Task status is: {task_from_db['status']}"}
@@ -87,7 +87,7 @@ def start_task(task_name):
       200:
         description: 99% caution
     """
-    log.info(f"Started working on task {task_name}")
+    app.logger.info(f"Started working on task {task_name}")
     task_unique_name = str(task_name) + c.tasks_name_delimiter + random_utils.generate_random_uid4()
     task_obj = InputTask(task_name, task_unique_name)
     data = None

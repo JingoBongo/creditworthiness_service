@@ -130,7 +130,7 @@ def test_provider(path):
         # return below should be unreachable in theory, but... still
         return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
     except Exception as e:
-        log.exception(e)
+        app.logger.exception(e)
         return {'msg': 'error', 'exception': e}
 
 
@@ -181,7 +181,7 @@ def redir_request(path):
         # return below should be unreachable in theory, but... still
         return {'msg': 'no such route. You want to start harvester? (/trigger-harvester)'}
     except Exception as e:
-        log.exception(e)
+        app.logger.exception(e)
         return {'msg': 'error', 'exception': e}
 
 

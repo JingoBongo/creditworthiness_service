@@ -1,3 +1,5 @@
+from watchdog.observers.inotify import InotifyObserver
+
 import __init__
 import re
 
@@ -166,7 +168,7 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     video_handler = VideoHandler(video_folder, screenshot_folder)
     screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
 
-    observer = Observer()
+    observer = InotifyObserver()
     observer.schedule(video_handler, video_folder, recursive=False)
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
     observer.start()

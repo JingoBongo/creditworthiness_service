@@ -214,7 +214,7 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
 
 
 def process_existing_videos():
-    theshold_of_screenshots_to_panic = 10_000
+    theshold_of_screenshots_to_panic = 5_000
 
     existing_files = []
     for filename in os.listdir(videos_folder_name):
@@ -243,7 +243,7 @@ def process_existing_screenshots():
     # batch = []
 
     # Collect file paths
-    theshold_of_screenshots_to_panic = 30_000
+    theshold_of_screenshots_to_panic = 20_000
 
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)

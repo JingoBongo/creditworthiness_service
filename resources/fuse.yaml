@@ -71,16 +71,16 @@ sqlite:
       Remote_Modules:
         schema_path: resources//schemas//remote_modules.json
 uncommon_modules:
-  ssl:
-    module_name: pyopenssl
-    import_name: pyopenssl
-    module_version: any
-  github:
-    module_name: PyGithub
-    import_name: github
-    module_version: any
-  temp_sql_alc_has_broken_last_version:
-    module_name: sqlalchemy
-    import_name: sqlalchemy
-    module_version: 1.4.46
+#  ssl:
+#    module_name: pyopenssl
+#    import_name: pyopenssl
+#    module_version: any
+#  github:
+#    module_name: PyGithub
+#    import_name: github
+#    module_version: any
+#  temp_sql_alc_has_broken_last_version:
+#    module_name: sqlalchemy
+#    import_name: sqlalchemy
+#    module_version: 1.4.46
 

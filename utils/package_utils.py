@@ -8,6 +8,7 @@ import os
 all_py_local_files = []
 all_imports = []
 
+
 # TODO FIX  [WinError 5] Access is denied:
 def progress_bar(progress, total, text=''):
     percent = 100 * (progress / float(total))
@@ -118,6 +119,16 @@ def is_local_import(line: str):
     return False
 
 
+def process_requirements_file(file_path):
+    try:
+        print(f"Trying to Install requirements: {file_path}")
+        subprocess.check_call(["pip3", "install", "-r", file_path])
+    except Exception as e:
+        print(f"Failed to install {file_path}")
+        print(e)
+    pass
+
+
 def find_used_packages():
     global all_py_local_files
     global all_imports
@@ -127,6 +138,10 @@ def find_used_packages():
     for root, dirs, files in os.walk(root_path):
         for file in files:
             file_full_path = os.path.join(root, file)
+
+            if file.endswith("requirements.txt"):
+                process_requirements_file(file_full_path)
+
             if file.endswith(".py") and check_restricted_folders_to_be_in_path(file_full_path, restricted_folders):
                 all_py_local_files.append(file.replace('.py', ''))
                 with open(file_full_path, encoding='utf-8') as f:

@@ -112,7 +112,7 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
-        self.screenshotExecutor = ThreadPoolExecutor(max_workers=1)
+        self.screenshotExecutor = ProcessPoolExecutor(max_workers=1)
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.png'):

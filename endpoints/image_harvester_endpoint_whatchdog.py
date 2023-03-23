@@ -42,7 +42,7 @@ class VideoHandler(FileSystemEventHandler):
     @staticmethod
     def cut_video_into_screenshots_and_return_screenshots(video_path):
         video_base = os.path.basename(video_path)
-        print(f" Working on {video_base}; cutting into screenshots")
+        app.logger.info(f" Working on {video_base}; cutting into screenshots")
         cap = cv2.VideoCapture(video_path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         index = 0
@@ -62,6 +62,7 @@ class VideoHandler(FileSystemEventHandler):
             i += 1
 
         cap.release()
+        app.logger.info(f" Releasing {video_base}; Trying to delete it")
         if os.path.exists(video_path):
             os.remove(video_path)
         # return frames

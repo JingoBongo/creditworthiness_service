@@ -64,7 +64,7 @@ class VideoHandler(FileSystemEventHandler):
                     # frames.append(frame)
                     index += 1
 
-                if frame % (180 * fps) == 0:
+                if frame_count % (180 * fps) == 0:
                     # current_time_sec = frame_index / fps
                     # current_time_min = current_time_sec / 60
                     current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)

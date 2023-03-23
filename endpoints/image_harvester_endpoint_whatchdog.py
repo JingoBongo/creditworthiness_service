@@ -1,3 +1,5 @@
+import time
+
 import __init__
 
 import re
@@ -196,7 +198,6 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
     process_existing_files()
 
-
     observer = InotifyObserver()
     # observer = Observer()
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
@@ -249,6 +250,13 @@ def process_existing_screenshots():
         # screenshotExecutor.submit(aboba, batch.copy())
         event = FileCreatedEvent(file_path)
         screenshot_handler.on_created(event)
+    if ind := len(file_paths) > 30_000:
+        for i in range(ind):
+            if i % 100 == 0:
+                app.logger.warn(
+                    f"There is currently too big amount of screenshots ({ind}), video cutting is postponed temporarily, "
+                    f"as well it is recommended to avoid sending requests to the module")
+            time.sleep(0.5)
 
         # screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
 
@@ -265,10 +273,10 @@ def process_existing_screenshots():
 
 
 def process_existing_files():
-    app.logger.info(f"Processing existing videos")
-    process_existing_videos()
     app.logger.info(f"Processing existing screenshots")
     process_existing_screenshots()
+    app.logger.info(f"Processing existing videos")
+    process_existing_videos()
 
 
 def download_playlist(playlist):

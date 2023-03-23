@@ -88,14 +88,14 @@ class FuseNode(Flask):
 
     def get_log(self):
         name = self.name
-        self.logger = logging.getLogger(name)
+        pid = os.getpid()
+        logger_name = f"{name}-{pid}"
+        self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
 
         # Create formatter
         formatter = logging.Formatter('[%(asctime)s] [%(name)-s] [%(levelname)-s] %(message)s')
 
-        pid = os.getpid()
-        logger_name = f"{name}-{pid}"
         log_path = f"{c.root_path}resources//{c.logs_folder_name}//{logger_name}"
         # log = setup_logger(logger_name, log_path)
 

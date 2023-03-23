@@ -1,5 +1,6 @@
 import __init__
 
+
 import re
 
 from flask import request, send_from_directory, render_template
@@ -10,10 +11,15 @@ from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils.flask_child import FuseNode
 import cv2
-from watchdog.observers.inotify import InotifyObserver
+
+
 
 import os
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+
+
+# checkout for handling files that already are there
+# https://stackoverflow.com/questions/59265504/python-watchdog-process-existing-files-on-startup
 
 
 class VideoHandler(FileSystemEventHandler):
@@ -21,15 +27,17 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
+        self.videoExecutor = ProcessPoolExecutor(max_workers=2)
+
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.webm'):
-            videoExecutor.submit(VideoHandler.process_video, event.src_path)
+            self.videoExecutor.submit(VideoHandler.process_video, event.src_path)
 
     # TODO: to test. I have a theory that yt-dlp sometimes renames chunks into final file, so on modify is needed
     def on_modified(self, event):
         if not event.is_directory and event.src_path.endswith('.webm'):
-            videoExecutor.submit(VideoHandler.process_video, event.src_path)
+            self.videoExecutor.submit(VideoHandler.process_video, event.src_path)
 
     @staticmethod
     def cut_video_into_screenshots_and_return_screenshots(video_path):
@@ -84,6 +92,8 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
+        self.screenshotExecutor = ProcessPoolExecutor(max_workers=2)
+
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.png'):
@@ -91,7 +101,7 @@ class ScreenshotHandler(FileSystemEventHandler):
             if len(self.screenshots_list) >= 100:
                 local_screenshot_copy = self.screenshots_list.copy()
                 self.screenshots_list.clear()
-                screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, local_screenshot_copy)
+                self.screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, local_screenshot_copy)
 
     @staticmethod
     def process_screenshots_list(local_screenshot_copy):
@@ -149,22 +159,24 @@ app = FuseNode(__name__, arg_parser=parser)
 
 # worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
 downloadExecutor = ProcessPoolExecutor(max_workers=1)
-videoExecutor = ProcessPoolExecutor(max_workers=2)
-screenshotExecutor = ProcessPoolExecutor(max_workers=2)
+# videoExecutor = ProcessPoolExecutor(max_workers=2)
+# screenshotExecutor = ProcessPoolExecutor(max_workers=2)
 
 # executor = ProcessPoolExecutor(max_workers=3)
 
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
-    if not os_utils.is_linux_running():
-        import watchdog.observers as ob
-        ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
-        ob.winapi.BUFFER_SIZE = 8192
+    # if not os_utils.is_linux_running():
+        # import watchdog.observers as ob
+        # ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
+        # ob.winapi.BUFFER_SIZE = 8192
+    # video_handler = VideoHandler(video_folder, screenshot_folder)
+    # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
     process_existing_files()
-    video_handler = VideoHandler(video_folder, screenshot_folder)
-    screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
 
+    from watchdog.observers.inotify import InotifyObserver
     observer = InotifyObserver()
+    # observer = Observer()
     observer.schedule(video_handler, video_folder, recursive=False)
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
     observer.start()
@@ -188,7 +200,9 @@ def process_existing_videos():
     ind = 0
     for existing_file in existing_files:
         app.logger.info(f"Existing video No. {ind}/{amount_of_videos} sent to videoExecutor Process Pool")
-        videoExecutor.submit(VideoHandler.process_video, existing_file)
+        event = FileCreatedEvent(existing_file)
+        video_handler.on_created(event)
+        # videoExecutor.submit(VideoHandler.process_video, existing_file)
         ind += 1
 
 
@@ -210,7 +224,10 @@ def process_existing_screenshots():
         if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
             app.logger.info(f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
             # screenshotExecutor.submit(aboba, batch.copy())
-            screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
+            event = FileCreatedEvent(file_path)
+            screenshot_handler.on_created(event)
+
+            # screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
 
             # archive_screenshots(batch)
             batch.clear()
@@ -560,6 +577,8 @@ def download_videos(number_of_screenshots):
 if __name__ == "__main__":
     recreate_image_harvester_files_and_folders()
     # init_start_function_thread(watch_folders, videos_folder_name, screenshots_folder_name, archives_folder_name)
+    video_handler = VideoHandler(videos_folder_name, screenshots_folder_name)
+    screenshot_handler = ScreenshotHandler(screenshots_folder_name, archives_folder_name)
     watch_folders(videos_folder_name, screenshots_folder_name, archives_folder_name)
     app.run()
 

@@ -24,7 +24,7 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
-        self.videoExecutor = ProcessPoolExecutor(max_workers=1)
+        self.videoExecutor = ProcessPoolExecutor(max_workers=2)
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.webm'):
@@ -69,7 +69,7 @@ class VideoHandler(FileSystemEventHandler):
                     # current_time_min = current_time_sec / 60
                     current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
                     app.logger.info(
-                        f"Processed {frame_count}/{total_frames} frames, {current_time} seconds out of {int(total_frames / fps)} seconds")
+                        f"Processed {frame_count}/{total_frames} frames, {current_time} seconds out of {int(total_frames / fps)} seconds; ({video_base})")
 
                     # app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
                     # duration_total += 3
@@ -109,7 +109,7 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
-        self.screenshotExecutor = ProcessPoolExecutor(max_workers=1)
+        self.screenshotExecutor = ProcessPoolExecutor(max_workers=2)
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.png'):

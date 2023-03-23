@@ -37,6 +37,7 @@ class VideoHandler(FileSystemEventHandler):
 
     @staticmethod
     def cut_video_into_screenshots_and_return_screenshots(video_path):
+        # (doesn't return screenshots)
         video_base = os.path.basename(video_path)
         app.logger.info(f" Working on {video_base}; cutting into screenshots")
         cap = cv2.VideoCapture(video_path)
@@ -73,6 +74,8 @@ class VideoHandler(FileSystemEventHandler):
 
                     # app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
                     # duration_total += 3
+                if frame_count >= 1.5 * 60 * 60 * fps:
+                    app.logger.warn(f"Video {video_base} lasts more than 1.5 hours, Freezes may occur")
 
             i += 1
 
@@ -227,8 +230,8 @@ def process_existing_videos():
 def process_existing_screenshots():
     folder_path = screenshots_folder_name
     file_paths = []
-    MAX_BATCH_SIZE = 100
-    batch = []
+    # MAX_BATCH_SIZE = 100
+    # batch = []
 
     # Collect file paths
     for filename in os.listdir(folder_path):
@@ -252,12 +255,12 @@ def process_existing_screenshots():
         # batch.clear()
 
 
-def aboba(local_screenshot_copy):
-    screenshot_base = os.path.basename(local_screenshot_copy[0])
-    with ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w') as zipObj:
-        app.logger.info(f"Archiving {[os.path.basename(el) for el in local_screenshot_copy]}")
-        [zipObj.write(f) for f in local_screenshot_copy]
-        [os.remove(f) for f in local_screenshot_copy]
+# def aboba(local_screenshot_copy):
+#     screenshot_base = os.path.basename(local_screenshot_copy[0])
+#     with ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w') as zipObj:
+#         app.logger.info(f"Archiving {[os.path.basename(el) for el in local_screenshot_copy]}")
+#         [zipObj.write(f) for f in local_screenshot_copy]
+#         [os.remove(f) for f in local_screenshot_copy]
 
 
 def process_existing_files():

@@ -213,7 +213,9 @@ def process_existing_screenshots():
         batch.append(file_path)
         if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
             app.logger.info(f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
-            screenshotExecutor.submit(aboba, batch.copy())
+            # screenshotExecutor.submit(aboba, batch.copy())
+            screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
+
             # archive_screenshots(batch)
             batch.clear()
 

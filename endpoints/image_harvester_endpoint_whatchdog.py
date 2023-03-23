@@ -17,6 +17,8 @@ import cv2
 import os
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
+from utils.general_utils import init_start_function_thread
+
 
 # checkout for handling files that already are there
 # https://stackoverflow.com/questions/59265504/python-watchdog-process-existing-files-on-startup
@@ -289,7 +291,7 @@ def process_existing_files():
     app.logger.info(f"Processing existing screenshots")
     process_existing_screenshots()
     app.logger.info(f"Processing existing videos")
-    process_existing_videos()
+    init_start_function_thread(process_existing_videos)
 
 
 def download_playlist(playlist):

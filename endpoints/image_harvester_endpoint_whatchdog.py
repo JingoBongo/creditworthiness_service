@@ -198,8 +198,8 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     from watchdog.observers.inotify import InotifyObserver
     observer = InotifyObserver()
     # observer = Observer()
-    observer.schedule(video_handler, video_folder, recursive=False)
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
+    observer.schedule(video_handler, video_folder, recursive=False)
     observer.start()
 
     # try:

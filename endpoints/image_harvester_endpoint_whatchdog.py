@@ -1,6 +1,5 @@
-from watchdog.observers.inotify import InotifyObserver
-
 import __init__
+
 import re
 
 from flask import request, send_from_directory, render_template
@@ -9,16 +8,11 @@ from zipfile import ZipFile
 from concurrent.futures import ProcessPoolExecutor
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
-from utils import logger_utils as log
 from utils.flask_child import FuseNode
 import cv2
-
-from utils.general_utils import init_start_function_thread
-from utils.os_utils import check_there_is_enough_free_space
+from watchdog.observers.inotify import InotifyObserver
 
 import os
-import time
-from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 
@@ -160,10 +154,10 @@ screenshotExecutor = ProcessPoolExecutor(max_workers=2)
 
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
-    if not os_utils.is_linux_running():
-        import watchdog.observers as ob
-        ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
-        ob.winapi.BUFFER_SIZE = 8192
+    # if not os_utils.is_linux_running():
+    import watchdog.observers as ob
+    ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
+    ob.winapi.BUFFER_SIZE = 8192
     process_existing_files()
     video_handler = VideoHandler(video_folder, screenshot_folder)
     screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
@@ -213,7 +207,9 @@ def process_existing_screenshots():
         batch.append(file_path)
         if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
             app.logger.info(f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
-            screenshotExecutor.submit(aboba, batch.copy())
+            # screenshotExecutor.submit(aboba, batch.copy())
+            screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
+
             # archive_screenshots(batch)
             batch.clear()
 

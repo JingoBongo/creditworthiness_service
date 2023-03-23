@@ -103,7 +103,7 @@ class ScreenshotHandler(FileSystemEventHandler):
     def process_screenshots_list(local_screenshot_copy):
         screenshot_base = os.path.basename(local_screenshot_copy[0])
         with ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w') as zipObj:
-            app.logger.info(f"Archiving {[os.path.basename(el) for el in local_screenshot_copy]}")
+            app.logger.info(f"Archiving {screenshot_base}+")
             [zipObj.write(f) for f in local_screenshot_copy]
             [os.remove(f) for f in local_screenshot_copy]
 

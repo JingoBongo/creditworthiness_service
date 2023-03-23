@@ -68,8 +68,8 @@ class VideoHandler(FileSystemEventHandler):
                     # current_time_sec = frame_index / fps
                     # current_time_min = current_time_sec / 60
                     current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
-                    app.logger.info(print(
-                        f"Processed {frame_count}/{total_frames} frames, {current_time} seconds out of {int(total_frames / fps)} seconds"))
+                    app.logger.info(
+                        f"Processed {frame_count}/{total_frames} frames, {current_time} seconds out of {int(total_frames / fps)} seconds")
 
                     # app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
                     # duration_total += 3

@@ -154,9 +154,9 @@ screenshotExecutor = ProcessPoolExecutor(max_workers=1)
 
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
-    # if not os_utils.is_linux_running():
     import watchdog.observers as ob
-    ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
+    if not os_utils.is_linux_running():
+        ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
     ob.winapi.BUFFER_SIZE = 8192
     process_existing_files()
     video_handler = VideoHandler(video_folder, screenshot_folder)

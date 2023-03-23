@@ -47,7 +47,6 @@ class VideoHandler(FileSystemEventHandler):
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         index = 0
         i = 1
-        frames = []
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -57,15 +56,15 @@ class VideoHandler(FileSystemEventHandler):
                 faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
                 if len(faces) > 0:
-                    # cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-                    frames.append(frame)
+                    cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
+                    # frames.append(frame)
                     index += 1
             i += 1
 
         cap.release()
         if os.path.exists(video_path):
             os.remove(video_path)
-        return frames
+        # return frames
 
     @staticmethod
     def process_video(video_path):
@@ -76,14 +75,15 @@ class VideoHandler(FileSystemEventHandler):
         #     os.makedirs(screenshot_folder)
         basename = os.path.basename(video_path)
         app.logger.info(f"Cutting {basename} into screenshots")
-        screenshots = VideoHandler.cut_video_into_screenshots_and_return_screenshots(video_path)
-        for i, screenshot in enumerate(screenshots):
-            screenshot_filename = f'{basename}_{i}.png'
-            screenshot_path = f"{screenshots_folder_name}/{screenshot_filename}"
-            cv2.imwrite(screenshot_path, screenshot)
+        VideoHandler.cut_video_into_screenshots_and_return_screenshots(video_path)
+        # screenshots = VideoHandler.cut_video_into_screenshots_and_return_screenshots(video_path)
+        # for i, screenshot in enumerate(screenshots):
+        #     screenshot_filename = f'{basename}_{i}.png'
+        #     screenshot_path = f"{screenshots_folder_name}/{screenshot_filename}"
+        #     cv2.imwrite(screenshot_path, screenshot)
 
         # Delete the video
-        os.remove(video_path)
+        # os.remove(video_path)
 
 
 class ScreenshotHandler(FileSystemEventHandler):

@@ -214,6 +214,8 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
 
 
 def process_existing_videos():
+    theshold_of_screenshots_to_panic = 10_000
+
     existing_files = []
     for filename in os.listdir(videos_folder_name):
         file_path = os.path.join(videos_folder_name, filename)
@@ -227,6 +229,11 @@ def process_existing_videos():
         video_handler.on_created(event)
         # videoExecutor.submit(VideoHandler.process_video, existing_file)
         ind += 1
+        if ind % theshold_of_screenshots_to_panic == 0:
+            app.logger.warn(
+                f"There is currently too big amount of videos ({len(existing_files)}), video cutting is slowed down, "
+                f"as well it is recommended to avoid sending requests to the module")
+            time.sleep(180)
 
 
 def process_existing_screenshots():
@@ -236,6 +243,8 @@ def process_existing_screenshots():
     # batch = []
 
     # Collect file paths
+    theshold_of_screenshots_to_panic = 30_000
+
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         if filename.endswith('.png') and os.path.isfile(file_path):
@@ -243,20 +252,24 @@ def process_existing_screenshots():
 
     # Group files into batches of MAX_BATCH_SIZE and call function on each batch
     for i, file_path in enumerate(file_paths):
-        # batch.append(file_path)
-        # if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
         app.logger.info(
             f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
-        # screenshotExecutor.submit(aboba, batch.copy())
         event = FileCreatedEvent(file_path)
         screenshot_handler.on_created(event)
-    if ind := len(file_paths) > 30_000:
-        for i in range(ind):
-            if i % 100 == 0:
-                app.logger.warn(
-                    f"There is currently too big amount of screenshots ({ind}), video cutting is postponed temporarily, "
-                    f"as well it is recommended to avoid sending requests to the module")
-            time.sleep(0.5)
+        if i % theshold_of_screenshots_to_panic == 0:
+            app.logger.warn(
+                f"There is currently too big amount of screenshots ({len(file_paths)}), video cutting is postponed temporarily, "
+                f"as well it is recommended to avoid sending requests to the module")
+            time.sleep(180)
+
+
+    # if ind := len(file_paths) > 30_000:
+    #     for i in range(ind):
+    #         if i % 100 == 0:
+    #             app.logger.warn(
+    #                 f"There is currently too big amount of screenshots ({ind}), video cutting is postponed temporarily, "
+    #                 f"as well it is recommended to avoid sending requests to the module")
+    #         time.sleep(0.5)
 
         # screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
 

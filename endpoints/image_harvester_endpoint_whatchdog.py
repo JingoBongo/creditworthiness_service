@@ -152,6 +152,8 @@ downloadExecutor = ProcessPoolExecutor(max_workers=1)
 videoExecutor = ProcessPoolExecutor(max_workers=1)
 screenshotExecutor = ProcessPoolExecutor(max_workers=1)
 
+# executor = ProcessPoolExecutor(max_workers=3)
+
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
     if not os_utils.is_linux_running():

@@ -289,7 +289,7 @@ def process_existing_screenshots():
 
 def process_existing_files():
     app.logger.info(f"Processing existing screenshots")
-    process_existing_screenshots()
+    init_start_function_thread(process_existing_screenshots)
     app.logger.info(f"Processing existing videos")
     init_start_function_thread(process_existing_videos)
 

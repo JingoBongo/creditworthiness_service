@@ -196,13 +196,13 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     # ob.winapi.BUFFER_SIZE = 8192
     # video_handler = VideoHandler(video_folder, screenshot_folder)
     # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
-    process_existing_files()
 
     observer = InotifyObserver()
     # observer = Observer()
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
     observer.schedule(video_handler, video_folder, recursive=False)
     observer.start()
+    process_existing_files()
 
     # try:
     #     while True:

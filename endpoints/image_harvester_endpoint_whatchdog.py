@@ -24,7 +24,7 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
-        self.videoExecutor = ProcessPoolExecutor(max_workers=2)
+        self.videoExecutor = ProcessPoolExecutor(max_workers=1)
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.webm'):

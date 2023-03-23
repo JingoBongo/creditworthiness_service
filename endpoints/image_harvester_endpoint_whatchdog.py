@@ -238,18 +238,18 @@ def process_existing_screenshots():
 
     # Group files into batches of MAX_BATCH_SIZE and call function on each batch
     for i, file_path in enumerate(file_paths):
-        batch.append(file_path)
-        if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
-            app.logger.info(
-                f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
-            # screenshotExecutor.submit(aboba, batch.copy())
-            event = FileCreatedEvent(file_path)
-            screenshot_handler.on_created(event)
+        # batch.append(file_path)
+        # if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
+        app.logger.info(
+            f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
+        # screenshotExecutor.submit(aboba, batch.copy())
+        event = FileCreatedEvent(file_path)
+        screenshot_handler.on_created(event)
 
-            # screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
+        # screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, batch.copy())
 
-            # archive_screenshots(batch)
-            batch.clear()
+        # archive_screenshots(batch)
+        # batch.clear()
 
 
 def aboba(local_screenshot_copy):

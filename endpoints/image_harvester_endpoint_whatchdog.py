@@ -230,7 +230,7 @@ def process_existing_videos():
         # videoExecutor.submit(VideoHandler.process_video, existing_file)
         ind += 1
         if ind % theshold_of_screenshots_to_panic == 0:
-            app.logger.warn(
+            app.logger.warning(
                 f"There is currently too big amount of videos ({len(existing_files)}), video cutting is slowed down, "
                 f"as well it is recommended to avoid sending requests to the module")
             time.sleep(180)
@@ -256,8 +256,8 @@ def process_existing_screenshots():
             f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
         event = FileCreatedEvent(file_path)
         screenshot_handler.on_created(event)
-        if i % theshold_of_screenshots_to_panic == 0:
-            app.logger.warn(
+        if (i + 1) % theshold_of_screenshots_to_panic == 0:
+            app.logger.warning(
                 f"There is currently too big amount of screenshots ({len(file_paths)}), video cutting is postponed temporarily, "
                 f"as well it is recommended to avoid sending requests to the module")
             time.sleep(180)

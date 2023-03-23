@@ -6,7 +6,7 @@ import re
 from flask import request, send_from_directory, render_template
 
 from zipfile import ZipFile
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils.flask_child import FuseNode
@@ -27,7 +27,7 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
-        self.videoExecutor = ProcessPoolExecutor(max_workers=2)
+        self.videoExecutor = ThreadPoolExecutor(max_workers=2)
 
 
     def on_created(self, event):
@@ -92,7 +92,7 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
-        self.screenshotExecutor = ProcessPoolExecutor(max_workers=2)
+        self.screenshotExecutor = ThreadPoolExecutor(max_workers=2)
 
 
     def on_created(self, event):
@@ -158,11 +158,11 @@ parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 
 # worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
-downloadExecutor = ProcessPoolExecutor(max_workers=1)
-# videoExecutor = ProcessPoolExecutor(max_workers=2)
-# screenshotExecutor = ProcessPoolExecutor(max_workers=2)
+downloadExecutor = ThreadPoolExecutor(max_workers=1)
+# videoExecutor = ThreadPoolExecutor(max_workers=2)
+# screenshotExecutor = ThreadPoolExecutor(max_workers=2)
 
-# executor = ProcessPoolExecutor(max_workers=3)
+# executor = ThreadPoolExecutor(max_workers=3)
 
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
@@ -560,7 +560,7 @@ def download_videos(number_of_screenshots):
 
 
 # def cut_videos_into_raw_screenshots():
-#     process_pool = ProcessPoolExecutor(max_workers=3)
+#     process_pool = ThreadPoolExecutor(max_workers=3)
 #     i = 0
 #     for root, dirs, files in os.walk(videos_folder_name):
 #         for file in files:

@@ -6,7 +6,7 @@ import re
 from flask import request, send_from_directory, render_template
 
 from zipfile import ZipFile
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils.flask_child import FuseNode
@@ -27,7 +27,7 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
-        self.videoExecutor = ThreadPoolExecutor(max_workers=1)
+        self.videoExecutor = ProcessPoolExecutor(max_workers=1)
 
 
     def on_created(self, event):
@@ -92,7 +92,7 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
-        self.screenshotExecutor = ThreadPoolExecutor(max_workers=1)
+        self.screenshotExecutor = ProcessPoolExecutor(max_workers=1)
 
 
     def on_created(self, event):
@@ -158,7 +158,7 @@ parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 
 # worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
-downloadExecutor = ThreadPoolExecutor(max_workers=1)
+downloadExecutor = ProcessPoolExecutor(max_workers=1)
 # videoExecutor = ThreadPoolExecutor(max_workers=2)
 # screenshotExecutor = ThreadPoolExecutor(max_workers=2)
 

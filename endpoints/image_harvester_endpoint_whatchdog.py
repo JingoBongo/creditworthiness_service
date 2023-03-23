@@ -27,7 +27,7 @@ class VideoHandler(FileSystemEventHandler):
         super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
-        self.videoExecutor = ThreadPoolExecutor(max_workers=2)
+        self.videoExecutor = ThreadPoolExecutor(max_workers=1)
 
 
     def on_created(self, event):
@@ -92,7 +92,7 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
-        self.screenshotExecutor = ThreadPoolExecutor(max_workers=2)
+        self.screenshotExecutor = ThreadPoolExecutor(max_workers=1)
 
 
     def on_created(self, event):

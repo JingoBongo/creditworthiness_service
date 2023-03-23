@@ -149,8 +149,8 @@ app = FuseNode(__name__, arg_parser=parser)
 
 # worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
 downloadExecutor = ProcessPoolExecutor(max_workers=1)
-videoExecutor = ProcessPoolExecutor(max_workers=1)
-screenshotExecutor = ProcessPoolExecutor(max_workers=1)
+videoExecutor = ProcessPoolExecutor(max_workers=2)
+screenshotExecutor = ProcessPoolExecutor(max_workers=2)
 
 # executor = ProcessPoolExecutor(max_workers=3)
 

@@ -1,6 +1,5 @@
 import __init__
 
-
 import re
 
 from flask import request, send_from_directory, render_template
@@ -11,8 +10,6 @@ from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils.flask_child import FuseNode
 import cv2
-
-
 
 import os
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
@@ -29,7 +26,6 @@ class VideoHandler(FileSystemEventHandler):
         self.dest_folder = dest_folder
         self.videoExecutor = ProcessPoolExecutor(max_workers=1)
 
-
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.webm'):
             self.videoExecutor.submit(VideoHandler.process_video, event.src_path)
@@ -45,29 +41,43 @@ class VideoHandler(FileSystemEventHandler):
         app.logger.info(f" Working on {video_base}; cutting into screenshots")
         cap = cv2.VideoCapture(video_path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_count = 0
+        # frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        # duration_sec = frame_count / fps
+        # duration_min = duration_sec / 60
         index = 0
+        # duration_total = 0
+        # frame_index = 0
         i = 1
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
+            frame_count += 1
             if i % fps == 0:
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
                 if len(faces) > 0:
-
                     cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
                     # frames.append(frame)
                     index += 1
 
-                if index % 180 == 0:
-                    app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
+                if frame % (180 * fps) == 0:
+                    # current_time_sec = frame_index / fps
+                    # current_time_min = current_time_sec / 60
+                    current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
+                    app.logger.info(print(
+                        f"Processed {frame_count} frames, {current_time} seconds out of {total_frames / fps} seconds"))
 
+                    # app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
+                    # duration_total += 3
 
             i += 1
 
         cap.release()
+        cap.destroyAllWindows()
         app.logger.info(f" Releasing {video_base}; Trying to delete it")
         if os.path.exists(video_path):
             os.remove(video_path)
@@ -100,7 +110,6 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.dest_folder = dest_folder
         self.screenshots_list = []
         self.screenshotExecutor = ProcessPoolExecutor(max_workers=1)
-
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.png'):
@@ -166,6 +175,8 @@ app = FuseNode(__name__, arg_parser=parser)
 
 # worker_statuses = {worker_name: WorkerStatus.IDLE for worker_name in WorkerName}
 downloadExecutor = ProcessPoolExecutor(max_workers=1)
+
+
 # videoExecutor = ThreadPoolExecutor(max_workers=2)
 # screenshotExecutor = ThreadPoolExecutor(max_workers=2)
 
@@ -174,9 +185,9 @@ downloadExecutor = ProcessPoolExecutor(max_workers=1)
 
 def watch_folders(video_folder, screenshot_folder, archive_folder):
     # if not os_utils.is_linux_running():
-        # import watchdog.observers as ob
-        # ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
-        # ob.winapi.BUFFER_SIZE = 8192
+    # import watchdog.observers as ob
+    # ob.read_directory_changes.WATCHDOG_TRAVERSE_MOVED_DIR_DELAY = 0
+    # ob.winapi.BUFFER_SIZE = 8192
     # video_handler = VideoHandler(video_folder, screenshot_folder)
     # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
     process_existing_files()
@@ -229,7 +240,8 @@ def process_existing_screenshots():
     for i, file_path in enumerate(file_paths):
         batch.append(file_path)
         if len(batch) == MAX_BATCH_SIZE or i == len(file_paths) - 1:
-            app.logger.info(f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
+            app.logger.info(
+                f"Existing batch of screenshots No. {i}/{len(file_paths)} sent to screenshotExecutor Process Pool")
             # screenshotExecutor.submit(aboba, batch.copy())
             event = FileCreatedEvent(file_path)
             screenshot_handler.on_created(event)

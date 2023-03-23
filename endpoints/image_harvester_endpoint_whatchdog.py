@@ -6,6 +6,7 @@ from flask import request, send_from_directory, render_template
 
 from zipfile import ZipFile
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from watchdog.observers.inotify import InotifyObserver
 from utils import constants as c, general_utils, yaml_utils, git_utils, os_utils
 from argparse import ArgumentParser
 from utils.flask_child import FuseNode
@@ -21,7 +22,7 @@ from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 class VideoHandler(FileSystemEventHandler):
     def __init__(self, source_folder, dest_folder):
-        super().__init__()
+        # super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.videoExecutor = ProcessPoolExecutor(max_workers=1)
@@ -108,7 +109,7 @@ class VideoHandler(FileSystemEventHandler):
 
 class ScreenshotHandler(FileSystemEventHandler):
     def __init__(self, source_folder, dest_folder):
-        super().__init__()
+        # super().__init__()
         self.source_folder = source_folder
         self.dest_folder = dest_folder
         self.screenshots_list = []
@@ -195,7 +196,7 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
     process_existing_files()
 
-    from watchdog.observers.inotify import InotifyObserver
+
     observer = InotifyObserver()
     # observer = Observer()
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)

@@ -56,10 +56,15 @@ class VideoHandler(FileSystemEventHandler):
                 faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
                 if len(faces) > 0:
-                    app.logger.info(f"New screenshot: {video_base}_{str(index)}.png;")
+
                     cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
                     # frames.append(frame)
                     index += 1
+
+                if index % 180 == 0:
+                    app.logger.info(f"New 3 minutes worth (~180) of screenshots from: {video_base}!")
+
+
             i += 1
 
         cap.release()

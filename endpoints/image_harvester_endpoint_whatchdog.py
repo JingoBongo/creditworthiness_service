@@ -204,7 +204,7 @@ def watch_folders(video_folder, screenshot_folder, archive_folder):
     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
     observer.schedule(video_handler, video_folder, recursive=False)
     observer.start()
-    process_existing_files()
+    init_start_function_thread(process_existing_files)
 
     # try:
     #     while True:
@@ -289,9 +289,9 @@ def process_existing_screenshots():
 
 def process_existing_files():
     app.logger.info(f"Processing existing screenshots")
-    init_start_function_thread(process_existing_screenshots)
+    process_existing_screenshots()
     app.logger.info(f"Processing existing videos")
-    init_start_function_thread(process_existing_videos)
+    process_existing_videos()
 
 
 def download_playlist(playlist):

@@ -1,13 +1,13 @@
 import __init__
+from utils.package_utils import run_importing_process
+run_importing_process()
 from daemon import daemon
 
 import os
 import signal
 import threading
 
-from utils.package_utils import run_importing_process
 
-run_importing_process()
 
 from utils import logger_utils as log, os_utils
 from utils import yaml_utils

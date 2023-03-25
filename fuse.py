@@ -94,9 +94,10 @@ def main():
 
 
 if __name__ == "__main__":
-    run_importing_process()
     if yaml_utils.is_daemon_from_config():
         with daemon.DaemonContext():
+            run_importing_process()
             main()
     else:
+        run_importing_process()
         main()

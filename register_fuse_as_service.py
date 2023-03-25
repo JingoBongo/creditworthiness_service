@@ -16,7 +16,7 @@ replacement2 = f"{c.root_path[:-1]}"
 replacement = f"{c.root_path}fuse.py"
 placeholder2 = '<path_to_fuse_root>'
 modified_text = text.replace(placeholder, replacement)
-modified_text = text.replace(placeholder2, replacement2)
+modified_text = modified_text.replace(placeholder2, replacement2)
 
 # define the path to the output text file
 if len(sys.argv) > 1:

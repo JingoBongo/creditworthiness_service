@@ -1,6 +1,21 @@
-There is a config in yaml file fuse -> is_deamon
+in theory if you are on Linux and want to make fuse a service:
 
-set it to true and start fuse in this way:
-python(3) fuse.py start
-python(3) fuse.py stop
-python(3) fuse.py status
+1. launch 'python register_fuse_as_service.py'
+ in case your path to services files is not '/etc/systemd/system/', use it like this:
+ 'python register_fuse_as_service.py <path_to_services_folder>'
+
+2. run 'sudo systemctl daemon-reload'
+
+3. run 'sudo systemctl enable fuse.service'
+
+4. run 'sudo systemctl start fuse.service'
+
+TO STOP THE SERVICE:
+run 'sudo systemctl stop fuse'
+
+TO RESTART SERVICE
+run 'sudo systemctl restart fuse'
+
+TO CHECK STATUS OF SERVICE
+run 'sudo systemctl status fuse'
+

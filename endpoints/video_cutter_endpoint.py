@@ -29,7 +29,6 @@ class VideoHandler(FileSystemEventHandler):
     @staticmethod
     def cut_video_into_screenshots(video_path):
         video_base = os.path.basename(video_path)
-        app.logger.info(f" Working on {video_base}; cutting into screenshots")
         cap = cv2.VideoCapture(video_path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -57,8 +56,7 @@ class VideoHandler(FileSystemEventHandler):
             i += 1
 
         cap.release()
-        cap.destroyAllWindows()
-        app.logger.info(f" Releasing {video_base}; Trying to delete it")
+        app.logger.info(f"Releasing {video_base}; Trying to delete it")
         if os.path.exists(video_path):
             os.remove(video_path)
 

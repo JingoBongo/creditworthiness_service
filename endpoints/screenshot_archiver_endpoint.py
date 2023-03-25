@@ -20,7 +20,7 @@ class ScreenshotHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.png'):
-            self.screenshots_list.append(event)
+            self.screenshots_list.append(event.src_path)
             if len(self.screenshots_list) >= 100:
                 self.screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, self.screenshots_list.copy())
                 self.screenshots_list.clear()
@@ -28,10 +28,12 @@ class ScreenshotHandler(FileSystemEventHandler):
     @staticmethod
     def process_screenshots_list(local_screenshot_copy):
         screenshot_base = os.path.basename(local_screenshot_copy[0])
-        with ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w') as zipObj:
-            app.logger.info(f"Archiving {screenshot_base} ++")
-            [zipObj.write(f) for f in local_screenshot_copy]
-            [os.remove(f) for f in local_screenshot_copy]
+        zipp = ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w')
+        app.logger.info(f"Archiving {screenshot_base} ++")
+        for f in local_screenshot_copy:
+            zipp.write(f)
+            os.remove(f)
+        zipp.close()
 
 
 yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp_used_playlists.txt'

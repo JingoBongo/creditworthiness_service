@@ -1,3 +1,7 @@
+import os
+import signal
+import threading
+
 import __init__
 
 from utils.package_utils import run_importing_process
@@ -33,6 +37,14 @@ def try_service_launch(service_name: str, service_config: dict, is_system: bool)
     g.init_start_service_procedure(service_name, is_sys=is_system)
 
 
+def signal_handler(signum, frame):
+    """
+    Signal handler that terminates all subprocesses and threads.
+    """
+    os.killpg(os.getpgid(os.getpid()), signal.SIGTERM)
+    threading.Timer(5, os.kill, args=(os.getpid(), signal.SIGKILL)).start()
+
+
 def main():
     # some preconfiguration & init activities
     g.recreate_log_folder_if_not_exists()
@@ -55,6 +67,7 @@ def main():
     log.warn(f"[!!!] Going with config : {c.root_path + c.conf_path}")
     if os_utils.is_linux_running():
         log.warn(f"[!!!] On linux machine it is needed to sudo chmod 755 ./fuse.py (once)")
+    signal.signal(signal.SIGINT, signal_handler)
     system_services = config['services']['system']
     business_services = config['services']['business']
 
@@ -78,6 +91,7 @@ def main():
     #   the while that survived
     while True:
         pass
+
 
 
 if __name__ == "__main__":

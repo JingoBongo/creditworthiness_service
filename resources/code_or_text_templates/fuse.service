@@ -2,7 +2,6 @@
 Description=Fuse Framework Service
 After=multi-user.target
 [Service]
-User=administrator
 Type=simple
 Restart=always
 WorkingDirectory=<path_to_fuse_root>

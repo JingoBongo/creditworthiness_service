@@ -198,6 +198,17 @@ def download_videos(number_of_screenshots):
     return {'status': 'ok'}
 
 
+def give_recreated_files_and_folders_permissions():
+    # TODO NOTE if the problem persists with the files,
+    # refer here to create folders/files already with needed permissions
+    # https://stackoverflow.com/questions/5231901/permission-problems-when-creating-a-dir-with-os-makedirs-in-python/67723702#67723702
+    if os_utils.is_linux_running():
+        # this might *need* sudo, even tho as service it is root already
+        command = f"cd {c.temporary_files_folder_full_path} && chmod ugo+rwx *"
+        general_utils.run_cmd_command_and_wait_response(command)
+
+
 if __name__ == "__main__":
     recreate_image_harvester_files_and_folders()
+    give_recreated_files_and_folders_permissions()
     app.run()

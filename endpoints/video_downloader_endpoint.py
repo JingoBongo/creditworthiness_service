@@ -9,10 +9,10 @@ from utils import constants as c, git_utils, yaml_utils, general_utils, os_utils
 
 from utils.flask_child import FuseNode
 
-yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '/yt_dlp_used_playlists.txt'
-videos_folder_name = c.temporary_files_folder_full_path + '/ytdlp_videos'
-screenshots_folder_name = c.temporary_files_folder_full_path + '/ytlpd_screenshots'
-archives_folder_name = c.temporary_files_folder_full_path + '/ytlpd_archives'
+yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp_used_playlists.txt'
+videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
+screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screenshots'
+archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 downloadExecutor = ProcessPoolExecutor(max_workers=1)

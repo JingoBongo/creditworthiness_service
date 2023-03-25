@@ -12,7 +12,7 @@ with open(input_file, "r") as f:
 
 # replace the placeholder string with the desired value
 placeholder = "<path_to_fuse>"
-replacement2 = f"{c.root_path}"
+replacement2 = f"{c.root_path[:-1]}"
 replacement = f"{replacement2}fuse.py"
 placeholder2 = '<path_to_fuse_root>'
 modified_text = text.replace(placeholder, replacement)

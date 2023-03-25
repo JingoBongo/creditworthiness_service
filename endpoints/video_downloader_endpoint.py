@@ -9,10 +9,10 @@ from utils import constants as c, git_utils, yaml_utils, general_utils, os_utils
 
 from utils.flask_child import FuseNode
 
-yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp_used_playlists.txt'
-videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
-screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screenshots'
-archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
+yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '/yt_dlp_used_playlists.txt'
+videos_folder_name = c.temporary_files_folder_full_path + '/ytdlp_videos'
+screenshots_folder_name = c.temporary_files_folder_full_path + '/ytlpd_screenshots'
+archives_folder_name = c.temporary_files_folder_full_path + '/ytlpd_archives'
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 downloadExecutor = ProcessPoolExecutor(max_workers=1)
@@ -103,7 +103,6 @@ def append_new_used_playlists_to_file(strings):
 def download_playlist(playlist):
     app.logger.info(f"Starting downloading {playlist}")
     if os_utils.is_linux_running():
-        app.logger.error(f"Ran AS LINUX")
         command = f"cd {c.root_path} && yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""
     else:
         command = f"yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""

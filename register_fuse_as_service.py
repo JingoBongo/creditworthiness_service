@@ -12,8 +12,11 @@ with open(input_file, "r") as f:
 
 # replace the placeholder string with the desired value
 placeholder = "<path_to_fuse>"
-replacement = f"{c.root_path}fuse.py"
+replacement2 = f"{c.root_path}"
+replacement = f"{replacement2}fuse.py"
+placeholder2 = '<path_to_fuse_root>'
 modified_text = text.replace(placeholder, replacement)
+modified_text = text.replace(placeholder2, replacement2)
 
 # define the path to the output text file
 if len(sys.argv) > 1:

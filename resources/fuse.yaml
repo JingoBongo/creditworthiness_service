@@ -25,7 +25,7 @@ services:
       port: 5015
       path: endpoints//video_downloader_endpoint.py
     video_cutter:
-      enabled: True
+      enabled: False
       mono: True
       path: endpoints//video_cutter_endpoint.py
     screenshot_archiver:

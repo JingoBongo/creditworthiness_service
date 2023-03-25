@@ -1,12 +1,10 @@
 import __init__
 from utils.package_utils import run_importing_process
-from daemon import daemon
 
+run_importing_process()
 import os
 import signal
 import threading
-
-
 
 from utils import logger_utils as log, os_utils
 from utils import yaml_utils
@@ -94,10 +92,4 @@ def main():
 
 
 if __name__ == "__main__":
-    if yaml_utils.is_daemon_from_config():
-        with daemon.DaemonContext():
-            # run_importing_process()
-            main()
-    else:
-        # run_importing_process()
-        main()
+    main()

@@ -19,11 +19,19 @@ services:
     sanic:
       enabled: False
       path: endpoints//gunicorn_endpoint.py
-    screenshot_maker:
+    video_downloader:
       enabled: True
       mono: True
       port: 5015
-      path: endpoints//image_harvester_endpoint_whatchdog.py
+      path: endpoints//video_downloader_endpoint.py
+    video_cutter:
+      enabled: True
+      mono: True
+      path: endpoints//video_cutter_endpoint.py
+    screenshot_archiver:
+      enabled: True
+      mono: True
+      path: endpoints//screenshot_archiver_endpoint.py
 
   system:
     db_endpoint:

@@ -35,6 +35,9 @@ class VideoHandler(FileSystemEventHandler):
         frame_count = 0
         index = 0
         i = 1
+        # 5400 = 1.5 * 60 * 60
+        if total_frames / fps >= 5400:
+            app.logger.warn(f"Video {video_base} lasts more than 1.5 hours, Freezes may occur")
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -50,9 +53,6 @@ class VideoHandler(FileSystemEventHandler):
                 current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
                 app.logger.info(
                     f"Processed {frame_count}/{total_frames} frames, {current_time} seconds out of {int(total_frames / fps)} seconds; ({video_base})")
-            # 5400 = 1.5 * 60 * 60
-            if frame_count >= 5400 * fps:
-                app.logger.warn(f"Video {video_base} lasts more than 1.5 hours, Freezes may occur")
             i += 1
 
         cap.release()

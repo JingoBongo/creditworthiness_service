@@ -36,6 +36,12 @@ def get_host_from_config():
     return get_config()['general']['host']
 
 
+def is_daemon_from_config():
+    """is daemon or not
+    """
+    return bool(get_config()['fuse']['is_daemon'])
+
+
 def get_secret_bin_path_from_config():
     """secret token to make read out of the git
     """

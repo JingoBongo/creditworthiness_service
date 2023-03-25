@@ -1,4 +1,6 @@
 import __init__
+from flask import render_template, request, send_from_directory
+
 import os
 import re
 from concurrent.futures import ProcessPoolExecutor
@@ -102,6 +104,83 @@ def download_playlist(playlist):
     app.logger.info(f"Starting downloading {playlist}")
     command = f"yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""
     return general_utils.run_cmd_command(command)
+
+
+@app.route('/yt_downloader/show_archives')
+def show_files():
+    directory = archives_folder_name  # replace with your directory path
+    files = os.listdir(directory)
+    return render_template('file_list_explorer.html', files=files)
+
+
+@app.route('/yt_downloader/download_files', methods=['POST'])
+def download_files():
+    directory = archives_folder_name  # replace with your directory path
+    selected_files = request.form.getlist('files')
+
+    # send each selected file as an attachment
+    for filename in selected_files:
+        # TODO: why is file_path needed?
+        file_path = os.path.join(directory, filename)
+        return send_from_directory(directory, filename, as_attachment=True)
+
+
+# this todo is a big one: on linux machine it is needed to sudo chmod 755 ./fuse.py  ;
+#  or permission denied will be a common thing
+
+@app.route("/yt_downloader/how_many_screenshots_ready")
+def show_ready_screenshot_count():
+    for root, dirs, files in os.walk(archives_folder_name):
+        return {'status': 'ok', 'amount': int(100 * len(files))}
+
+
+@app.route("/yt_downloader/clear_errored_videos")
+def clear_errored_videos():
+    for root, dirs, files in os.walk(videos_folder_name):
+        for file in files:
+            file_full_path = os.path.join(root, file)
+            if not file.endswith(".webm"):
+                os.remove(file_full_path)
+    return {'status': 'ok'}
+
+
+@app.route("/yt_downloader/clear_webm_videos")
+def clear_webm_videos():
+    for root, dirs, files in os.walk(videos_folder_name):
+        for file in files:
+            file_full_path = os.path.join(root, file)
+            if file.endswith(".webm"):
+                os.remove(file_full_path)
+    return {'status': 'ok'}
+
+
+@app.route("/yt_downloader/get_approximation_of_available_screenshots")
+def get_available_screenshot_approx():
+    list_of_playlists = git_utils.get_yaml_file_from_repository(yaml_utils.get_cloud_repo_from_config(),
+                                                                'youtube_playlists.yaml')['list']
+    dict_of_playlists_with_data = {}
+    total_seconds_available = 0
+    playlists_to_download_list = []
+    for playlist in list_of_playlists:
+        if playlist in read_used_playlists_from_file():
+            continue
+        #   well, first we need length and size of each element of each playlist.. or just for playlists
+
+        # this function is pretty slow. it is slower the more videos are there in the playlist, no way to speed up
+        size_byte_res = generate_bytesize_of_playlist(playlist)
+
+        local_dict = {'size_b': size_byte_res,
+                      'size_gb': size_byte_res / c.one_thousand_to_the_power_3,
+                      'url': playlist,
+                      'duration_seconds': int(size_byte_res / 41788)}
+        dict_of_playlists_with_data[playlist] = local_dict
+        # here we should theoretically have all data about playlists
+        total_seconds_available += local_dict['duration_seconds']
+        playlists_to_download_list.append(local_dict['url'])
+    print(str({'num_of_playlists': len(playlists_to_download_list),
+               'approximate_screenshot_amount': total_seconds_available}))
+    return {'num_of_playlists': len(playlists_to_download_list),
+            'approximate_screenshot_amount': total_seconds_available}
 
 
 @app.route("/yt_downloader/download/<int:number_of_screenshots>")

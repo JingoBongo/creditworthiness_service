@@ -1,0 +1,6 @@
+There is a config in yaml file fuse -> is_deamon
+
+set it to true and start fuse in this way:
+python(3) fuse.py start
+python(3) fuse.py stop
+python(3) fuse.py status

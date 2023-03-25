@@ -198,7 +198,7 @@
 #     # video_handler = VideoHandler(video_folder, screenshot_folder)
 #     # screenshot_handler = ScreenshotHandler(screenshot_folder, archive_folder)
 #
-#     observer = InotifyObserver()
+#     observer = Observer()
 #     # observer = Observer()
 #     observer.schedule(screenshot_handler, screenshot_folder, recursive=False)
 #     observer.schedule(video_handler, video_folder, recursive=False)

@@ -1,8 +1,9 @@
+import __init__
+from daemon import daemon
+
 import os
 import signal
 import threading
-
-import __init__
 
 from utils.package_utils import run_importing_process
 
@@ -93,6 +94,9 @@ def main():
         pass
 
 
-
 if __name__ == "__main__":
-    main()
+    if yaml_utils.is_daemon_from_config():
+        with daemon.DaemonContext():
+            main()
+    else:
+        main()

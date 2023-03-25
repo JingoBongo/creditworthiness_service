@@ -1,58 +1,57 @@
 fuse:
-  first_port: 5000
-  last_port: 5100
   cloud_repo: JingoBongo/fuse_cloud_repo
   cloud_repo_username: FuseFrameworkRobot
+  first_port: 5000
+  last_port: 5100
+  is_daemon: True
   secret:
-    txt: fuse_root + resources//secret.txt
     bin: fuse_root + resources//secret.bin
+    txt: fuse_root + resources//secret.txt
 general:
   debug: false
   host: 0.0.0.0
   tasks_folder: resources//tasks
-
 services:
   business:
     endpoint_template:
-      enabled: False
+      enabled: false
       path: endpoints//py_runnable_endpoint_template.py
     sanic:
-      enabled: False
+      enabled: false
       path: endpoints//gunicorn_endpoint.py
-    video_downloader:
-      enabled: True
-      mono: True
-      port: 5015
-      path: endpoints//video_downloader_endpoint.py
-    video_cutter:
-      enabled: True
-      mono: True
-      path: endpoints//video_cutter_endpoint.py
     screenshot_archiver:
-      enabled: True
-      mono: True
+      enabled: true
+      mono: true
       path: endpoints//screenshot_archiver_endpoint.py
-
+    video_cutter:
+      enabled: true
+      mono: true
+      path: endpoints//video_cutter_endpoint.py
+    video_downloader:
+      enabled: true
+      mono: true
+      path: endpoints//video_downloader_endpoint.py
+      port: 5015
   system:
     db_endpoint:
       path: endpoints//system_endpoints//db_endpoint.py
       port: 5002
     gateway:
+      enabled: true
       path: endpoints//system_endpoints//gateway.py
       port: 5000
     life_ping_endpoint:
       path: endpoints//system_endpoints//life_ping_endpoint.py
       port: 5001
     taskmaster:
+      enabled: true
       path: endpoints//system_endpoints//taskmaster_endpoint.py
       port: 5003
-      enabled: True
     test_sys_endpoint:
-      enabled: False
+      enabled: false
       local: false
       mono: true
       path: endpoints//system_endpoints//py_runnable_system_endpoint_template.py
-
 sqlite:
   init:
     tables:
@@ -66,6 +65,10 @@ sqlite:
         schema_path: resources//schemas//commonly_used_strings_table_schema.json
       Harvested_Routes:
         schema_path: resources//schemas//harvested_routes_table_schema.json
+      Local_Modules:
+        schema_path: resources//schemas//local_modules.json
+      Remote_Modules:
+        schema_path: resources//schemas//remote_modules.json
       Schedulers:
         schema_path: resources//schemas//schedulers_table_schema.json
       Sys_Services:
@@ -74,21 +77,4 @@ sqlite:
         schema_path: resources//schemas//taskmaster_available_tasks_table_schema.json
       Tasks:
         schema_path: resources//schemas//tasks_table_schema.json
-      Local_Modules:
-        schema_path: resources//schemas//local_modules.json
-      Remote_Modules:
-        schema_path: resources//schemas//remote_modules.json
-uncommon_modules:
-#  ssl:
-#    module_name: pyopenssl
-#    import_name: pyopenssl
-#    module_version: any
-#  github:
-#    module_name: PyGithub
-#    import_name: github
-#    module_version: any
-#  temp_sql_alc_has_broken_last_version:
-#    module_name: sqlalchemy
-#    import_name: sqlalchemy
-#    module_version: 1.4.46
-
+uncommon_modules: null

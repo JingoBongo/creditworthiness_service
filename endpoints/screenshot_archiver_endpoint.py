@@ -34,6 +34,7 @@ class ScreenshotHandler(FileSystemEventHandler):
             zipp.write(f)
             os.remove(f)
         zipp.close()
+        app.logger.info(f"Finished archiving {screenshot_base} ++")
 
 
 yt_dlp_used_playlists_file_path = c.temporary_files_folder_full_path + '//yt_dlp_used_playlists.txt'
@@ -41,7 +42,7 @@ videos_folder_name = c.temporary_files_folder_full_path + '//ytdlp_videos'
 screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screenshots'
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 theshold_of_screenshots_to_panic = 10_000
-archiver_max_workers = 1
+archiver_max_workers = 2
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 

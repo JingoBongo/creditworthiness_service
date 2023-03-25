@@ -19,3 +19,5 @@ run 'sudo systemctl restart fuse'
 TO CHECK STATUS OF SERVICE
 run 'sudo systemctl status fuse'
 
+better status:
+sudo systemctl status fuse -l

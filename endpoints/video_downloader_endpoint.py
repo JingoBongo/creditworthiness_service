@@ -103,6 +103,7 @@ def append_new_used_playlists_to_file(strings):
 def download_playlist(playlist):
     app.logger.info(f"Starting downloading {playlist}")
     if os_utils.is_linux_running():
+        app.logger.error(f"Ran AS LINUX")
         command = f"cd {c.root_path} && yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""
     else:
         command = f"yt-dlp --verbose -ci -f \"bestvideo[height<=480]\" --geo-bypass -P \"{videos_folder_name}\" \"{playlist}\""

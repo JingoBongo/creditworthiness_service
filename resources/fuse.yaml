@@ -46,7 +46,7 @@ services:
     taskmaster:
       path: endpoints//system_endpoints//taskmaster_endpoint.py
       port: 5003
-      enabled: False
+      enabled: True
     test_sys_endpoint:
       enabled: False
       local: false

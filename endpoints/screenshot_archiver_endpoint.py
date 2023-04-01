@@ -5,7 +5,7 @@ from concurrent.futures import ProcessPoolExecutor
 from zipfile import ZipFile
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 from argparse import ArgumentParser
-from utils import constants as c, os_utils
+from utils import constants as c, os_utils, general_utils
 from utils.flask_child import FuseNode
 from utils.general_utils import init_start_function_thread
 
@@ -91,8 +91,19 @@ def watch_screenshot_folder():
     init_start_function_thread(process_existing_screenshots)
 
 
+def give_recreated_files_and_folders_permissions():
+    # TODO NOTE if the problem persists with the files,
+    # refer here to create folders/files already with needed permissions
+    # https://stackoverflow.com/questions/5231901/permission-problems-when-creating-a-dir-with-os-makedirs-in-python/67723702#67723702
+    if os_utils.is_linux_running():
+        # this might *need* sudo, even tho as service it is root already
+        command = f"cd {c.temporary_files_folder_full_path} && chmod ugo+rwx *"
+        general_utils.run_cmd_command_and_wait_response(command)
+
+
 if __name__ == "__main__":
     recreate_image_harvester_files_and_folders()
+    give_recreated_files_and_folders_permissions()
     screenshot_handler = ScreenshotHandler(screenshots_folder_name, archives_folder_name)
     init_start_function_thread(watch_screenshot_folder)
     app.run()

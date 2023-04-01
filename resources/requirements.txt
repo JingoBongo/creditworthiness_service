@@ -2,3 +2,4 @@ python-daemon
 opencv-python
 PyGithub
 sqlalchemy==1.4.46
+yt-dlp

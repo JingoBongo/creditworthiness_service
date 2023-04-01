@@ -1,12 +1,11 @@
 import __init__
 import time
-from watchdog.observers.inotify import InotifyObserver
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 import os
 from concurrent.futures import ProcessPoolExecutor
 import cv2
 from argparse import ArgumentParser
-from utils import constants as c
+from utils import constants as c, os_utils
 from utils.flask_child import FuseNode
 from utils.general_utils import init_start_function_thread
 
@@ -111,7 +110,12 @@ def process_existing_videos():
 
 
 def watch_video_folder():
-    observer = InotifyObserver()
+    if os_utils.is_linux_running():
+        from watchdog.observers.inotify import InotifyObserver
+        observer = InotifyObserver()
+    else:
+        from watchdog.observers import Observer
+        observer = Observer()
     observer.schedule(video_handler, videos_folder_name, recursive=False)
     observer.start()
     init_start_function_thread(process_existing_videos)

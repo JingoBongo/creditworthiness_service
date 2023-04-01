@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 from watchdog.observers.inotify import InotifyObserver
 from argparse import ArgumentParser
-from utils import constants as c
+from utils import constants as c, os_utils
 from utils.flask_child import FuseNode
 from utils.general_utils import init_start_function_thread
 
@@ -81,7 +81,12 @@ def process_existing_screenshots():
 
 
 def watch_screenshot_folder():
-    observer = InotifyObserver()
+    if os_utils.is_linux_running():
+        from watchdog.observers.inotify import InotifyObserver
+        observer = InotifyObserver()
+    else:
+        from watchdog.observers import Observer
+        observer = Observer()
     observer.schedule(screenshot_handler, screenshots_folder_name, recursive=False)
     observer.start()
     init_start_function_thread(process_existing_screenshots)

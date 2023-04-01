@@ -4,7 +4,6 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from zipfile import ZipFile
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
-from watchdog.observers.inotify import InotifyObserver
 from argparse import ArgumentParser
 from utils import constants as c, os_utils
 from utils.flask_child import FuseNode

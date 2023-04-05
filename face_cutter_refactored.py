@@ -30,8 +30,8 @@ mp_face_detection = mp.solutions.face_detection
 face_detection = mp_face_detection.FaceDetection()
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 compressed_folder_name = c.temporary_files_folder_full_path + '//ytlpd_compressed_archives'
-theshold_of_archives_to_panic = 1_000
-compresser_max_workers = 2
+theshold_of_archives_to_panic = 200
+compresser_max_workers = 1
 
 
 def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnValue:
@@ -145,7 +145,7 @@ def process_existing_archives():
         if ind % theshold_of_archives_to_panic == 0:
             print(
                 f"There is currently too big amount of archives ({len(existing_files)}), compressing is slowed down")
-
+            time.sleep(100)
 
 
 if __name__ == "__main__":

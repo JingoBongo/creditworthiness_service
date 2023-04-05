@@ -1,5 +1,7 @@
 import os
+import signal
 import subprocess
+import threading
 import time
 import zipfile
 from concurrent.futures import ProcessPoolExecutor
@@ -29,7 +31,7 @@ face_detection = mp_face_detection.FaceDetection()
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 compressed_folder_name = c.temporary_files_folder_full_path + '//ytlpd_compressed_archives'
 theshold_of_archives_to_panic = 1_000
-compresser_max_workers = 3
+compresser_max_workers = 2
 
 
 def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnValue:
@@ -85,6 +87,16 @@ def process_one_zip(zip_path):
         for file_name, img_array in source_files.items():
             img_buffer = cv2.imencode('.jpg', img_array)[1].tobytes()
             archive.writestr(file_name, img_buffer)
+    print(f"Finished compressing {basename}")
+
+
+def signal_handler(signum, frame):
+    """
+    Signal handler that terminates all subprocesses and threads.
+    """
+    os.killpg(os.getpgid(os.getpid()), signal.SIGTERM)
+    threading.Timer(5, os.kill, args=(os.getpid(), signal.SIGKILL)).start()
+
 
 
 def give_recreated_files_and_folders_permissions():
@@ -137,6 +149,7 @@ def process_existing_archives():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
     if not os.path.exists(compressed_folder_name):
         os.makedirs(compressed_folder_name)
     give_recreated_files_and_folders_permissions()

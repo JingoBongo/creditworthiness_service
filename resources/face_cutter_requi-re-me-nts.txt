@@ -1,0 +1,8 @@
+opencv-python
+zipfile36
+Pillow
+mediapipe
+matplotlib
+numpy
+psutil
+yaml

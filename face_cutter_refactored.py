@@ -1,4 +1,5 @@
 import os
+import re
 import signal
 import subprocess
 import threading
@@ -8,8 +9,6 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 import cv2
-import mediapipe as mp
-from PIL import Image
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 from utils import constants as c, os_utils
@@ -26,8 +25,11 @@ class FaceCutterHandler(FileSystemEventHandler):
 
 
 
-mp_face_detection = mp.solutions.face_detection
-face_detection = mp_face_detection.FaceDetection()
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+pattern = r'[^a-zA-Z0-9\s]'
+replace = ''
+
+
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 compressed_folder_name = c.temporary_files_folder_full_path + '//ytlpd_compressed_archives'
 theshold_of_archives_to_panic = 200
@@ -47,6 +49,7 @@ def get_files_from_zip(zip_file_path):
         for item in archive.infolist():
             if not item.is_dir():
                 file_name = os.path.basename(item.filename)
+                file_name = re.sub(pattern, replace, file_name)
                 file_contents = archive.read(item.filename)
                 # ML part
                 input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
@@ -56,24 +59,35 @@ def get_files_from_zip(zip_file_path):
                 elif input_img.shape[2] == 3 and input_img.ndim == 2:
                     input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
 
-                results = face_detection.process(input_img)
-                if results.detections is not None:
-                    for i, detection in enumerate(results.detections):
-                        bbox = detection.location_data.relative_bounding_box
-                        x, y, w, h = int(bbox.xmin * input_img.shape[1]), int(bbox.ymin * input_img.shape[0]), \
-                            int(bbox.width * input_img.shape[1]), int(bbox.height * input_img.shape[0])
-                        x_offset, y_offset = int(w * offset), int(h * offset)
-                        x = x - x_offset if x_offset < x else 0
-                        y = y - y_offset if y_offset < y else 0
-                        x_end = x + w + 2 * x_offset
-                        y_end = y + h + 2 * y_offset
-                        x_end = x_end if x_end < input_img.shape[1] else input_img.shape[1]
-                        y_end = y_end if y_end < input_img.shape[0] else input_img.shape[0]
-                        face_img = input_img[y:y_end, x:x_end]
-                        face_img = Image.fromarray(face_img)
+                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
 
-                        face_img = np.array(face_img)
-                        files[f"{file_name.split('.'[0])}_{i}.jpg"] = face_img
+                # Loop over the detected faces and extract them
+                i = 0
+                for (x, y, w, h) in faces:
+                    # Crop the face region from the image
+                    face = input_img[y:y + h, x:x + w]
+                    face_img = np.array(face)
+                    files[f"{file_name[:-3]}_{i}.jpg"] = face_img
+                    i += 1
+
+                # results = face_detection.process(input_img)
+                # if results.detections is not None:
+                #     for i, detection in enumerate(results.detections):
+                #         bbox = detection.location_data.relative_bounding_box
+                #         x, y, w, h = int(bbox.xmin * input_img.shape[1]), int(bbox.ymin * input_img.shape[0]), \
+                #             int(bbox.width * input_img.shape[1]), int(bbox.height * input_img.shape[0])
+                #         x_offset, y_offset = int(w * offset), int(h * offset)
+                #         x = x - x_offset if x_offset < x else 0
+                #         y = y - y_offset if y_offset < y else 0
+                #         x_end = x + w + 2 * x_offset
+                #         y_end = y + h + 2 * y_offset
+                #         x_end = x_end if x_end < input_img.shape[1] else input_img.shape[1]
+                #         y_end = y_end if y_end < input_img.shape[0] else input_img.shape[0]
+                #         face_img = input_img[y:y_end, x:x_end]
+                #         face_img = Image.fromarray(face_img)
+                #
+                #         face_img = np.array(face_img)
+                #         files[f"{file_name.split('.'[0])}_{i}.jpg"] = face_img
 
     return files
 

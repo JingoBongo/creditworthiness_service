@@ -47,8 +47,13 @@ def get_files_from_zip(zip_file_path):
                 file_name = os.path.basename(item.filename)
                 file_contents = archive.read(item.filename)
                 # ML part
-                img_array = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
-                input_img = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
+                input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
+
+                if input_img.shape[2] == 1:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
+                elif input_img.shape[2] == 3 and input_img.ndim == 2:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+
                 results = face_detection.process(input_img)
                 if results.detections is not None:
                     for i, detection in enumerate(results.detections):
@@ -65,8 +70,6 @@ def get_files_from_zip(zip_file_path):
                         face_img = input_img[y:y_end, x:x_end]
                         face_img = Image.fromarray(face_img)
 
-                        if face_img.mode != "RGB":
-                            face_img = face_img.convert("RGB")
                         face_img = np.array(face_img)
                         files[f"{file_name.split('.'[0])}_{i}.jpg"] = face_img
 
@@ -77,6 +80,7 @@ def process_one_zip(zip_path):
     print(f"Compressing {basename}")
     new_zip_path = f"{compressed_folder_name}//{basename}"
     source_files = get_files_from_zip(zip_path)
+    os.remove(zip_path)
     with zipfile.ZipFile(new_zip_path, 'w') as archive:
         for file_name, img_array in source_files.items():
             img_buffer = cv2.imencode('.jpg', img_array)[1].tobytes()

@@ -145,7 +145,7 @@ def process_existing_archives():
         if ind % theshold_of_archives_to_panic == 0:
             print(
                 f"There is currently too big amount of archives ({len(existing_files)}), compressing is slowed down")
-            time.sleep(180)
+
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
+import __init__
 import subprocess
 
-import __init__
 
 import shutil
 

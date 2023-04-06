@@ -8,8 +8,8 @@ import threading
 
 from utils import logger_utils as log, os_utils
 from utils import yaml_utils
-from utils import general_utils as g
 from utils import db_utils
+from utils import general_utils as g
 from utils import constants as c
 
 

@@ -69,7 +69,7 @@ def get_files_from_zip(zip_file_path):
                 face_img = np.array(face)
                 files[f"{file_name[:-3]}_{i}.jpg"] = face_img
                 i += 1
-    archive.close()
+
     return files
 
 

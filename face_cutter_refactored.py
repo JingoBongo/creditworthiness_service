@@ -25,7 +25,7 @@ class FaceCutterHandler(FileSystemEventHandler):
 
 
 
-face_cascade = cv2.CascadeClassifier("resources/lbpcascade_frontalface.xml")
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 pattern = r'[^a-zA-Z0-9\s]'
 replace = ''
 
@@ -44,7 +44,7 @@ def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnV
 
 def get_files_from_zip(zip_file_path):
     files = {}
-    offset = 0.05
+    offset = 0.2
     with zipfile.ZipFile(zip_file_path, 'r') as archive:
         for item in archive.infolist():
             if not item.is_dir():
@@ -59,29 +59,16 @@ def get_files_from_zip(zip_file_path):
                 elif input_img.shape[2] == 3 and input_img.ndim == 2:
                     input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
 
-                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=10)
+                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
 
                 # Loop over the detected faces and extract them
                 i = 0
                 for (x, y, w, h) in faces:
-                    #   considering found face, apply offset to save some additional face elements
-                    x_offset, y_offset = int(w * offset), int(h * offset)
-
-                    #   considering face start point, its width and height, offsets to apply -
-                    # calculate start point, end point and make sure that it's not going out
-                    # of the image size
-                    x = x - x_offset if x_offset < x else 0
-                    y = y - y_offset if y_offset < y else 0
-                    x_end = x + w + 2 * x_offset
-                    y_end = y + h + 2 * y_offset
-                    x_end = x_end if x_end < input_img.shape[1] else input_img.shape[1]
-                    y_end = y_end if y_end < input_img.shape[0] else input_img.shape[0]
                     # Crop the face region from the image
-                    face = input_img[y:y_end, x:x_end]
+                    face = input_img[y:y + h, x:x + w]
                     face_img = np.array(face)
                     files[f"{file_name[:-3]}_{i}.jpg"] = face_img
                     i += 1
-
 
     return files
 

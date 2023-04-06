@@ -101,7 +101,7 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
             face_img = np.array(face)
             success, buffer = cv2.imencode('.jpg', face_img)
             parts = os.path.basename(name).split('.')
-            output_zip.writestr(f"{'.'.join(parts[:-1])}_{i}.jpg", buffer.tobytes())
+            output_zip.writestr(f"{'.'.join(parts[:-1])}_{i}.jpg", buffer)
             i += 1
     # ===========================
     # with zipfile.ZipFile(input_zip_path, 'r') as input_zip, zipfile.ZipFile(output_zip_path, 'w') as output_zip:

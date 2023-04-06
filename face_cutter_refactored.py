@@ -24,16 +24,14 @@ class FaceCutterHandler(FileSystemEventHandler):
             self.compressorExecutor.submit(process_one_zip, event.src_path)
 
 
-
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 pattern = r'[^a-zA-Z0-9\s]'
 replace = ''
 
-
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 compressed_folder_name = c.temporary_files_folder_full_path + '//ytlpd_compressed_archives'
 theshold_of_archives_to_panic = 200
-compresser_max_workers = 1
+compresser_max_workers = 2
 
 
 def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnValue:
@@ -42,35 +40,38 @@ def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnV
     print(f"Created thread for function {function.__name__} with args {argss} and kwargs {kwargss}")
     return thread
 
+
 def get_files_from_zip(zip_file_path):
     files = {}
     offset = 0.2
-    with zipfile.ZipFile(zip_file_path, 'r') as archive:
-        for item in archive.infolist():
-            if not item.is_dir():
-                file_name = os.path.basename(item.filename)
-                file_name = re.sub(pattern, replace, file_name)
-                file_contents = archive.read(item.filename)
-                # ML part
-                input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
+    # with zipfile.ZipFile(zip_file_path, 'r') as archive:
+    archive = zipfile.ZipFile(zip_file_path, 'r')
+    for item in archive.infolist():
+        if not item.is_dir():
+            file_name = os.path.basename(item.filename)
+            file_name = re.sub(pattern, replace, file_name)
+            file_contents = archive.read(item.filename)
+            # ML part
+            input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
 
-                if input_img.shape[2] == 1:
-                    input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
-                elif input_img.shape[2] == 3 and input_img.ndim == 2:
-                    input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+            if input_img.shape[2] == 1:
+                input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
+            elif input_img.shape[2] == 3 and input_img.ndim == 2:
+                input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
 
-                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
+            faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
 
-                # Loop over the detected faces and extract them
-                i = 0
-                for (x, y, w, h) in faces:
-                    # Crop the face region from the image
-                    face = input_img[y:y + h, x:x + w]
-                    face_img = np.array(face)
-                    files[f"{file_name[:-3]}_{i}.jpg"] = face_img
-                    i += 1
-
+            # Loop over the detected faces and extract them
+            i = 0
+            for (x, y, w, h) in faces:
+                # Crop the face region from the image
+                face = input_img[y:y + h, x:x + w]
+                face_img = np.array(face)
+                files[f"{file_name[:-3]}_{i}.jpg"] = face_img
+                i += 1
+    archive.close()
     return files
+
 
 def process_one_zip(zip_path):
     basename = os.path.basename(zip_path)
@@ -93,7 +94,6 @@ def signal_handler(signum, frame):
     threading.Timer(5, os.kill, args=(os.getpid(), signal.SIGKILL)).start()
 
 
-
 def give_recreated_files_and_folders_permissions():
     # TODO NOTE if the problem persists with the files,
     # refer here to create folders/files already with needed permissions
@@ -112,6 +112,7 @@ def run_cmd_command_and_wait_response(command):
     print(f"{run_cmd_command_and_wait_response.__name__} executed '{command}' and returned value: {output}")
     return output
 
+
 def watch_archives_folder():
     if os_utils.is_linux_running():
         from watchdog.observers.inotify import InotifyObserver
@@ -122,6 +123,7 @@ def watch_archives_folder():
     observer.schedule(compressor_handler, archives_folder_name, recursive=False)
     observer.start()
     init_start_function_thread(process_existing_archives)
+
 
 def process_existing_archives():
     print(f"Processing existing archives")

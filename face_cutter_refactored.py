@@ -43,32 +43,32 @@ def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnV
 
 def get_files_from_zip(zip_file_path):
     files = {}
-    offset = 0.2
-    # with zipfile.ZipFile(zip_file_path, 'r') as archive:
-    archive = zipfile.ZipFile(zip_file_path, 'r')
-    for item in archive.infolist():
-        if not item.is_dir():
-            file_name = os.path.basename(item.filename)
-            file_name = re.sub(pattern, replace, file_name)
-            file_contents = archive.read(item.filename)
-            # ML part
-            input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
+    # offset = 0.2
+    with zipfile.ZipFile(zip_file_path, 'r') as archive:
+    # archive = zipfile.ZipFile(zip_file_path, 'r')
+        for item in archive.infolist():
+            if not item.is_dir():
+                file_name = os.path.basename(item.filename)
+                file_name = re.sub(pattern, replace, file_name)
+                file_contents = archive.read(item.filename)
+                # ML part
+                input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
 
-            if input_img.shape[2] == 1:
-                input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
-            elif input_img.shape[2] == 3 and input_img.ndim == 2:
-                input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+                if input_img.shape[2] == 1:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
+                elif input_img.shape[2] == 3 and input_img.ndim == 2:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
 
-            faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
+                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
 
-            # Loop over the detected faces and extract them
-            i = 0
-            for (x, y, w, h) in faces:
-                # Crop the face region from the image
-                face = input_img[y:y + h, x:x + w]
-                face_img = np.array(face)
-                files[f"{file_name[:-3]}_{i}.jpg"] = face_img
-                i += 1
+                # Loop over the detected faces and extract them
+                i = 0
+                for (x, y, w, h) in faces:
+                    # Crop the face region from the image
+                    face = input_img[y:y + h, x:x + w]
+                    face_img = np.array(face)
+                    files[f"{file_name[:-3]}_{i}.jpg"] = face_img
+                    i += 1
 
     return files
 

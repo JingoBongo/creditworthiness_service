@@ -2,6 +2,7 @@ import __init__
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor
+import zipfile
 from zipfile import ZipFile
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 from argparse import ArgumentParser
@@ -18,16 +19,22 @@ class ScreenshotHandler(FileSystemEventHandler):
         self.screenshotExecutor = ProcessPoolExecutor(max_workers=archiver_max_workers)
 
     def on_created(self, event):
-        if not event.is_directory and event.src_path.endswith('.png'):
-            self.screenshots_list.append(event.src_path)
-            if len(self.screenshots_list) >= 100:
-                self.screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, self.screenshots_list.copy())
-                self.screenshots_list.clear()
+        if os_utils.check_there_is_enough_free_space():
+            if not event.is_directory and (
+                    event.src_path.endswith('.png') or
+                    event.src_path.endswith('.jpg') or
+                    event.src_path.endswith('.jpeg')):
+                self.screenshots_list.append(event.src_path)
+                if len(self.screenshots_list) >= 100:
+                    self.screenshotExecutor.submit(ScreenshotHandler.process_screenshots_list, self.screenshots_list.copy())
+                    self.screenshots_list.clear()
+        else:
+            app.logger.warning(f"There is not enough space to archive screenshot {event.src_path}.")
 
     @staticmethod
     def process_screenshots_list(local_screenshot_copy):
         screenshot_base = os.path.basename(local_screenshot_copy[0])
-        zipp = ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w')
+        zipp = ZipFile(f"{archives_folder_name}/{screenshot_base}.zip", 'w', zipfile.ZIP_DEFLATED)
         app.logger.info(f"Archiving {screenshot_base} ++")
         for f in local_screenshot_copy:
             zipp.write(f)

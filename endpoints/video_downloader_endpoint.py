@@ -59,7 +59,7 @@ def make_sure_there_is_enough_space_for_playlist(dict_of_all_playlist_data):
 
 
 def download_videos_task_body(number_of_screenshots, list_of_playlists):
-    app.logger.info(f"Started downloading")
+    app.logger.info(f"Started downloading videos")
     total_seconds_available = 0
     for playlist in list_of_playlists:
         if playlist in read_used_playlists_from_file():

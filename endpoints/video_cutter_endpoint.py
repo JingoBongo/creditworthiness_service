@@ -17,8 +17,11 @@ class VideoHandler(FileSystemEventHandler):
         self.videoExecutor = ProcessPoolExecutor(max_workers=cutter_max_workers)
 
     def on_created(self, event):
-        if not event.is_directory and event.src_path.endswith('.webm'):
-            self.videoExecutor.submit(VideoHandler.process_video, event.src_path)
+        if os_utils.check_there_is_enough_free_space():
+            if not event.is_directory and event.src_path.endswith('.webm'):
+                self.videoExecutor.submit(VideoHandler.process_video, event.src_path)
+        else:
+            app.logger.warning(f"There is not enough space to cut video {event.src_path} on screenshots")
 
     # TODO: to test. I have a theory that yt-dlp sometimes renames chunks into final file, so on modify is needed
     def on_modified(self, event):
@@ -43,11 +46,15 @@ class VideoHandler(FileSystemEventHandler):
                 break
             frame_count += 1
             if i % fps == 0:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=10, minSize=(50, 50),
+                                                      flags=cv2.CASCADE_SCALE_IMAGE)
                 if len(faces) > 0:
-                    cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.png", frame)
-                    index += 1
+                    for (x, y, w, h) in faces:
+                        crop_img = frame[y:y + h, x:x + w]
+                        cv2.imwrite(f"{screenshots_folder_name}/{video_base}_{str(index)}.jpg", crop_img)
+                        index += 1
+
             if frame_count % (180 * fps) == 0:
                 current_time = int(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
                 app.logger.info(
@@ -72,7 +79,9 @@ screenshots_folder_name = c.temporary_files_folder_full_path + '//ytlpd_screensh
 archives_folder_name = c.temporary_files_folder_full_path + '//ytlpd_archives'
 theshold_of_videos_to_panic = 1_000
 cutter_max_workers = 1
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier(c.resources_folder_full_path+"//yt_downloader_models//lbpcascade_frontalface.xml")
+
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 

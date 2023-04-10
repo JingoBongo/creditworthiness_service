@@ -5,7 +5,7 @@ import subprocess
 import threading
 import time
 import zipfile
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import numpy as np
 import cv2
@@ -17,7 +17,8 @@ from utils.dataclasses.thread_with_return_value import ThreadWithReturnValue
 
 class FaceCutterHandler(FileSystemEventHandler):
     def __init__(self):
-        self.compressorExecutor = ProcessPoolExecutor(max_workers=compresser_max_workers)
+        # self.compressorExecutor = ProcessPoolExecutor(max_workers=compresser_max_workers)
+        self.compressorExecutor = ThreadPoolExecutor(max_workers=compresser_max_workers)
 
     def on_created(self, event):
         if not event.is_directory:

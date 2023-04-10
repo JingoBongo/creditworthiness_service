@@ -5,7 +5,6 @@ import subprocess
 import threading
 import time
 import zipfile
-import traceback
 from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
@@ -75,16 +74,6 @@ def get_files_from_zip(zip_file_path):
     return files
 
 
-def fixBadZipfile(zipFile):
- f = open(zipFile, 'r+b')
- data = f.read()
- pos = data.find(b'\x50\x4b\x05\x06') # End of central directory signature
- if (pos > 0):
-     print("Trancating file at location " + str(pos + 22)+ ".")
-     f.seek(pos + 22)   # size of 'ZIP end of central directory record'
-     f.truncate()
-     f.close()
-
 def crop_faces_in_zip(input_zip_path, output_zip_path):
     """
     Detects faces in all images in a zip file and crops them based on the detected faces, then saves them to a new zip file.
@@ -101,6 +90,8 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
             # print("3")
             for name in input_zip.namelist():
                 # print("4")
+                if not '.jpg' in name or not '.png' in name:
+                    continue
                 input_file = input_zip.open(name)
                 # print("5")
                 np_img = np.frombuffer(input_file.read(), np.uint8)

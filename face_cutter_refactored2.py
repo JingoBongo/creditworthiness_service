@@ -4,7 +4,8 @@ import signal
 import subprocess
 import threading
 import time
-import zipfile36
+import zipfile
+import traceback
 from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
@@ -25,8 +26,8 @@ class FaceCutterHandler(FileSystemEventHandler):
                 future = self.compressorExecutor.submit(process_one_zip, event.src_path)
                 result = future.result()
             except Exception as e:
-                print("Caught an exception: {}".format(e))
-
+                # print("Caught an exception: {}".format(e))
+                traceback.print_exc()
 
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -46,36 +47,36 @@ def init_start_function_thread(function, *argss, **kwargss) -> ThreadWithReturnV
     return thread
 
 
-# def get_files_from_zip(zip_file_path):
-#     files = {}
-#     # offset = 0.2
-#     with zipfile.ZipFile(zip_file_path, 'r') as archive:
-#     # archive = zipfile.ZipFile(zip_file_path, 'r')
-#         for item in archive.infolist():
-#             if not item.is_dir():
-#                 file_name = os.path.basename(item.filename)
-#                 file_name = re.sub(pattern, replace, file_name)
-#                 file_contents = archive.read(item.filename)
-#                 # ML part
-#                 input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
-#
-#                 if input_img.shape[2] == 1:
-#                     input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
-#                 elif input_img.shape[2] == 3 and input_img.ndim == 2:
-#                     input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
-#
-#                 faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
-#
-#                 # Loop over the detected faces and extract them
-#                 i = 0
-#                 for (x, y, w, h) in faces:
-#                     # Crop the face region from the image
-#                     face = input_img[y:y + h, x:x + w]
-#                     face_img = np.array(face)
-#                     files[f"{file_name[:-3]}_{i}.jpg"] = face_img
-#                     i += 1
-#
-#     return files
+def get_files_from_zip(zip_file_path):
+    files = {}
+    # offset = 0.2
+    with zipfile.ZipFile(zip_file_path, 'r') as archive:
+    # archive = zipfile.ZipFile(zip_file_path, 'r')
+        for item in archive.infolist():
+            if not item.is_dir():
+                file_name = os.path.basename(item.filename)
+                file_name = re.sub(pattern, replace, file_name)
+                file_contents = archive.read(item.filename)
+                # ML part
+                input_img = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
+
+                if input_img.shape[2] == 1:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_GRAY2RGB)
+                elif input_img.shape[2] == 3 and input_img.ndim == 2:
+                    input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+
+                faces = face_cascade.detectMultiScale(input_img, scaleFactor=1.1, minNeighbors=5)
+
+                # Loop over the detected faces and extract them
+                i = 0
+                for (x, y, w, h) in faces:
+                    # Crop the face region from the image
+                    face = input_img[y:y + h, x:x + w]
+                    face_img = np.array(face)
+                    files[f"{file_name[:-3]}_{i}.jpg"] = face_img
+                    i += 1
+
+    return files
 
 
 def crop_faces_in_zip(input_zip_path, output_zip_path):
@@ -87,9 +88,9 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
         output_zip_path (str): The path to the output zip file.
     """
     print(f"1 {os.path.normpath(input_zip_path)=}")
-    with zipfile36.ZipFile(os.path.normpath(input_zip_path) , 'r') as input_zip :
+    with zipfile.ZipFile(os.path.normpath(input_zip_path) , 'r') as input_zip :
         print(f"2 {os.path.normpath(output_zip_path)=}")
-        with zipfile36.ZipFile(os.path.normpath(output_zip_path) , 'w', zipfile36.ZIP_DEFLATED) as output_zip :
+        with zipfile.ZipFile(os.path.normpath(output_zip_path) , 'w', zipfile.ZIP_DEFLATED) as output_zip :
             print("3")
             for name in input_zip.namelist():
                 print("4")

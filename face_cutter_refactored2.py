@@ -22,12 +22,8 @@ class FaceCutterHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         if not event.is_directory:
-            try:
-                future = self.compressorExecutor.submit(process_one_zip, event.src_path)
-                result = future.result()
-            except Exception as e:
-                # print("Caught an exception: {}".format(e))
-                traceback.print_exc()
+            self.compressorExecutor.submit(process_one_zip, event.src_path)
+
 
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -97,46 +93,46 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
         input_zip_path (str): The path to the input zip file.
         output_zip_path (str): The path to the output zip file.
     """
-    fixBadZipfile(input_zip_path)
-    print(f"1 {os.path.normpath(input_zip_path)=}")
+
+    # print(f"1 {os.path.normpath(input_zip_path)=}")
     with zipfile.ZipFile(os.path.normpath(input_zip_path) , 'r') as input_zip :
-        print(f"2 {os.path.normpath(output_zip_path)=}")
+        # print(f"2 {os.path.normpath(output_zip_path)=}")
         with zipfile.ZipFile(os.path.normpath(output_zip_path) , 'w', zipfile.ZIP_DEFLATED) as output_zip :
-            print("3")
+            # print("3")
             for name in input_zip.namelist():
-                print("4")
+                # print("4")
                 input_file = input_zip.open(name)
-                print("5")
+                # print("5")
                 np_img = np.frombuffer(input_file.read(), np.uint8)
-                print("6")
+                # print("6")
                 img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
-                print("7")
+                # print("7")
                 if img.shape[2] == 1:
-                    print("8")
+                    # print("8")
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-                    print("9")
+                    # print("9")
                 elif img.shape[2] == 3 and img.ndim == 2:
-                    print("10")
+                    # print("10")
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                    print("11")
-                print("12")
+                    # print("11")
+                # print("12")
                 faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=10, minSize=(30, 30))
-                print("13")
+                # print("13")
                 i = 0
                 for (x, y, w, h) in faces:
-                    print("14")
+                    # print("14")
                     # Crop the face region from the image
                     face = img[y:y + h, x:x + w]
                     face_img = np.array(face)
-                    print("15")
+                    # print("15")
                     success, buffer = cv2.imencode('.jpg', face_img)
-                    print("16")
+                    # print("16")
                     parts = os.path.basename(name).split('.')
-                    print("17")
+                    # print("17")
                     output_zip.writestr(f"{'.'.join(parts[:-1])}_{i}.jpg", buffer)
-                    print("18")
+                    # print("18")
                     i += 1
-
+    # os.remove()
 
 
 

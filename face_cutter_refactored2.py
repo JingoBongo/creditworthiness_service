@@ -82,10 +82,14 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
         input_zip_path (str): The path to the input zip file.
         output_zip_path (str): The path to the output zip file.
     """
+    if os.path.isfile(input_zip_path):
+        print("File exists!")
+    else:
+        print("File does not exist!")
     print(f"1 {os.path.normpath(input_zip_path)=}")
     with zipfile.ZipFile(os.path.normpath(input_zip_path) , 'r') as input_zip :
         print(f"2 {os.path.normpath(output_zip_path)=}")
-        with zipfile.ZipFile(os.path.normpath(output_zip_path) , 'w') as output_zip :
+        with zipfile.ZipFile(os.path.normpath(output_zip_path) , 'w', zipfile.ZIP_DEFLATED) as output_zip :
             print("3")
             for name in input_zip.namelist():
                 print("4")

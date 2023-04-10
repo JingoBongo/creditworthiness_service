@@ -5,7 +5,7 @@ import subprocess
 import threading
 import time
 import zipfile
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 import cv2
@@ -17,12 +17,15 @@ from utils.dataclasses.thread_with_return_value import ThreadWithReturnValue
 
 class FaceCutterHandler(FileSystemEventHandler):
     def __init__(self):
-        # self.compressorExecutor = ProcessPoolExecutor(max_workers=compresser_max_workers)
-        self.compressorExecutor = ThreadPoolExecutor(max_workers=compresser_max_workers)
+        self.compressorExecutor = ProcessPoolExecutor(max_workers=compresser_max_workers)
 
     def on_created(self, event):
         if not event.is_directory:
-            self.compressorExecutor.submit(process_one_zip, event.src_path)
+            try:
+                future = self.compressorExecutor.submit(process_one_zip, event.src_path)
+                result = future.result()
+            except Exception as e:
+                print("Caught an exception: {}".format(e))
 
 
 
@@ -83,10 +86,6 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
         input_zip_path (str): The path to the input zip file.
         output_zip_path (str): The path to the output zip file.
     """
-    if os.path.isfile(input_zip_path):
-        print("File exists!")
-    else:
-        print("File does not exist!")
     print(f"1 {os.path.normpath(input_zip_path)=}")
     with zipfile.ZipFile(os.path.normpath(input_zip_path) , 'r') as input_zip :
         print(f"2 {os.path.normpath(output_zip_path)=}")

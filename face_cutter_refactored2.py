@@ -82,73 +82,45 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
         input_zip_path (str): The path to the input zip file.
         output_zip_path (str): The path to the output zip file.
     """
+    print("1")
     input_zip = zipfile.ZipFile(input_zip_path, 'r')
+    print("2")
     output_zip = zipfile.ZipFile(output_zip_path, 'w')
-
+    print("3")
     for name in input_zip.namelist():
+        print("4")
         input_file = input_zip.open(name)
+        print("5")
         np_img = np.frombuffer(input_file.read(), np.uint8)
+        print("6")
         img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+        print("7")
         if img.shape[2] == 1:
+            print("8")
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+            print("9")
         elif img.shape[2] == 3 and img.ndim == 2:
+            print("10")
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            print("11")
+        print("12")
         faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=10, minSize=(30, 30))
+        print("13")
         i = 0
         for (x, y, w, h) in faces:
+            print("14")
             # Crop the face region from the image
             face = img[y:y + h, x:x + w]
             face_img = np.array(face)
+            print("15")
             success, buffer = cv2.imencode('.jpg', face_img)
+            print("16")
             parts = os.path.basename(name).split('.')
+            print("17")
             output_zip.writestr(f"{'.'.join(parts[:-1])}_{i}.jpg", buffer)
+            print("18")
             i += 1
-    # ===========================
-    # with zipfile.ZipFile(input_zip_path, 'r') as input_zip, zipfile.ZipFile(output_zip_path, 'w') as output_zip:
-    #
-    #     # Initialize the face detector
-    #     # face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-    #
-    #     for name in input_zip.namelist():
-    #
-    #         with input_zip.open(name) as input_file:
-    #
-    #             try:
-    #                 # Attempt to open the file as an image
-    #                 np_img = np.frombuffer(input_file.read(), np.uint8)
-    #                 img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
-    #
-    #                 # Convert the image to RGB if it is not already in RGB format
-    #                 if len(img.shape) == 2 or img.shape[2] == 1:
-    #                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-    #                 elif img.shape[2] == 4:
-    #                     img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
-    #                 elif img.shape[2] != 3:
-    #                     # If the image has an unsupported number of channels, write the original file to the output as-is
-    #                     output_zip.writestr(name, input_file.read())
-    #                     continue
-    #
-    #                 # Detect faces in the image
-    #                 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    #                 faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    #
-    #                 if len(faces) > 0:
-    #                     # Crop the image to the first detected face
-    #                     x, y, w, h = faces[0]
-    #                     img = img[y:y + h, x:x + w]
-    #
-    #                     # Encode the cropped image as a JPEG file
-    #                     success, buffer = cv2.imencode('.jpg', img)
-    #
-    #                     output_zip.writestr(name, buffer.tobytes())
-    #
-    #                 else:
-    #                     # If no faces were detected, write the original file to the output as-is
-    #                     output_zip.writestr(name, input_file.read())
-    #
-    #             except (cv2.error, OSError):
-    #                 # If the file is not an image or could not be decoded, write it to the output as-is
-    #                 output_zip.writestr(name, input_file.read())
+
 
 def process_one_zip(zip_path):
     basename = os.path.basename(zip_path)

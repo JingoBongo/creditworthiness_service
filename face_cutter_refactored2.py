@@ -124,6 +124,9 @@ def crop_faces_in_zip(input_zip_path, output_zip_path):
                     output_zip.writestr(f"{'.'.join(parts[:-1])}_{i}.jpg", buffer)
                     print("18")
                     i += 1
+            output_zip.close()
+
+        input_zip.close()
 
 
 def process_one_zip(zip_path):

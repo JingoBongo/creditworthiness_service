@@ -1,6 +1,6 @@
+import __init__
 import socket
 
-import __init__
 import time
 import os
 import requests

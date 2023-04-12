@@ -48,6 +48,7 @@ def lazy_task(task_name):
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
     # why didn't I just use localhost here?)..
+    # TODO: here port is not specified
     return redirect(f"http://{ip_address}/redir/tasks/get_result/{task_unique_name}")
 
 

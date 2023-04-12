@@ -66,7 +66,7 @@ def main():
     log.warn(f"[!!!] Going with config : {c.root_path + c.conf_path}")
     if os_utils.is_linux_running():
         log.warn(f"[!!!] On linux machine it is needed to sudo chmod 755 ./fuse.py (once)")
-        cmd0 = f"cd {c.root_path} && chown - R root:root ."
+        cmd0 = f"cd {c.root_path} && chown -R root:root ."
         run_cmd_command_and_wait_response(cmd0)
         # chown - R
         # myuser: myuser / path / to / directory

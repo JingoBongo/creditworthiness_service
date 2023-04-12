@@ -1,3 +1,5 @@
+import socket
+
 import __init__
 import json
 
@@ -260,7 +262,10 @@ def provide_url_from_service(service: str):
                 raise Exception('Implement Load Balance')
             # TODO: [FFD-35] https for fuse
             port = services_from_db[0]['port']
-            return f"http://localhost:{port}"
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            # TODO: make ip address some DB value, not just FIND or COMPUTE IT EVERY TIME
+            return f"http://{ip_address}:{port}"
         raise Exception(f"Implement me ({provide_url_from_service.__name__})")
 
 

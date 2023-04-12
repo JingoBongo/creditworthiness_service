@@ -1,3 +1,5 @@
+import socket
+
 import __init__
 import time
 import os
@@ -122,7 +124,9 @@ def test_provider(path):
             #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
             #     TODO this includes selects from db as well
             port = row['port']
-            new_url = f"http://localhost:{port}/{path}"
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            new_url = f"http://{ip_address}:{port}/{path}"
             esreq = requests.Request(method=request.method, url=new_url, headers=request.headers, data=request.data)
             resp = requests.Session().send(esreq.prepare())
             return (resp.text, resp.status_code, resp.headers.items())
@@ -173,7 +177,9 @@ def redir_request(path):
             #     TODO. here could be your load balancing logic or multi service handling, but here is a TODO :)
             #     TODO this includes selects from db as well
             port = row['port']
-            new_url = f"http://localhost:{port}/{path}"
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            new_url = f"http://{ip_address}:{port}/{path}"
             if request.method == 'POST':
                 return redirect(new_url, code=307)
 

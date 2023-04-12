@@ -1,3 +1,5 @@
+import socket
+
 import __init__
 from concurrent.futures import ThreadPoolExecutor
 from itertools import repeat
@@ -25,7 +27,9 @@ log.get_log(c.life_ping_schedule_name)
 
 def ping_one(port):
     try:
-        r = requests.patch(f"http://localhost:{port}{c.life_ping_endpoint_context}").status_code
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        r = requests.patch(f"http://{ip_address}:{port}{c.life_ping_endpoint_context}").status_code
         if r:
             return 'alive'
     except Exception as e:
@@ -88,7 +92,9 @@ def ping_one_service_and_more(service, services_and_statuses):
         if service['status'] != service_status:
             db_utils.change_service_status_by_pid(service.pid, service_status)
         short_name = service['name'].split('\\')[-1]
-        log.debug(f"Endpoint {short_name} (localhost:{service.port}) is {service_status}")
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        log.debug(f"Endpoint {short_name} ({ip_address}:{service.port}) is {service_status}")
     except Exception as e:
         log.exception(f"Something went wrong while pinging in lifping scheduler")
         log.exception(e)

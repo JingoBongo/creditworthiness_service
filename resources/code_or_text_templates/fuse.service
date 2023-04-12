@@ -7,6 +7,6 @@ Group=root
 Type=simple
 Restart=always
 WorkingDirectory=<path_to_fuse_root>
-ExecStart=/usr/bin/python3 <path_to_fuse>
+ExecStart=sudo /usr/bin/python3 <path_to_fuse>
 [Install]
 WantedBy=multi-user.target

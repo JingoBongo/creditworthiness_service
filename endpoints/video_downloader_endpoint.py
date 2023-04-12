@@ -41,6 +41,8 @@ def generate_bytesize_of_playlist(playlist_url):
     # 41788 bytes per second for 480p video, roughly
     # therefore length = ALL_BYTES / 156
     if type(size_byte_res) == bytes:
+        if len(size_byte_res) == 0:
+            return None
         if '\\n' in str(size_byte_res):  # then this is a list
             size_byte_res = sum(
                 [int(el.decode('utf-8')) for el in size_byte_res.split() if re.match('^[0-9]+$', el.decode('utf-8'))])
@@ -64,26 +66,38 @@ def download_videos_task_body(number_of_screenshots, list_of_playlists):
     for playlist in list_of_playlists:
         if playlist in read_used_playlists_from_file():
             continue
+        try:
+            if size_byte_res := generate_bytesize_of_playlist(playlist):
+                local_dict = {'size_b': size_byte_res,
+                              'size_gb': size_byte_res / c.one_thousand_to_the_power_3,
+                              'url': playlist,
+                              'duration_seconds': int(size_byte_res / 41788)}
 
-        size_byte_res = generate_bytesize_of_playlist(playlist)
-        local_dict = {'size_b': size_byte_res,
-                      'size_gb': size_byte_res / c.one_thousand_to_the_power_3,
-                      'url': playlist,
-                      'duration_seconds': int(size_byte_res / 41788)}
+                total_seconds_available += local_dict['duration_seconds']
+                if make_sure_there_is_enough_space_for_playlist(local_dict):
+                    app.logger.info(
+                        f"{total_seconds_available=} is being complemented with {local_dict['duration_seconds']} seconds; "
+                        f"Downloading playlist {playlist}")
+                    download_playlist(playlist)
+                    append_new_used_playlists_to_file(playlist)
 
-        total_seconds_available += local_dict['duration_seconds']
-        if make_sure_there_is_enough_space_for_playlist(local_dict):
-            app.logger.info(
-                f"{total_seconds_available=} is being complemented with {local_dict['duration_seconds']} seconds; "
-                f"Downloading playlist {playlist}")
-            download_playlist(playlist)
-            append_new_used_playlists_to_file(playlist)
-
-        else:
-            app.logger.error(f"Not enough space ({os_utils.get_hard_drive_free_space_gbyte()} gbytes free) available")
-            return
-        if total_seconds_available >= number_of_screenshots:
-            break
+                else:
+                    app.logger.error(
+                        f"Not enough space ({os_utils.get_hard_drive_free_space_gbyte()} gbytes free) available")
+                    return
+                if total_seconds_available >= number_of_screenshots:
+                    break
+            else:
+                #         this means playlist for some reason didn't work out, need to delete it
+                app.logger.warning(
+                    f"While downloading, playlist {playlist} appeared to be unavailable, trying to delete from repository")
+                old_yaml = git_utils.get_yaml_file_from_repository(yaml_utils.get_cloud_repo_from_config(),
+                                                                   'youtube_playlists.yaml')
+                old_yaml['list'].remove(playlist)
+                git_utils.modify_yaml_file(yaml_utils.get_cloud_repo_from_config(), 'youtube_playlists.yaml', old_yaml)
+        except Exception as e:
+            app.logger.exception('Something went horribly wrong while downloading videos')
+            app.logger.exception(e)
     app.logger.info(f"Stopped downloading")
 
 

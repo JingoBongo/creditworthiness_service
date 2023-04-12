@@ -1,4 +1,5 @@
 import __init__
+from utils.general_utils import run_cmd_command_and_wait_response
 from utils.package_utils import run_importing_process
 
 run_importing_process()
@@ -65,6 +66,8 @@ def main():
     log.warn(f"[!!!] Going with config : {c.root_path + c.conf_path}")
     if os_utils.is_linux_running():
         log.warn(f"[!!!] On linux machine it is needed to sudo chmod 755 ./fuse.py (once)")
+        command = f"cd {c.root_path} && chmod ugo+rwx *"
+        run_cmd_command_and_wait_response(command)
     signal.signal(signal.SIGINT, signal_handler)
     system_services = config['services']['system']
     business_services = config['services']['business']

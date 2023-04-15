@@ -1,7 +1,6 @@
 import __init__
 import subprocess
 
-
 import socket
 
 import time
@@ -21,6 +20,7 @@ from flask_sse import sse
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
 app.register_blueprint(sse, url_prefix='/stream')
+
 
 @app.route('/home')
 @app.route('/home/<current>')
@@ -42,36 +42,31 @@ def manage(current=None):
 
     return render_template(template, title=title, current=current)
 
+
 @app.route('/stream-output')
 def stream_output():
     # Run the journalctl command and stream the output to the client
     def generate_output():
-        if os_utils.is_linux_running():
-            cmd = ['journalctl', '-f', '-u', 'service_name']
-            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-            for stdout_line in iter(popen.stdout.readline, ""):
-                yield 'data: {}\n\n'.format(stdout_line.decode('utf-8').rstrip())
-            popen.stdout.close()
-            return_code = popen.wait()
-            if return_code:
-                raise subprocess.CalledProcessError(return_code, cmd)
+        # if os_utils.is_linux_running():
+        cmd = ['journalctl', '-f', '-u', 'service_name']
+        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+        for stdout_line in iter(popen.stdout.readline, ""):
+            yield 'data: {}\n\n'.format(stdout_line.decode('utf-8').rstrip())
 
+        # proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
+        # while True:
+        #     line = proc.stdout.readline()
+        #     if not line:
+        #         break
+        #     app.logger.info(f"Cmd output: {line}")
+        #     yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
 
-            # proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
-            # while True:
-            #     line = proc.stdout.readline()
-            #     if not line:
-            #         break
-            #     app.logger.info(f"Cmd output: {line}")
-            #     yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
-        else:
-            while True:
-                time.sleep(1)
-                app.logger.info('not a linux device')
-                yield 'not a linux device' + '\n'
+    # else:
+    #     while True:
+    #         time.sleep(1)
+    #         yield 'not a linux device' + '\n'
 
-    return app.response_class(generate_output(), mimetype='text/plain')
-
+    return Response(generate_output(), mimetype='text/plain')
 
 
 @app.route('/logs')

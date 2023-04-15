@@ -52,13 +52,14 @@ def stream_output():
                 line = proc.stdout.readline()
                 if not line:
                     break
+                app.logger.info(f"Cmd output: {line}")
                 yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
         else:
             while True:
                 time.sleep(1)
                 yield 'data: {}\n\n'.format('not a linux device'.rstrip())
 
-    return Response(generate_output(), mimetype='text/event-stream')
+    return Response(generate_output(), mimetype='text')
 
 
 

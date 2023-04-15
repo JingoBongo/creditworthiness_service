@@ -46,7 +46,7 @@ def manage(current=None):
 @app.route('/stream-output')
 def stream_output():
     g = proc.Group()
-    p = g.run(["bash", "-c", "for ((i=0;i<100;i=i+1)); do echo $i; sleep 1; done"])
+    p = g.run(['journalctl', '-f', '-u', 'service_name'])
 
     def read_process():
         while g.is_pending():

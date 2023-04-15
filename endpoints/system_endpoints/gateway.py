@@ -47,19 +47,30 @@ def stream_output():
     # Run the journalctl command and stream the output to the client
     def generate_output():
         if os_utils.is_linux_running():
-            proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
-            while True:
-                line = proc.stdout.readline()
-                if not line:
-                    break
-                app.logger.info(f"Cmd output: {line}")
-                yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
+            cmd = ['journalctl', '-f', '-u', 'service_name']
+            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+            for stdout_line in iter(popen.stdout.readline, ""):
+                yield 'data: {}\n\n'.format(stdout_line.decode('utf-8').rstrip())
+            popen.stdout.close()
+            return_code = popen.wait()
+            if return_code:
+                raise subprocess.CalledProcessError(return_code, cmd)
+
+
+            # proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
+            # while True:
+            #     line = proc.stdout.readline()
+            #     if not line:
+            #         break
+            #     app.logger.info(f"Cmd output: {line}")
+            #     yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
         else:
             while True:
                 time.sleep(1)
-                yield 'data: {}\n\n'.format('not a linux device'.rstrip())
+                app.logger.info('not a linux device')
+                yield 'not a linux device' + '\n'
 
-    return Response(generate_output(), mimetype='text')
+    return app.response_class(generate_output(), mimetype='text/plain')
 
 
 

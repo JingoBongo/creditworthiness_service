@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style type="text/css">
+        html {
+            overflow: auto;
+        }
+
+        html,
+        body,
+        div,
+        iframe {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            border: none;
+        }
+
+        iframe {
+            display: block;
+            width: 100%;
+            border: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+
     <title>Real-Time Output</title>
-<!--    <script src="https://cdn.jsdelivr.net/npm/event-source-polyfill/dist/eventsource.min.js"></script>-->
-    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+    <!--    <script src="https://cdn.jsdelivr.net/npm/event-source-polyfill/dist/eventsource.min.js"></script>-->
+    <!--    <script src="//code.jquery.com/jquery-1.11.1.js"></script>-->
 </head>
 <body>
-    <div id="output"></div>
-    <script>
-        var source = new EventSource('/stream-output');
-        source.onmessage = function(event) {
-            $('#output').append('<p>' + event.data + '</p>');
-        };
-    </script>
+<iframe src="/stream-output" frameborder="0"
+        marginheight="0"
+        marginwidth="0"
+        width="100%"
+        height="100%"
+        scrolling="auto"></iframe>
 </body>
 </html>

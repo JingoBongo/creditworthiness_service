@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Output</title>
+<!--    <script src="https://cdn.jsdelivr.net/npm/event-source-polyfill/dist/eventsource.min.js"></script>-->
+    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+    <script>
+        var source = new EventSource('/stream-output');
+        source.onmessage = function(event) {
+            $('#output').append('<p>' + event.data + '</p>');
+        };
+    </script>
+</body>
+</html>

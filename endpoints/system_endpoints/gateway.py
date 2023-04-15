@@ -1,22 +1,26 @@
 import __init__
+import subprocess
+
+
 import socket
 
 import time
 import os
 import requests
-from flask import redirect, request, abort, render_template
+from flask import redirect, request, abort, render_template, Response
 
-from utils import general_utils as g
+from utils import general_utils as g, os_utils
 from argparse import ArgumentParser
 from utils import constants as c
 from utils.flask_child import FuseNode
 from utils.root_finder_utils import find_valid_route
 from utils.schedulers_utils import launch_route_harvester_scheduler_if_not_exists, route_harvester_job_body
 from utils import logger_utils as log
+from flask_sse import sse
 
 parser = ArgumentParser()
 app = FuseNode(__name__, arg_parser=parser)
-
+app.register_blueprint(sse, url_prefix='/stream')
 
 @app.route('/home')
 @app.route('/home/<current>')
@@ -24,9 +28,9 @@ def manage(current=None):
     if current == 'services':
         template = 'services.html'
         title = 'Services'
-    elif current == 'internet_market':
-        template = 'internet_market.html'
-        title = 'Internet market'
+    elif current == 'logs2':
+        template = 'logs2.html'
+        title = 'Logs 2'
     elif current == 'logs':
         log_files = os.listdir(c.logs_folder_full_path)
         return render_template('logs_main.html', log_files=log_files)
@@ -37,6 +41,25 @@ def manage(current=None):
         abort(404)
 
     return render_template(template, title=title, current=current)
+
+@app.route('/stream-output')
+def stream_output():
+    # Run the journalctl command and stream the output to the client
+    def generate_output():
+        if os_utils.is_linux_running():
+            proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
+            while True:
+                line = proc.stdout.readline()
+                if not line:
+                    break
+                yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
+        else:
+            while True:
+                time.sleep(1)
+                yield 'data: {}\n\n'.format('not a linux device'.rstrip())
+
+    return Response(generate_output(), mimetype='text/event-stream')
+
 
 
 @app.route('/logs')

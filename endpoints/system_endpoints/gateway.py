@@ -7,7 +7,7 @@ import time
 import os
 import requests
 from flask import redirect, request, abort, render_template, Response
-
+from shelljob import proc
 from utils import general_utils as g, os_utils
 from argparse import ArgumentParser
 from utils import constants as c
@@ -45,28 +45,32 @@ def manage(current=None):
 
 @app.route('/stream-output')
 def stream_output():
-    # Run the journalctl command and stream the output to the client
-    def generate_output():
-        # if os_utils.is_linux_running():
-        cmd = ['journalctl', '-f', '-u', 'service_name']
-        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(popen.stdout.readline, ""):
-            yield 'data: {}\n\n'.format(stdout_line.decode('utf-8').rstrip())
+    g = proc.Group()
+    p = g.run(["bash", "-c", "for ((i=0;i<100;i=i+1)); do echo $i; sleep 1; done"])
 
-        # proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
-        # while True:
-        #     line = proc.stdout.readline()
-        #     if not line:
-        #         break
-        #     app.logger.info(f"Cmd output: {line}")
-        #     yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
+    def read_process():
+        while g.is_pending():
+            lines = g.readlines()
+            for proc, line in lines:
+                yield line
+
+    return Response(read_process(), mimetype='text/plain')
+
+    # proc = subprocess.Popen(['journalctl', '-f', '-u', 'service_name'], stdout=subprocess.PIPE)
+    # while True:
+    #     line = proc.stdout.readline()
+    #     if not line:
+    #         break
+    #     app.logger.info(f"Cmd output: {line}")
+    #     yield 'data: {}\n\n'.format(line.decode('utf-8').rstrip())
 
     # else:
     #     while True:
     #         time.sleep(1)
     #         yield 'not a linux device' + '\n'
 
-    return Response(generate_output(), mimetype='text/plain')
+
+# return Response(generate_output(), mimetype='text/plain')
 
 
 @app.route('/logs')
